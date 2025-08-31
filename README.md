@@ -1,4 +1,4 @@
-# CloudZen
+# CloudZen Doc.
 
 CloudZen is a modern Blazor WebAssembly application designed as a professional portfolio and consulting showcase for Dariem C. Macias, founder and principal consultant at CloudZen Inc.
 
