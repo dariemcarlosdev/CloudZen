@@ -36,3 +36,4 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           app_location: "." # or "CloudZen" if your .csproj is in a subfolder
           output_location: "build_output/wwwroot"
+          deployment_action: "upload"
