@@ -1,0 +1,54 @@
+﻿<header class="fixed top-0 left-0 z-50 w-full flex justify-between items-center p-6 bg-gray-900 backdrop-blur shadow">
+    <div class="text-2xl font-bold text-blue-600">
+        <a href="#hero" @onclick='() => SetActive("#hero")'>CloudZen</a>
+    </div>
+    <!-- Hamburger for mobile -->
+    <button class="md:hidden text-white focus:outline-none" @onclick="ToggleMobileMenu" aria-label="Open menu">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button>
+    <!-- Desktop nav -->
+    <nav class="hidden md:flex items-center gap-6 text-base font-semibold">
+        <a href="#mission" @onclick='() => SetActive("#mission")' class="@GetNavClass("#mission")">Mission</a>
+        <a href="#value" @onclick='() => SetActive("#value")' class="@GetNavClass("#value")">Value</a>
+        <NavLink href="/whoiam" class="text-white hover:text-gray-400" ActiveClass="text-blue-400">Who I Am</NavLink>
+        <a href="#services" @onclick='() => SetActive("#services")' class="@GetNavClass("#services")">Services</a>
+        <a href="#cases" @onclick='() => SetActive("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
+        <a href="#testimonials" @onclick='() => SetActive("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a>
+        <a href="#contact" @onclick='() => SetActive("#contact")' class="@GetContactClass()">Contact</a>
+    </nav>
+    <!-- Mobile nav -->
+    @if (isMobileMenuOpen)
+    {
+        <nav class="absolute top-full left-0 w-full bg-gray-900 flex flex-col items-center gap-4 py-6 md:hidden shadow-lg z-50">
+            <a href="#mission" @onclick='() => OnMobileNavClick("#mission")' class="@GetNavClass("#mission")">Mission</a>
+            <a href="#value" @onclick='() => OnMobileNavClick("#value")' class="@GetNavClass("#value")">Value</a>
+            <NavLink href="/whoiam" class="text-white hover:text-gray-400" ActiveClass="text-blue-400" @onclick='CloseMobileMenu'>Who I Am</NavLink>
+            <a href="#services" @onclick='() => OnMobileNavClick("#services")' class="@GetNavClass("#services")">Services</a>
+            <a href="#cases" @onclick='() => OnMobileNavClick("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
+            <a href="#testimonials" @onclick='() => OnMobileNavClick("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a>
+            <a href="#contact" @onclick='() => OnMobileNavClick("#contact")' class="@GetContactClass()">Contact</a>
+        </nav>
+    }
+</header>
+
+@code {
+    private string activeSection = "#hero";
+    private bool isMobileMenuOpen = false;
+
+    private void SetActive(string section) => activeSection = section;
+    private void ToggleMobileMenu() => isMobileMenuOpen = !isMobileMenuOpen;
+    private void CloseMobileMenu() => isMobileMenuOpen = false;
+    private void OnMobileNavClick(string section)
+    {
+        SetActive(section);
+        CloseMobileMenu();
+    }
+
+    private string GetNavClass(string section) =>
+        $"text-white transition-colors duration-200 {(activeSection == section ? "text-blue-400" : "hover:text-gray-400")}";
+
+    private string GetContactClass() =>
+        $"px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition {(activeSection == "#contact" ? "ring-2 ring-blue-400" : "")}";
+}

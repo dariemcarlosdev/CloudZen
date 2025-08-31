@@ -1,0 +1,60 @@
+@inject IJSRuntime JS
+
+<section id="value" class="py-24 bg-gray-50">
+    <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold text-center md:text-left mb-12">Why Work With Me</h2>
+        <div class="grid md:grid-cols-2 gap-10">
+            <div class="flex items-start gap-4 group transition duration-300 hover:-translate-y-1 hover:shadow-lg bg-white p-5 rounded-xl border border-gray-100" data-reveal>
+                <span class="w-12 h-12 text-blue-600 flex items-center justify-center text-3xl font-semibold group-hover:scale-110 transition-transform">
+                    <i class="bi bi-lightning-fill"></i>
+                </span>
+                <div>
+                    <h3 class="font-semibold mb-1">Direct Expertise</h3>
+                    <p class="text-gray-600 text-sm">I personally deliver every solution, ensuring clear communication and accountability.</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-4 group transition duration-300 hover:-translate-y-1 hover:shadow-lg bg-white p-5 rounded-xl border border-gray-100" data-reveal>
+                <span class="w-12 h-12 text-blue-600 flex items-center justify-center text-3xl font-semibold group-hover:scale-110 transition-transform">
+                    <i class="bi bi-link-45deg"></i>
+                </span>
+                <div>
+                    <h3 class="font-semibold mb-1">Flexible Collaboration</h3>
+                    <p class="text-gray-600 text-sm">When needed, I bring in trusted professionals for specialized skills like Power BI reporting automation.</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-4 group transition duration-300 hover:-translate-y-1 hover:shadow-lg bg-white p-5 rounded-xl border border-gray-100" data-reveal>
+                <span class="w-12 h-12 text-blue-600 flex items-center justify-center text-3xl font-semibold group-hover:scale-110 transition-transform">
+                    <i class="bi bi-rocket-takeoff-fill"></i>
+                </span>
+                <div>
+                    <h3 class="font-semibold mb-1">Proven Experience</h3>
+                    <p class="text-gray-600 text-sm">From legacy application migration to DevOps pipelines in Azure, I bring hands-on expertise to complex problems.</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-4 group transition duration-300 hover:-translate-y-1 hover:shadow-lg bg-white p-5 rounded-xl border border-gray-100" data-reveal>
+                <span class="w-12 h-12 text-blue-600 flex items-center justify-center text-3xl font-semibold group-hover:scale-110 transition-transform">
+                    <i class="bi bi-bar-chart-fill"></i>
+                </span>
+                <div>
+                    <h3 class="font-semibold mb-1">Business-First Approach</h3>
+                    <p class="text-gray-600 text-sm">I focus on outcomes that reduce costs, improve efficiency, and create measurable business value.</p>
+                </div>
+            </div>
+        </div>
+        <div class="mt-12 text-center md:text-left">
+            <a href="#contact" class="inline-block px-8 py-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
+                Let’s Work Together
+            </a>
+        </div>
+    </div>
+</section>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initReveal");
+        }
+    }
+}

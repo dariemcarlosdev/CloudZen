@@ -1,0 +1,11 @@
+﻿<section id="contact" class="py-16 bg-indigo-600 text-center text-white">
+    <h2 class="text-3xl font-bold mb-6">Let’s Modernize Your Business</h2>
+    <p class="mb-8">Schedule a free consultation to discover how CloudZen can help.</p>
+    <button class="px-8 py-3 bg-white text-indigo-600 font-semibold rounded-lg shadow" @onclick="BookConsultation">
+        Schedule Now
+    </button>
+</section>
+
+@code {
+    private void BookConsultation() => Console.WriteLine("CTA clicked");
+}

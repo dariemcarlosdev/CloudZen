@@ -1,0 +1,41 @@
+﻿<section id="services" class="py-20 bg-gray-50 text-center">
+    <h2 class="text-3xl font-bold mb-12">Services I Offer</h2>
+    <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        @foreach (var service in ServicesList)
+        {
+            <div class="p-6 bg-white rounded-xl shadow hover:shadow-lg transition-transform duration-300 hover:-translate-y-2">
+                <div class="text-4xl mb-4">@service.Icon</div>
+                <h3 class="text-xl font-semibold mb-2">@service.Title</h3>
+                <p class="text-gray-600">@service.Description</p>
+            </div>
+        }
+    </div>
+</section>
+
+@code {
+    private List<Service> ServicesList = new()
+    {
+        new Service("💻", "Custom .NET Solutions",
+            "I design and build scalable applications with ASP.NET Core, Blazor, and REST APIs, tailored to each client’s business needs."),
+
+        new Service("☁️", "Cloud & Azure Consulting",
+            "I help businesses plan, deploy, and optimize their solutions on Microsoft Azure — from serverless functions to containerized applications."),
+
+        new Service("🔄", "Legacy Application Migration",
+            "I specialize in moving outdated or on-premise applications into modern, secure, cloud-native environments with minimal disruption."),
+
+        new Service("⚙️", "DevOps & CI/CD Automation",
+            "I implement automated pipelines, containerization strategies, and GitHub/Azure DevOps workflows so clients can ship faster and with confidence."),
+
+        new Service("📊", "Reporting & Power BI Automation",
+            "I create automated dashboards, reports, and data workflows using Power BI and Azure services to turn raw data into actionable insights."),
+
+        new Service("🤖", "AI & Intelligent Automation",
+            "I integrate Azure OpenAI and Cognitive Services to enhance business processes with natural language, predictive, and intelligent features."),
+
+        new Service("🤝", "Extended Expertise On-Demand",
+            "When a project requires skills outside my focus, I collaborate with trusted professionals to deliver complete solutions without compromising quality.")
+    };
+
+    record Service(string Icon, string Title, string Description);
+}
