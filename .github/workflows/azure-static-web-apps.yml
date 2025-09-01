@@ -37,4 +37,4 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)          
           deployment_action: "upload"
           app_location: "." # or "CloudZen" if your .csproj is in a subfolder
-          output_location: "build_output/wwwroot"
+          output_location: "/wwwroot"
