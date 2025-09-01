@@ -28,18 +28,13 @@ jobs:
         run: dotnet build --configuration Release --no-restore
 
       - name: Publish
-        run: dotnet publish CloudZen.csproj -c Release -o build_output
-
-      - name: List build_output contents
-        run: ls -l build_output
-
-      - name: List build_output/wwwroot contents
-        run: ls -l build_output/wwwroot
+        run: dotnet publish -c Release -o build_output
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          app_location: "."
-          output_location: "build_output/wwwroot"
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)          
           deployment_action: "upload"
+          app_location: "." # or "CloudZen" if your .csproj is in a subfolder
+          output_location: "build_output/wwwroot"
