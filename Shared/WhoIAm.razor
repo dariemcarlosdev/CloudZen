@@ -1,4 +1,8 @@
 ﻿@page "/whoiam"
+@using CloudZen.Services
+@inject ResumeService ResumeService
+@* Injects IJSRuntime to enable JavaScript interop for client-side features (e.g., file download from Blazor) *@
+@inject IJSRuntime JS
 
 <section id="who-i-am" class="bg-white py-20">
     <div class="max-w-6xl mx-auto px-6 lg:px-8">
@@ -72,13 +76,27 @@
                 </div>
 
                 <div class="mt-6">
-                    <a href="/files/Dariem_C_Macias_Resume.pdf" target="_blank"
-                       class="inline-block px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl shadow hover:bg-indigo-700 transition">
+                    <button @onclick="DownloadResume" class="inline-block px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl shadow hover:bg-indigo-700 transition">
                         📄 Download My Resume
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 </section>
 <Footer />
+
+@code {
+    private async Task DownloadResume()
+    {
+        var resumeBytes = await ResumeService.DownloadResumeAsync();
+        // Extract the filename from the blob URL and use it in your JS interop call for a dynamic, accurate filename.
+
+        var uri = new Uri(ResumeService.ResumeBlobUrl);
+
+        var fileName = System.IO.Path.GetFileName(uri.LocalPath);
+
+
+        await JS.InvokeVoidAsync("saveAsFile", fileName, resumeBytes);
+    }
+}

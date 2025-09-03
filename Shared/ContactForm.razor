@@ -1,10 +1,14 @@
 ﻿@using System.ComponentModel.DataAnnotations
+@using CloudZen.Services.Abstractions
+@inject IEmailProvider _emailService
+
+
 
 <section id="contact" class="py-20 bg-gray-50">
     <div class="max-w-3xl mx-auto bg-white p-10 rounded-xl shadow-lg">
         <h2 class="text-3xl font-bold text-center mb-6">Book a Consultation</h2>
         <p class="text-center text-gray-600 mb-10">
-            Fill out the form below and one of our consultants will contact you within 24 hours.
+            Fill out the form below and I will contact you within 24 hours.
         </p>
 
         <EditForm Model="@formModel" OnValidSubmit="HandleValidSubmit">
@@ -24,8 +28,8 @@
             </div>
 
             <div class="mb-6">
-                <label class="block text-gray-700 mb-2">Company</label>
-                <InputText @bind-Value="formModel.Company" class="w-full p-3 border rounded-lg" />
+                <label class="block text-gray-700 mb-2">Subject</label>
+                <InputText @bind-Value="formModel.Subject" class="w-full p-3 border rounded-lg" />
             </div>
 
             <div class="mb-6">
@@ -42,7 +46,7 @@
         @if (submitted)
         {
             <div class="mt-6 p-4 bg-green-100 text-green-700 rounded-lg">
-                ✅ Thank you! We’ve received your request and will contact you shortly.
+                !Thank you! We’ve received your request and will contact you shortly.
             </div>
         }
     </div>
@@ -52,9 +56,16 @@
     private ContactFormModel formModel = new();
     private bool submitted = false;
 
-    private void HandleValidSubmit()
+    private async Task HandleValidSubmit()
     {
         // TODO: Send email / call API
+        await _emailService.SendEmailAsync(            
+            formModel.Subject,
+            formModel.Message!,
+            formModel.Name!,
+            formModel.Email!
+        );        
+        
         submitted = true;
     }
 
@@ -67,7 +78,8 @@
         [EmailAddress(ErrorMessage = "Invalid email address")]
         public string? Email { get; set; }
 
-        public string? Company { get; set; }
+        [Required(ErrorMessage = "Subject is required")]
+        public string? Subject { get; set; }
 
         [Required(ErrorMessage = "Message is required")]
         [StringLength(500, ErrorMessage = "Message too long (max 500 chars)")]
