@@ -1,6 +1,7 @@
 {
   "name": "CloudZen",
   "short_name": "CloudZen",
+  "description": "Modernize your business with CloudZen cloud solutions.",
   "id": "./",
   "start_url": "./",
   "display": "standalone",
