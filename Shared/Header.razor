@@ -1,6 +1,38 @@
-﻿<header class="fixed top-0 left-0 z-50 w-full flex justify-between items-center p-6 bg-gray-900 backdrop-blur shadow">
-    <div class="text-2xl font-semibold text-indigo-400 hover:text-indigo-700">
+﻿@* Summary:
+   In this Blazor WebAssembly WPA, WhoIAm.razor is treated as a standalone page. When the user navigates to it via the header, a styled arrow appears next to "CloudZen" in the header. Clicking the arrow navigates the user back to the Hero section (main page).
+*@
+@* Requirement:
+   Show a styled "Back to Home" button next to CloudZen in the header when the user is on the Who I Am page (/whoiam).
+   The button should navigate back to the home/hero section when clicked.
+
+   Problem:
+   The header does not automatically update when navigating between pages in Blazor WebAssembly.
+   The Back button only appears if the header is re-rendered manually (e.g., by clicking CloudZen), not when navigating to /whoiam.
+
+   Solution:
+   Subscribe to NavigationManager.LocationChanged to detect route changes and update the header state.
+   Unsubscribe in Dispose to avoid memory leaks.
+
+   Fix Plan:
+   1. Add a boolean isWhoIAmPage to track if the current route is /whoiam.
+   2. Subscribe to NavigationManager.LocationChanged in OnInitialized.
+   3. Update isWhoIAmPage and call StateHasChanged in the event handler.
+   4. Unsubscribe in Dispose.
+*@
+@inject NavigationManager NavigationManager
+
+<header class="fixed top-0 left-0 z-50 w-full flex justify-between items-center p-6 bg-gray-900 backdrop-blur shadow">
+    <div class="text-2xl font-semibold text-indigo-400 hover:text-indigo-700 flex items-center gap-2">
         <a href="#hero" @onclick='() => SetActive("#hero")'>CloudZen</a>
+        @if (isWhoIAmPage && !isMobileMenuOpen)
+        {
+            <button class="ml-2 text-indigo-500 hover:text-indigo-700 transition flex items-center" @onclick="NavigateToHero" title="Back to Home">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                <span class="ml-1 text-base font-semibold">Back</span>
+            </button>
+        }
     </div>
     <!-- Hamburger for mobile -->
     <button class="md:hidden text-white focus:outline-none" @onclick="ToggleMobileMenu" aria-label="Open menu">
@@ -36,6 +68,29 @@
 @code {
     private string activeSection = "#hero";
     private bool isMobileMenuOpen = false;
+    private bool isWhoIAmPage;
+
+    protected override void OnInitialized()
+    {
+        UpdateIsWhoIAmPage();
+        NavigationManager.LocationChanged += HandleLocationChanged;
+    }
+
+    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        UpdateIsWhoIAmPage();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void UpdateIsWhoIAmPage()
+    {
+        isWhoIAmPage = NavigationManager.Uri.EndsWith("/whoiam", StringComparison.OrdinalIgnoreCase);
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= HandleLocationChanged;
+    }
 
     private void SetActive(string section) => activeSection = section;
     private void ToggleMobileMenu() => isMobileMenuOpen = !isMobileMenuOpen;
@@ -53,4 +108,9 @@
 
     private string GetContactClass() =>
         $"px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition {(activeSection == "#contact" ? "ring-2 ring-blue-400" : "")}";
+
+    private void NavigateToHero()
+    {
+        NavigationManager.NavigateTo("/");
+    }
 }
