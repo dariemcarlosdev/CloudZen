@@ -1,32 +1,29 @@
 ﻿@page "/"
 @using CloudZen.Shared
+@inject IJSRuntime JS
 
 <div class="min-h-screen flex flex-col bg-gray-50">
-    <main class="flex-1 flex flex-col gap-12 md:gap-20">
-        <section class="container mx-auto px-4">
+    <main class="flex-1 flex flex-col gap-12 md:gap-20 items-center w-full px-4 sm:px-6">
+        <div class="w-full max-w-7xl">
             <Hero />
-        </section>
-        <section class="container mx-auto px-4">
             <Mission />
-        </section>
-        <section class="container mx-auto px-4">
             <ValueProposition />
-        </section>
-        <section class="container mx-auto px-4">
-            <Services />
-        </section>
-        <section class="container mx-auto px-4">
+            <Services /> 
             <CaseStudies />
-        </section>
-        <section class="container mx-auto px-4">
             <Testimonials />
-        </section>
-        <section class="container mx-auto px-4">
             <CTA />
-        </section>
-        <section class="container mx-auto px-4 pb-12">
             <ContactForm />
-        </section>
+        </div>
     </main>
     <Footer />
 </div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("scrollToHero");
+        }
+    }
+}
