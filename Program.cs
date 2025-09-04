@@ -27,6 +27,9 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 var blobServiceEndpoint = builder.Configuration["CloudZenBlobStorageConnection:blobServiceUri"];
 
+// Register GoogleCalendarUrlService as a singleton
+builder.Services.AddSingleton<GoogleCalendarUrlService>();
+
 // Register ResumeService after HttpClient
 builder.Services.AddScoped(sp => new ResumeService(
     sp.GetRequiredService<HttpClient>(),
