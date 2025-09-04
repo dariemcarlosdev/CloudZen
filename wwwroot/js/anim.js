@@ -37,3 +37,10 @@ window.saveAsFile = function (filename, bytes) {
     document.body.removeChild(link);
     URL.revokeObjectURL(link.href);
 }
+
+window.scrollToHero = function () {
+    var hero = document.getElementById('hero');
+    if (hero) {
+        hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+};
