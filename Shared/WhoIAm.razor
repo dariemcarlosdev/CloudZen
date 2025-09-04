@@ -1,7 +1,6 @@
 ﻿@page "/whoiam"
 @using CloudZen.Services
 @inject ResumeService ResumeService
-@* Injects IJSRuntime to enable JavaScript interop for client-side features (e.g., file download from Blazor) *@
 @inject IJSRuntime JS
 
 <section id="who-i-am" class="bg-white py-20">
@@ -81,6 +80,47 @@
                 </div>
             </div>
         </div>
+
+        <!-- Projects Section -->
+        <div class="mt-20">
+            <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Highlighted Projects</h3>
+            <div class="flex flex-col gap-8">
+                @foreach (var project in Projects)
+                {
+                    <div class="bg-white rounded-2xl shadow p-6 flex flex-col gap-4">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl font-semibold">@project.Name</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold @GetStatusColor(project.Status)">@project.Status</span>
+                        </div>
+                        <p class="text-gray-700">@project.Description</p>
+                        <div class="flex flex-wrap gap-2">
+                            @foreach (var tech in project.TechStack)
+                            {
+                                <span class="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs rounded-full">@tech</span>
+                            }
+                        </div>
+                        @if (project.Participants?.Count() > 0)
+                        {
+                            <div class="flex items-center gap-2 mt-2">
+                                <span class="text-xs text-gray-500 mr-2">Participants:</span>
+                                @foreach (var participant in project.Participants)
+                                {
+                                    <img src="@participant.ImageUrl" alt="@participant.Name" title="@participant.Name" class="w-9 h-9 rounded-full border-2 border-indigo-700 object-cover" />
+                                }
+                            </div>
+                        }
+                        @if (!string.IsNullOrEmpty(project.MoreInfo))
+                        {
+                            <div class="text-xs text-gray-500">@project.MoreInfo</div>
+                        }
+                        <div class="w-full bg-gray-100 rounded-full h-3 mt-2">
+                            <div class="h-3 rounded-full @GetProgressColor(project.Progress)" style="width: @project.Progress%"></div>
+                        </div>
+                        <div class="text-xs text-gray-600">Progress: @project.Progress%</div>
+                    </div>
+                }
+            </div>
+        </div>
     </div>
 </section>
 <Footer />
@@ -97,5 +137,97 @@
 
 
         await JS.InvokeVoidAsync("saveAsFile", fileName, resumeBytes);
+    }
+
+    private List<ProjectInfo> Projects = new()
+    {
+        new ProjectInfo
+        {
+            Name = "Healthcare Modernization",
+            Status = "Completed",
+            Description = "Migrated a legacy healthcare platform to ASP.NET Core and Azure, improving performance and security.",
+            TechStack = new[] { ".NET", "Azure", "SQL Server", "Docker", "Blazor" },
+            Progress = 100,
+            MoreInfo = "Reduced downtime by 70%.",
+            Participants = new[]
+            {
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" },
+                new ProjectParticipant { Name = "Frank ", ImageUrl = "/images/participant-jane.jpg" }
+            }
+        },
+        new ProjectInfo
+        {
+            Name = "AI Analytics Portal",
+            Status = "In Progress",
+            Description = "Building an AI-powered analytics dashboard using Azure OpenAI and Power BI for real-time insights.",
+            TechStack = new[] { "Azure OpenAI", "Power BI", ".NET 8", "Blazor WASM" },
+            Progress = 65,
+            MoreInfo = "Integrating predictive analytics and natural language queries.",
+            Participants = new[]
+            {
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" },
+                new ProjectParticipant { Name = "Marlitos Aleas Go-Go", ImageUrl = "/images/participant-john.jpg" }
+            }
+        },
+        new ProjectInfo
+        {
+            Name = "DevOps Automation",
+            Status = "Completed",
+            Description = "Implemented CI/CD pipelines and infrastructure as code for a fintech client.",
+            TechStack = new[] { "Azure DevOps", "GitHub Actions", "Terraform", ".NET" },
+            Progress = 100,
+            MoreInfo = "Release cycles cut by 40%.",
+            Participants = new[]
+            {
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" }
+            }
+        },
+        new ProjectInfo
+        {
+            Name = "Legacy Migration",
+            Status = "Planning",
+            Description = "Preparing to migrate a large on-premise ERP system to Azure cloud.",
+            TechStack = new[] { "Azure", ".NET", "SQL Server" },
+            Progress = 10,
+            MoreInfo = "Discovery and architecture phase.",
+            Participants = new[]
+            {
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" },
+                new ProjectParticipant { Name = "Jane Doe", ImageUrl = "/images/participant-jane.jpg" },
+                new ProjectParticipant { Name = "John Smith", ImageUrl = "/images/participant-john.jpg" }
+            }
+        }
+    };
+
+    private string GetStatusColor(string status) => status switch
+    {
+        "Completed" => "bg-green-100 text-green-800",
+        "In Progress" => "bg-yellow-100 text-yellow-800",
+        "Planning" => "bg-blue-100 text-blue-800",
+        _ => "bg-gray-100 text-gray-800"
+    };
+
+    private string GetProgressColor(int progress) => progress switch
+    {
+        >= 100 => "bg-green-500",
+        >= 70 => "bg-blue-500",
+        >= 40 => "bg-yellow-400",
+        _ => "bg-gray-400"
+    };
+
+    private class ProjectInfo
+    {
+        public string Name { get; set; }
+        public string Status { get; set; }
+        public string Description { get; set; }
+        public string[] TechStack { get; set; }
+        public int Progress { get; set; }
+        public string? MoreInfo { get; set; }
+        public IEnumerable<ProjectParticipant> Participants { get; set; } = [];
+    }
+    private class ProjectParticipant
+    {
+        public string Name { get; set; }
+        public string ImageUrl { get; set; }
     }
 }
