@@ -58,4 +58,4 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           deployment_action: "upload"
           app_location: "." # or "CloudZen" if your .csproj is in a subfolder
-          output_location: "/wwwroot"
+          output_location: "/wwwroot" ## Location of the build output relative to the app_location folder, e.g. "/wwwroot"" if you published to Azure Static Web Apps. This must match the output folder in your Azure Static Web Apps configuration.
