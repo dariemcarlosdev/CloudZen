@@ -1,42 +1,61 @@
-name: Azure Static Web Apps CI/CD
+name: Azure CloudZen Static Web Apps CI/CD
 
 on:
   push:
     branches:
       - master
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - master
+  # pull_request:
+  #   types: [opened, synchronize, reopened, closed]
+  #   branches:
+  #     - master
 
 jobs:
-  build_and_deploy:
+  build:
+    # This job handles building and publishing the .NET application
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
+    name: Build Job
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4 # Checkout the repository code
 
-      - name: Setup .NET
+      - name: Setup .NET # Install the required .NET SDK
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - name: Restore dependencies
+      - name: Restore dependencies # Restore NuGet packages
         run: dotnet restore
 
-      - name: Build
+      - name: Build # Build the project in Release mode
         run: dotnet build --configuration Release --no-restore
 
-      - name: Publish
+      - name: Publish # Publish the project to the build_output directory
         run: dotnet publish -c Release -o build_output
 
-      - name: Deploy to Azure Static Web Apps
+      - name: Upload build artifacts # Upload the published output for use in the deploy job
+        uses: actions/upload-artifact@v4
+        with:
+          name: build_output
+          path: build_output
+
+  deploy:
+    # This job handles deploying the published app to Azure Static Web Apps
+    runs-on: ubuntu-latest
+    name: Deploy Job
+    needs: build
+    steps:
+      - uses: actions/checkout@v4 # Checkout the repository code
+
+      - name: Download build artifacts # Download the published output from the build job
+        uses: actions/download-artifact@v4
+        with:
+          name: build_output
+          path: build_output
+
+      - name: Deploy to Azure Static Web Apps # Deploy the app to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)          
+          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
           deployment_action: "upload"
-          # app_location must point to the location of your application code and match with App Location set in Azure Static Web App -> Configuration
           app_location: "." # or "CloudZen" if your .csproj is in a subfolder
-          # output_location must point to the location of your built application and match with App Artifact Location set in Azure Static Web App -> Configuration
-          output_location: "/wwwroot"
+          output_location: "build_output"
