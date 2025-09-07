@@ -3,12 +3,18 @@
 @inject ResumeService ResumeService
 @inject IJSRuntime JS
 
-<section id="who-i-am" class="bg-white py-20">
+<section id="who-i-am" class="bg-white py-8">
     <div class="max-w-6xl mx-auto px-6 lg:px-8">
-        <div class="text-center mb-12">
+        <div class="text-center mb-6">
+            <!-- Avatar/Photo -->
+            <div class="flex justify-center mb-6">  
+                <img src="/images/dariem-avatar.jpg"
+                     alt="Dariem C. Macias - CloudZen"
+                     class="w-40 h-40 rounded-full shadow-lg object-cover border-4 border-indigo-700" />
+            </div>
             <h2 class="text-4xl font-bold text-gray-900">Who I Am</h2>
             <p class="mt-4 text-lg text-gray-600">
-                I’m <strong>Dariem C. Macias</strong>, founder and principal consultant at <strong>CloudZen Inc.</strong> .
+                I’m <strong>Dariem C. Macias</strong>, founder and principal consultant at <strong>CloudZen Inc</strong> .
             </p>
             <p class="mt-4 text-lg text-gray-600">
                 Over the past seven years, I’ve designed and delivered scalable, secure ASP.NET Core applications and enterprise backend systems, leveraging Azure cloud solutions and high-performance ETL pipelines. More recently, I’ve focused on AI and intelligent automation with Azure OpenAI to improve data workflows, enhance user experiences, and support smarter business decision-making. I excel at modernizing legacy platforms and integrating AI-driven capabilities, building solutions that address real business challenges while empowering teams and stakeholders.
@@ -22,17 +28,11 @@
                 </a>
             </div>
         </div>
-
+        <!-- SDLC Process Panel: Interactive, Responsive, and Highlights Each Stage -->
+        <SDLCProcess></SDLCProcess>
         <div class="grid md:grid-cols-2 gap-12 items-start">
             <!-- Left Column: Bio -->
             <div>
-                <!-- Avatar/Photo -->
-                <div class="flex justify-center md:justify-start mb-6">
-                    <img src="/images/dariem-avatar.jpg"
-                         alt="Dariem C. Macias - CloudZen"
-                         class="w-40 h-40 rounded-full shadow-lg object-cover border-4 border-indigo-700" />
-                </div>
-
                 <h3 class="text-2xl font-semibold text-gray-900 mb-4">My Approach</h3>
                 <p class="text-gray-700 leading-relaxed mb-4">
                     I specialize in delivering <strong><span class="font-bold text-indigo-700">measurable results</span></strong> — not just code.
@@ -50,26 +50,31 @@
             </div>
 
             <!-- Right Column: Results Highlights -->
-            <div class="bg-gray-50 p-6 rounded-2xl shadow-md">
-                <h3 class="text-xl font-semibold text-gray-900 mb-4">Key Results Delivered</h3>
+            <div >
+                <h3 class="text-2xl font-semibold text-gray-900 mb-4">Key Results Delivered</h3>
                 <ul class="space-y-3 text-gray-700">
-                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Migrated legacy WebForms app → ASP.NET Core, improving performance by 40%.</span></li>
+                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Migrated legacy WebForms app → monolithic ASP.NET Core, accelerating assessment cycles by 50%.</span></li>
                     <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Built CI/CD pipelines in Azure DevOps & GitHub Actions, cutting release cycles by 40%.</span></li>
                     <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Automated reporting with Power BI & SSIS, reducing runtimes by 70%.</span></li>
                     <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Integrated Azure OpenAI & Cognitive Services, reducing manual processing by 60%.</span></li>
                     <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Optimized APIs & databases, boosting system performance by 20–25%.</span></li>
+                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Engineered SSIS ETL for SAP Data Ingestion, reducing job runtimes by 70% through ABAP extraction and lookup-driven deduplication.</span></li>
+
                 </ul>
 
                 <h3 class="text-xl font-semibold text-gray-900 mt-6 mb-4">Core Expertise</h3>
                 <div class="flex flex-wrap gap-2">
                     <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">.NET / C#</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">Azure Cloud</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">OpenAI / Cognitive Services</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">Web APIs / REST</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">Azure Cloud Services</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">Azure OpenA / Cognitive Service</span>
                     <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">DevOps / CI/CD</span>
                     <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">Blazor</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">SQL & Databases</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">T-SQL & Databases</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">DATA Integration/ ETL Process</span>
+                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">SSIS Pipeline Engineering/Automation</span>
                     <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">Power BI & Reporting</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">AI & Cognitive Services</span>
-                    <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">Web APIs / REST</span>
                     <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">Software Architecture & Design Patterns</span>
                 </div>
 
@@ -84,6 +89,7 @@
         <!-- Projects Section -->
         <div class="mt-20">
             <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Highlighted Projects</h3>
+            <p class="text-gray-600 text-center mt-2 mb-8">This project showcases how I bring together software engineering, cloud-native design, and applied AI to solve a concrete business problem—while also reflecting my ability to start from scratch, iterate quickly, and deliver production-ready systems.</p>
             <div class="flex flex-col gap-8">
                 @foreach (var project in Projects)
                 {
@@ -109,9 +115,17 @@
                                 }
                             </div>
                         }
-                        @if (!string.IsNullOrEmpty(project.MoreInfo))
+                        @if (project.Results != null && project.Results.Count > 0)
                         {
-                            <div class="text-xs text-gray-500">@project.MoreInfo</div>
+                            <div class="flex flex-wrap gap-3 text-xs text-gray-500 mt-2">
+                                @foreach (var result in project.Results)
+                                {
+                                    <span class="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1">
+                                        <i class="bi bi-bar-chart-fill text-indigo-600"></i>
+                                        @result
+                                    </span>
+                                }
+                            </div>
                         }
                         <div class="w-full bg-gray-100 rounded-full h-3 mt-2">
                             <div class="h-3 rounded-full @GetProgressColor(project.Progress)" style="width: @project.Progress%"></div>
@@ -143,40 +157,76 @@
     {
         new ProjectInfo
         {
-            Name = "Healthcare Modernization",
+            Name = "WPBT Modernization:Scalable Assessment Services for MDCPS",
             Status = "Completed",
-            Description = "Migrated a legacy healthcare platform to ASP.NET Core and Azure, improving performance and security.",
-            TechStack = new[] { ".NET", "Azure", "SQL Server", "Docker", "Blazor" },
+            Description = "Modernized WPBT Assessment Services platform for MDCPS by migrating from legacy ASP.NET Web Forms to modular ASP.NET Core architecture—enhanced scalability, security, and user experience while accelerating assessment cycles by 50%",
+            TechStack = new[] { "LinQ", "T-SQL Server", "EF", "BootStrap", "ASP.NET Web-Form", ".NET Core",".NET 8", "C#" },
             Progress = 100,
-            MoreInfo = "Reduced downtime by 70%.",
+            Results = new List<string>
+            {
+                "Streamlined assessment cycle cutting turnaround times by roughly 50%.",
+                "Delivered a responsive, modular interface for principals and administrators.",
+                "Enhanced traceability and precision in assessment records, minimizing errors and boosting confidence in reporting.",
+                "Supported increasing teachers and program volumes without performance degradation, ensuring long-term viability.",
+                "Delivered a responsive, intuitive interface for Principals and administrators, increasing productivity and satisfaction.",
+                "Overcame rigid architecture and outdated UI that hindered scalability, performance, and user engagement"
+            },
             Participants = new[]
             {
                 new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" },
-                new ProjectParticipant { Name = "Frank ", ImageUrl = "/images/participant-jane.jpg" }
+            }
+        },
+         new ProjectInfo
+        {
+            Name = "Data-Driven ETL Optimization for SAP Maintenance Master Data",
+            Status = "Completed",
+            Description = "Engineered delta-based SSIS ETL pipeline for SAP Maintenance Data, replacing full daily loads with ABAP-driven delta extraction and lookup-based deduplication.",
+            TechStack = new[] { "SSIS ETL pipelines", "T-SQL Server", "EF", "LinQ", "Job Automation/Orchestration"},
+            Progress = 100,
+            Results = new List<string>
+            {
+                "Streamlined SAP Data Ingestion by 70% Runtime Reduction through Delta Processing.",
+                "Resolved performance bottlenecks in the downstream Data Warehouse (DW)",
+                "Scales-Out efficiently with large datasets",
+                "Modular SSIS Architecture for Scalable, Audit-Compliant SAP ETL.",
+                "Reinforced best practices in recursive ETL design and stakeholder-aligned architecture"
+            },
+            Participants = new[]
+            {
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" },
             }
         },
         new ProjectInfo
         {
-            Name = "AI Analytics Portal",
+            Name = "Smart Menu Optimizer - Cloud-native and AI-Powered app.",
             Status = "In Progress",
-            Description = "Building an AI-powered analytics dashboard using Azure OpenAI and Power BI for real-time insights.",
-            TechStack = new[] { "Azure OpenAI", "Power BI", ".NET 8", "Blazor WASM" },
-            Progress = 65,
-            MoreInfo = "Integrating predictive analytics and natural language queries.",
-            Participants = new[]
+            Description = "Smart Menu Optimizer is a cloud-native and AI-powered recommendation engine designed to help restaurants owners make data-driven decisions about their menus maximizing profitability and reduce waste.",
+            TechStack = new[] { 
+                ".NET 8.0/9.0 SDK",
+                "C#",
+                "Docker",
+                "Azure Functions",
+                "ML.NET models",
+                "AI NLP",
+                "Azure Cognitive Services",
+                "Azure OpenAI",
+                "Power BI dashboards",
+                "ASP.NET Core Web API",
+                "Blazor Server",
+                "PostgreSQL",
+                "Azure Redis",
+                "Azure Blob Storage",
+                "Multi-Tenant SaaS Architecture",
+                "GitHub Actions CI/CD Workflow"
+            },
+            Progress = 30,
+            Results = new List<string>
             {
-                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" },
-                new ProjectParticipant { Name = "Marlitos Aleas Go-Go", ImageUrl = "/images/participant-john.jpg" }
-            }
-        },
-        new ProjectInfo
-        {
-            Name = "DevOps Automation",
-            Status = "Completed",
-            Description = "Implemented CI/CD pipelines and infrastructure as code for a fintech client.",
-            TechStack = new[] { "Azure DevOps", "GitHub Actions", "Terraform", ".NET" },
-            Progress = 100,
-            MoreInfo = "Release cycles cut by 40%.",
+                "Increase profit margin per order by +18% through optimized menu recommendations.",
+                "Reduce food waste by 22% by aligning menu offerings with real-time inventory signals.",
+                "Enable automated daily menu refreshes with zero manual intervention from staff.",
+                "Empower chefs and reataurant Owners and Managers with actionable insights through intuitive dashboards."
+            },
             Participants = new[]
             {
                 new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" }
@@ -184,20 +234,82 @@
         },
         new ProjectInfo
         {
-            Name = "Legacy Migration",
-            Status = "Planning",
-            Description = "Preparing to migrate a large on-premise ERP system to Azure cloud.",
-            TechStack = new[] { "Azure", ".NET", "SQL Server" },
-            Progress = 10,
-            MoreInfo = "Discovery and architecture phase.",
+            Name = "VPKFILEPROCESSOR – Cloud-Enabled ETL Pipeline Modernization",
+            Status = "In Progress",
+            Description = "VPKFILEPROCESSOR is a cloud-native solution that modernizes ETL workflows for MDCPS by migrating SSIS pipelines from on-premise to Azure. It allows users to upload files, automate processing via Azure Data Factory, and retrieve results through a Blazor Server interface. The system’s modular microservices communicate asynchronously using Azure Event Grid, enabling scalable, secure, and fault-tolerant operations.",
+            TechStack = new[] {
+                ".NET 8.0 SDK",
+                "ASP.NET Core (Blazor Server)",
+                "Git & GitHub Actions",
+                "SOLID Principles",
+                "Azure Functions",
+                "Azure Blob Storage",
+                "Azure Data Factory",
+                "Azure SQL Database",
+                "Azure Key Vault",
+                "Azure Event Grid",
+                "Azure Monitor & Application Insights",
+                "Docker",
+                "CI/CD Workflow",
+                "Azure Logic Apps"
+            },
+            Progress = 80,
+            Results = new List<string>
+            {
+                "Designed a scalable, decoupled system using Azure Event Grid",
+                "Containerized core services using Docker",
+                "Delivered a responsive Blazor Server interface",
+                "Implemented robust error handling and retry logic in Azure Functions",
+                "Established CI/CD pipelines with GitHub Actions",
+                "Enabled automated email notifications via Logic Apps",
+                "Implemented reliable Azure Event Grid publishing/subscription",
+                "Prepared architecture for Azure SignalR integration"
+            },
             Participants = new[]
             {
-                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" },
-                new ProjectParticipant { Name = "Jane Doe", ImageUrl = "/images/participant-jane.jpg" },
-                new ProjectParticipant { Name = "John Smith", ImageUrl = "/images/participant-john.jpg" }
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" }
+            }
+        },
+        new ProjectInfo
+        {
+            Name = "DineJoy - Cloud and AI-Driven aplications.",
+            Status = "Planning",
+            Description = "DineJoy empowers restaurant owners to launch branded loyalty rewards programs without technical overhead. By blending AI-driven personalization with seamless POS/loyalty integration.it helps restaurants to Boost repeat visits through customer-centric rewards, Increase campaign effectiveness with AI personalization, Save time via auto-suggested promotions and insights,Strengthen guest relationships with tailored experiences. ",
+            TechStack = new[] {
+                ".NET 8.0/9.0 SDK",
+                "Blazor WASM + WPA",
+                "ASP.NET Core Web API",
+                "C#",
+                "PostgreSQL",
+                "Azure ML",
+                "Azure Cognitive Services",
+                "Azure OpenIA",
+                "Multi-Tenant SaaS Architecture",
+                "Power BI",
+                "Docker",
+                "GitHub Actions CI/CD workflow"
+            },
+            Progress = 0,
+            Results = new List<string>
+            {
+                "Boost repeat customer visits by 27% with branded loyalty programs.",
+                "Improve campaign conversion rates by 35% via AI-driven personalization.",
+                "Save 10+ staff hours monthly by automating promotion scheduling and recommendations.",
+                "Empower owners with guest insights through AI dashboards and predictive analytics."
+            },
+            Participants = new[]
+            {
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" }
             }
         }
     };
+
+    protected override void OnInitialized()
+    {
+        var statusOrder = new List<string> { "Completed", "In Progress", "Planning" };
+        // Sort projects based on the defined status order
+        Projects = Projects.OrderBy(p => statusOrder.IndexOf(p.Status)).ToList();
+    }
 
     private string GetStatusColor(string status) => status switch
     {
@@ -222,7 +334,7 @@
         public string Description { get; set; }
         public string[] TechStack { get; set; }
         public int Progress { get; set; }
-        public string? MoreInfo { get; set; }
+        public List<string> Results { get; set; } = new();
         public IEnumerable<ProjectParticipant> Participants { get; set; } = [];
     }
     private class ProjectParticipant
