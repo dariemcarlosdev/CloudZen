@@ -1,0 +1,74 @@
+@* SDLCProcess.razor - Selected Button Has Full Background Color *@
+<section id="sdlc-process" class="bg-gray-50 py-5">
+    <div class="max-w-5xl mx-auto px-6">
+        <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">My Streamlined SDLC Process</h2>
+        <!-- Button Group: Responsive margin below for mobile -->
+        <div class="flex justify-center items-center relative mb-10 sm:mb-8">
+            <div class="relative flex flex-col sm:flex-row justify-center gap-6 sm:gap-8 max-w-3xl mx-auto w-full items-center">
+                <!-- Desktop Horizontal Connecting Line -->
+                <div class="hidden sm:block absolute top-1/2" style="left: 13%; right: 13%; height: 4px; background: linear-gradient(90deg, #6366f1 0%, #a5b4fc 100%); transform: translateY(-50%); z-index: 0;"></div>
+                <!-- Mobile Vertical Connecting Line -->
+                <div class="block sm:hidden absolute left-1/2" style="top: 40px; bottom: 40px; width: 4px; background: linear-gradient(180deg, #6366f1 0%, #a5b4fc 100%); transform: translateX(-50%); z-index: 0;"></div>
+                <!-- Stage Buttons -->
+                <button class="flex-1 min-w-[300px] sm:min-w-[260px] px-4 py-3 sm:px-6 sm:py-3 rounded-xl font-semibold shadow transition focus:outline-none z-10 text-sm sm:text-lg whitespace-nowrap"
+                        style="@(SelectedStage == SDLCStage.Strategy ? "background:#4338ca;color:#fff;border-color:#4338ca;" : "background:#fff;color:#374151;border-color:#e5e7eb;")"
+                        @onclick="() => SelectStage(SDLCStage.Strategy)">
+                    <i class="bi bi-lightbulb text-xl sm:text-2xl align-middle mr-2"></i> Planning
+                </button>
+                <button class="flex-1 min-w-[300px] sm:min-w-[260px] px-4 py-3 sm:px-6 sm:py-3 rounded-xl font-semibold shadow transition focus:outline-none z-10 text-sm sm:text-lg whitespace-nowrap"
+                        style="@(SelectedStage == SDLCStage.Delivery ? "background:#4338ca;color:#fff;border-color:#4338ca;" : "background:#fff;color:#374151;border-color:#e5e7eb;")"
+                        @onclick="() => SelectStage(SDLCStage.Delivery)">
+                    <i class="bi bi-gear-wide-connected text-xl sm:text-2xl align-middle mr-2"></i> Automation
+                </button>
+                <button class="flex-1 min-w-[300px] sm:min-w-[260px] px-4 py-3 sm:px-6 sm:py-3 rounded-xl font-semibold shadow transition focus:outline-none z-10 text-sm sm:text-lg whitespace-nowrap"
+                        style="@(SelectedStage == SDLCStage.Deployment ? "background:#4338ca;color:#fff;border-color:#4338ca;" : "background:#fff;color:#374151;border-color:#e5e7eb;")"
+                        @onclick="() => SelectStage(SDLCStage.Deployment)">
+                    <i class="bi bi-cloud-upload text-xl sm:text-2xl align-middle mr-2"></i> Deployment
+                </button>
+            </div>
+        </div>
+        <!-- Description Panel: Responsive margin top for mobile -->
+        <div class="max-w-2xl mx-auto mt-8 sm:mt-0">
+            @if (SelectedStage == SDLCStage.Strategy)
+            {
+                <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center animate-fade-in">
+                    <h3 class="text-xl font-semibold mb-2 text-indigo-700">Strategy & Planning</h3>
+                    <p class="text-gray-700 text-center">I partner with stakeholders to define clear business goals, requirements, and success metrics. My approach emphasizes rapid prototyping, risk assessment, and solution architecture tailored to each client’s needs.</p>
+                </div>
+            }
+            else if (SelectedStage == SDLCStage.Delivery)
+            {
+                <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center animate-fade-in">
+                    <h3 class="text-xl font-semibold mb-2 text-indigo-700">Automated Delivery</h3>
+                    <p class="text-gray-700 text-center">I implement DevOps best practices—CI/CD pipelines, automated testing, and code reviews—to ensure fast, reliable, and repeatable delivery. This reduces manual effort, accelerates feedback, and improves quality at every stage.</p>
+                </div>
+            }
+            else if (SelectedStage == SDLCStage.Deployment)
+            {
+                <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center animate-fade-in">
+                    <h3 class="text-xl font-semibold mb-2 text-indigo-700">Production Deployment</h3>
+                    <p class="text-gray-700 text-center">I leverage cloud-native deployment strategies for zero-downtime releases, robust monitoring, and rapid rollback. My process ensures secure, scalable, and high-performing solutions in production environments.</p>
+                </div>
+            }
+        </div>
+        <div class="mt-10 text-center">
+            <span class="inline-block px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full font-medium">From vision to value—every step is automated, measured, and aligned with your business goals.</span>
+        </div>
+    </div>
+</section>
+
+@code {
+    private SDLCStage SelectedStage { get; set; } = SDLCStage.Strategy;
+
+    private void SelectStage(SDLCStage stage)
+    {
+        SelectedStage = stage;
+    }
+
+    private enum SDLCStage
+    {
+        Strategy,
+        Delivery,
+        Deployment
+    }
+}
