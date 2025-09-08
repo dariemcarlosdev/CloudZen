@@ -106,7 +106,7 @@
                                 <span class="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs rounded-full">@tech</span>
                             }
                         </div>
-                        @if (project.Participants?.Count() > 0)
+@*                         @if (project.Participants?.Count() > 0)
                         {
                             <div class="flex items-center gap-2 mt-2">
                                 <span class="text-xs text-gray-500 mr-2">Participants:</span>
@@ -115,7 +115,7 @@
                                     <img src="@participant.ImageUrl" alt="@participant.Name" title="@participant.Name" class="w-9 h-9 rounded-full border-2 border-indigo-700 object-cover" />
                                 }
                             </div>
-                        }
+                        } *@
                         @if (project.Results != null && project.Results.Count > 0)
                         {
                             <div class="flex flex-wrap gap-3 text-xs text-gray-500 mt-2">
