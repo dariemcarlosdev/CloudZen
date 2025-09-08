@@ -47,7 +47,7 @@
         <NavLink href="/whoiam" class="text-white hover:text-gray-400 text-lg font-semibold" ActiveClass="text-blue-400 text-lg font-semibold">Who I Am</NavLink>
         <a href="#services" @onclick='() => SetActive("#services")' class="@GetNavClass("#services")">Services</a>
         <a href="#cases" @onclick='() => SetActive("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
-        <a href="#testimonials" @onclick='() => SetActive("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a>
+@*         <a href="#testimonials" @onclick='() => SetActive("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a> *@
         <a href="#contact" @onclick='() => SetActive("#contact")' class="@GetContactClass()">Contact</a>
     </nav>
     <!-- Mobile nav -->
@@ -59,7 +59,7 @@
             <NavLink href="/whoiam" class="text-white hover:text-gray-400 text-lg font-semibold" ActiveClass="text-blue-400 text-lg font-semibold" @onclick='CloseMobileMenu'>Who I Am</NavLink>
             <a href="#services" @onclick='() => OnMobileNavClick("#services")' class="@GetNavClass("#services")">Services</a>
             <a href="#cases" @onclick='() => OnMobileNavClick("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
-            <a href="#testimonials" @onclick='() => OnMobileNavClick("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a>
+@*             <a href="#testimonials" @onclick='() => OnMobileNavClick("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a> *@
             <a href="#contact" @onclick='() => OnMobileNavClick("#contact")' class="@GetContactClass()">Contact</a>
         </nav>
     }
