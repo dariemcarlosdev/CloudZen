@@ -98,7 +98,15 @@
                         <div class="flex items-center gap-3">
                             <span class="text-xl font-semibold">@project.Name</span>
                             <span class="px-3 py-1 rounded-full text-xs font-bold @GetStatusColor(project.Status)">@project.Status</span>
-                        </div>
+                        </div>                        
+                        <!-- Role property with glyph icon -->
+                        @if (!string.IsNullOrWhiteSpace(project.Role))
+                        {
+                            <div class="flex items-center gap-2 text-indigo-700 text-sm">
+                                <i class="bi bi-person-badge text-lg"></i>
+                                <span class="font-semibold">@project.Role</span>
+                            </div>
+                        }
                         <p class="text-gray-700">@project.Description</p>
                         <div class="flex flex-wrap gap-2">
                             @foreach (var tech in project.TechStack)
@@ -106,26 +114,35 @@
                                 <span class="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs rounded-full">@tech</span>
                             }
                         </div>
-@*                         @if (project.Participants?.Count() > 0)
+                        <!-- Challenges property with check icons -->
+                        @if (project.Challenges != null && project.Challenges.Count > 0)
                         {
-                            <div class="flex items-center gap-2 mt-2">
-                                <span class="text-xs text-gray-500 mr-2">Participants:</span>
-                                @foreach (var participant in project.Participants)
-                                {
-                                    <img src="@participant.ImageUrl" alt="@participant.Name" title="@participant.Name" class="w-9 h-9 rounded-full border-2 border-indigo-700 object-cover" />
-                                }
+                            <div class="mt-1">
+                                <span class="text-xs text-gray-700 font-semibold">Main Challenges:</span>
+                                <div class="flex flex-wrap gap-3 text-xs text-gray-500 mt-1">
+                                    @foreach (var challenge in project.Challenges)
+                                    {
+                                        <span class="flex items-center gap-2 text-gray-700 text-xs">
+                                            <i class="bi bi-lightning text-green-600"></i>
+                                            <span>@challenge</span>
+                                        </span>
+                                    }
+                                </div>
                             </div>
-                        } *@
+                        }
                         @if (project.Results != null && project.Results.Count > 0)
                         {
-                            <div class="flex flex-wrap gap-3 text-xs text-gray-500 mt-2">
-                                @foreach (var result in project.Results)
-                                {
-                                    <span class="flex items-center gap-1 bg-gray-100 rounded-full px-3 py-1">
-                                        <i class="bi bi-bar-chart-fill text-indigo-600"></i>
-                                        @result
-                                    </span>
-                                }
+                            <div class="mt-2">
+                                <span class="text-xs text-gray-700 font-semibold">Outcomes:</span>
+                                <div class="flex flex-wrap gap-3 text-xs text-gray-500 mt-1">
+                                    @foreach (var result in project.Results)
+                                    {
+                                        <span class="flex items-center gap-1 bg-gray-100 rounded-full px-1 py-1">
+                                            <i class="bi bi-award text-green-600"></i>
+                                            @result
+                                        </span>
+                                    }
+                                </div>
                             </div>
                         }
                         <div class="w-full bg-gray-100 rounded-full h-3 mt-2">
@@ -175,6 +192,13 @@
             Participants = new[]
             {
                 new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" },
+            },
+            Role = "Principal Consultant / Lead Developer / Solution Architect",
+            Challenges = new List<string>
+            {
+                "Migrating complex legacy business logic from Web Forms to ASP.NET Core.",
+                "Ensuring data integrity and traceability during platform transition.",
+                "Redesigning UI/UX for modern accessibility and scalability."
             }
         },
          new ProjectInfo
@@ -195,6 +219,13 @@
             Participants = new[]
             {
                 new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" },
+            },
+            Role = "Lead ETL Engineer / Solution Architect",
+            Challenges = new List<string>
+            {
+                "Designing delta-based extraction logic for SAP data.",
+                "Optimizing ETL for large-scale, high-volume data loads.",
+                "Ensuring audit compliance and traceability in ETL workflows."
             }
         },
         new ProjectInfo
@@ -231,6 +262,13 @@
             Participants = new[]
             {
                 new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" }
+            },
+            Role = "Principal Consultant / AI Solution Architect",
+            Challenges = new List<string>
+            {
+                "Integrating AI/ML models for real-time menu optimization.",
+                "Building scalable cloud-native architecture for multi-tenant SaaS.",
+                "Automating data ingestion and dashboard reporting."
             }
         },
         new ProjectInfo
@@ -269,6 +307,13 @@
             Participants = new[]
             {
                 new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" }
+            },
+            Role = "Principal Consultant / Cloud Solution Architect",
+            Challenges = new List<string>
+            {
+                "Migrating on-premise SSIS ETL workflows to Azure cloud.",
+                "Implementing reliable event-driven microservices communication.",
+                "Ensuring security and scalability for sensitive data processing."
             }
         },
         new ProjectInfo
@@ -301,6 +346,13 @@
             Participants = new[]
             {
                 new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" }
+            },
+            Role = "Principal Consultant / Product Architect",
+            Challenges = new List<string>
+            {
+                "Integrating AI-driven personalization with POS/loyalty systems.",
+                "Designing scalable multi-tenant SaaS architecture.",
+                "Automating campaign management and analytics reporting."
             }
         }
     };
@@ -337,6 +389,8 @@
         public int Progress { get; set; }
         public List<string> Results { get; set; } = new();
         public IEnumerable<ProjectParticipant> Participants { get; set; } = [];
+        public string Role { get; set; } // Your role in the project
+        public List<string> Challenges { get; set; } = new(); // Main challenges for each project
     }
     private class ProjectParticipant
     {
