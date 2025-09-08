@@ -1,4 +1,5 @@
 // anim.js - reveal on scroll for [data-reveal] elements
+// Last significant change: Added scrollToElementById for Blazor interop to scroll to Highlighted Projects section in WhoIAm.razor when navigated from CaseStudies.razor.
 
 /**
  * Initializes reveal animations for elements with the [data-reveal] attribute.
@@ -42,5 +43,13 @@ window.scrollToHero = function () {
     var hero = document.getElementById('hero');
     if (hero) {
         hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+};
+
+// Last significant change: Added for Blazor navigation from CaseStudies.razor to WhoIAm.razor Highlighted Projects section.
+window.scrollToElementById = function (id) {
+    var el = document.getElementById(id);
+    if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 };

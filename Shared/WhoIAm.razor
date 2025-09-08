@@ -2,16 +2,19 @@
 @using CloudZen.Services
 @inject ResumeService ResumeService
 @inject IJSRuntime JS
+@inject NavigationManager NavigationManager
 
+<!-- Last significant change: Added logic to scroll to Highlighted Projects section if navigated from CaseStudies.razor with ?scroll=highlighted-projects query parameter. -->
 <section id="who-i-am" class="bg-white py-8">
     <div class="max-w-6xl mx-auto px-6 lg:px-8">
         <div class="text-center mb-6">
-            <!-- Avatar/Photo -->
-            <div class="flex justify-center mb-6">  
+            <!-- Avatar/Photo commented out: Temporarily disabled, possibly for redesign, privacy, or to focus on textual content.-->
+@*             <!-- Avatar/Photo -->
+            <div class="flex justify-center mb-6">
                 <img src="/images/dariem-avatar.jpg"
                      alt="Dariem C. Macias - CloudZen"
                      class="w-40 h-40 rounded-full shadow-lg object-cover border-4 border-indigo-700" />
-            </div>
+            </div> *@
             <h2 class="text-4xl font-bold text-gray-900">Who I Am</h2>
             <p class="mt-4 text-lg text-gray-600">
                 I’m <strong>Dariem C. Macias</strong>, founder and principal consultant at <strong>CloudZen Inc</strong> .
@@ -30,10 +33,10 @@
         </div>
         <!-- SDLC Process Panel: Interactive, Responsive, and Highlights Each Stage -->
         <SDLCProcess></SDLCProcess>
-        <div class="grid md:grid-cols-2 gap-12 items-start">
+        <div class="grid md:grid-cols-2 gap-12 items-start mt-8"> <!-- Added mt-8 for top margin -->
             <!-- Left Column: Bio -->
             <div>
-                <h3 class="text-2xl font-semibold text-gray-900 mb-4">My Approach</h3>
+                <h3 class="text-2xl font-semibold text-gray-900 mb-4 text-center">My Approach</h3>
                 <p class="text-gray-700 leading-relaxed mb-4">
                     I specialize in delivering <strong><span class="font-bold text-indigo-700">measurable results</span></strong> — not just code.
                     My focus is on modernizing legacy systems, implementing DevOps practices, and unlocking insights through reporting automation and AI-driven solutions.
@@ -50,15 +53,14 @@
 
             <!-- Right Column: Results Highlights -->
             <div >
-                <h3 class="text-2xl font-semibold text-gray-900 mb-4">Key Results Delivered</h3>
+                <h3 class="text-2xl font-semibold text-gray-900 mb-4 text-center">Key Results Delivered</h3>
                 <ul class="space-y-3 text-gray-700">
-                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Migrated legacy WebForms app → monolithic ASP.NET Core, accelerating assessment cycles by 50%.</span></li>
-                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Built CI/CD pipelines in Azure DevOps & GitHub Actions, cutting release cycles by 40%.</span></li>
-                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Automated reporting with Power BI & SSIS, reducing runtimes by 70%.</span></li>
-                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Integrated Azure OpenAI & Cognitive Services, reducing manual processing by 60%.</span></li>
-                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Optimized APIs & databases, boosting system performance by 20–25%.</span></li>
-                    <li class="flex items-start gap-2"><i class="bi bi-check-circle-fill text-indigo-600 text-xl mt-1"></i><span>Engineered SSIS ETL for SAP Data Ingestion, reducing job runtimes by 70% through ABAP extraction and lookup-driven deduplication.</span></li>
-
+                    <li class="flex items-start gap-2"><i class="bi bi-clipboard-check text-indigo-600 text-xl mt-1"></i><span>Migrated legacy WebForms app → monolithic ASP.NET Core, accelerating assessment cycles by 50%.</span></li>
+                    <li class="flex items-start gap-2"><i class="bi bi-clipboard-check text-indigo-600 text-xl mt-1"></i><span>Built CI/CD pipelines in Azure DevOps & GitHub Actions, cutting release cycles by 40%.</span></li>
+                    <li class="flex items-start gap-2"><i class="bi bi-clipboard-check text-indigo-600 text-xl mt-1"></i><span>Automated reporting with Power BI & SSIS, reducing runtimes by 70%.</span></li>
+                    <li class="flex items-start gap-2"><i class="bi bi-clipboard-check text-indigo-600 text-xl mt-1"></i><span>Integrated Azure OpenAI & Cognitive Services, reducing manual processing by 60%.</span></li>
+                    <li class="flex items-start gap-2"><i class="bi bi-clipboard-check text-indigo-600 text-xl mt-1"></i><span>Optimized APIs & databases, boosting system performance by 20–25%.</span></li>
+                    <li class="flex items-start gap-2"><i class="bi bi-clipboard-check text-indigo-600 text-xl mt-1"></i><span>Engineered SSIS ETL for SAP Data Ingestion, reducing job runtimes by 70% through ABAP extraction and lookup-driven deduplication.</span></li>
                 </ul>
 
                 <h3 class="text-xl font-semibold text-gray-900 mt-6 mb-4">Core Expertise</h3>
@@ -87,7 +89,7 @@
 
         <!-- Projects Section -->
         <div class="mt-20">
-            <h3 class="text-2xl font-bold text-gray-900 mb-8 text-center">Highlighted Projects</h3>
+            <h3 id="highlighted-projects" class="text-2xl font-bold text-gray-900 mb-8 text-center">Highlighted Projects</h3>
             <p class="text-gray-600 text-center mt-2 mb-8">This project showcases how I bring together software engineering, cloud-native design, and applied AI to solve a concrete business problem—while also reflecting my ability to start from scratch, iterate quickly, and deliver production-ready systems.</p>
             <div class="flex flex-col gap-8">
                 @foreach (var project in Projects)
@@ -288,7 +290,7 @@
                 "Docker",
                 "GitHub Actions CI/CD workflow"
             },
-            Progress = 0,
+            Progress = 10,
             Results = new List<string>
             {
                 "Boost repeat customer visits by 27% with branded loyalty programs.",
@@ -313,17 +315,17 @@
     private string GetStatusColor(string status) => status switch
     {
         "Completed" => "bg-green-100 text-green-800",
-        "In Progress" => "bg-yellow-100 text-yellow-800",
-        "Planning" => "bg-blue-100 text-blue-800",
+        "In Progress" => "bg-amber-300 text-yellow-800",
+        "Planning" => "bg-red-200 text-red-700",
         _ => "bg-gray-100 text-gray-800"
     };
 
     private string GetProgressColor(int progress) => progress switch
     {
-        >= 100 => "bg-green-500",
-        >= 70 => "bg-blue-500",
+        >= 100 => "bg-blue-400",
+        >= 70 => "bg-emerald-600",
         >= 40 => "bg-yellow-400",
-        _ => "bg-gray-400"
+        _ => "bg-red-500"
     };
 
     private class ProjectInfo
@@ -340,5 +342,20 @@
     {
         public string Name { get; set; }
         public string ImageUrl { get; set; }
+    }
+
+    // Last significant change: OnAfterRenderAsync checks for scroll query parameter and uses JS interop to scroll to Highlighted Projects from CaseStudies.razor.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var uri = new Uri(NavigationManager.Uri);
+            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            var scrollTarget = query["scroll"];
+            if (scrollTarget == "highlighted-projects")
+            {
+                await JS.InvokeVoidAsync("scrollToElementById", "highlighted-projects");
+            }
+        }
     }
 }

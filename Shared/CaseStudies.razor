@@ -1,13 +1,29 @@
 ﻿<section id="cases" class="py-24 bg-gray-50 text-center">
     <h2 class="text-3xl font-bold text-center mb-12">Case Studies</h2>
     <div class="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
+        <!-- Tailored to WPBT Modernization project from WhoIAm.razor -->
         <div class="bg-white p-6 rounded-lg shadow">
-            <h3 class="font-semibold text-xl mb-2">Legacy Modernization</h3>
-            <p class="text-gray-600">Migrated a healthcare platform from monolith to microservices, reducing downtime by 70%.</p>
+            <h3 class="font-semibold text-xl mb-2">WPBT assessment Service Modernization</h3>
+            <p class="text-gray-600">Migration from legacy ASP.NET Web Forms to modular ASP.NET Core architecture—enhanced scalability, security, and user experience while accelerating assessment cycles by 50%.</p>
+@*             <ul class="mt-4 text-left text-gray-700 list-disc list-inside text-sm">
+                <li>Streamlined assessment cycle cutting turnaround times by roughly 50%.</li>
+                <li>Delivered a responsive, modular interface for principals and administrators.</li>
+                <li>Enhanced traceability and precision in assessment records, minimizing errors and boosting confidence in reporting.</li>
+                <li>Supported increasing teachers and program volumes without performance degradation, ensuring long-term viability.</li>
+            </ul> *@
         </div>
         <div class="bg-white p-6 rounded-lg shadow">
-            <h3 class="font-semibold text-xl mb-2">AI-powered Analytics</h3>
+            <h3 class="font-semibold text-xl mb-2">AI-powered Analytics and Insights</h3>
             <p class="text-gray-600">Implemented Azure OpenAI + Cognitive Services for sentiment analysis, improving customer retention by 25%.</p>
         </div>
     </div>
+    <!-- Last significant change: Button now navigates to WhoIAm.razor with scroll query parameter for cross-page scroll to Highlighted Projects section. -->
+    <a href="/whoiam?scroll=highlighted-projects">
+        <button class="mt-12 px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl shadow hover:bg-indigo-700 transition">See Highlighted Projects</button>
+    </a>
 </section>
+
+@code {
+    // JS interop removed, navigation now handled by anchor link since I am navigating to a different page - component. Blazor WebAssembly supports full page navigation via anchor links.
+    // Last significant change: Navigation to WhoIAm.razor with scroll query parameter for scroll-to-section logic.
+}
