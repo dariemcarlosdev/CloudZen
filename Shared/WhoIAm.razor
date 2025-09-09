@@ -63,7 +63,7 @@
                     <li class="flex items-start gap-2"><i class="bi bi-clipboard-check text-indigo-600 text-xl mt-1"></i><span>Engineered SSIS ETL for SAP Data Ingestion, reducing job runtimes by 70% through ABAP extraction and lookup-driven deduplication.</span></li>
                 </ul>
 
-                <h3 class="text-xl font-semibold text-gray-900 mt-6 mb-4">Core Expertise</h3>
+                <h3 class="text-xl font-semibold text-gray-900 mt-6 mb-4 text-center md:text-left">Core Expertise</h3>
                 <div class="flex flex-wrap gap-2">
                     <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">.NET / C#</span>
                     <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">OpenAI / Cognitive Services</span>
@@ -79,7 +79,7 @@
                     <span class="px-3 py-1 bg-indigo-100 text-indigo-800 text-sm rounded-full">Software Architecture & Design Patterns</span>
                 </div>
 
-                <div class="mt-6">
+                <div class="mt-6 text-center md:text-left">
                     <button @onclick="DownloadResume" class="inline-block px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl shadow hover:bg-indigo-700 transition">
                         📄 Download My Resume
                     </button>
@@ -95,9 +95,9 @@
                 @foreach (var project in Projects)
                 {
                     <div class="bg-white rounded-2xl shadow p-6 flex flex-col gap-4">
-                        <div class="flex items-center gap-3">
-                            <span class="text-xl font-semibold">@project.Name</span>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold @GetStatusColor(project.Status)">@project.Status</span>
+                        <div class="flex flex-col md:flex-row items-center gap-3">
+                            <span class="text-xl font-semibold w-full text-center md:text-left">@project.Name</span>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold @GetStatusColor(project.Status) mt-1 md:mt-0">@project.Status</span>
                         </div>                        
                         <!-- Role property with glyph icon -->
                         @if (!string.IsNullOrWhiteSpace(project.Role))
