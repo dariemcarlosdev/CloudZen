@@ -1,3 +1,6 @@
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap');
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -100,4 +103,15 @@ a, .btn-link {
 
 code {
     color: #c02d76;
+}
+
+/* CloudZen brand styling */
+.cloudzen-hover {
+    color: #fff !important;
+    font-family: 'IBM Plex Sans', Arial, Helvetica, sans-serif !important;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+.cloudzen-hover:hover {
+    color: #6366f1 !important; /* Tailwind text-indigo-400 */
 }
