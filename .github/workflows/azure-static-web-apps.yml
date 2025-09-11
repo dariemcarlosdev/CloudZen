@@ -8,6 +8,9 @@ on:
   #   types: [opened, synchronize, reopened, closed]
   #   branches:
   #     - master
+permissions:
+  actions: write
+  contents: read
 
 jobs:
   build:
