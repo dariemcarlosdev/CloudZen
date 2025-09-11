@@ -8,9 +8,11 @@ on:
   #   types: [opened, synchronize, reopened, closed]
   #   branches:
   #     - master
-permissions:
-  actions: write
-  contents: read
+# This workflow uses the following permissions to interact with GitHub APIs and actions.
+# You can modify these permissions as needed. The permissions are set to the least privilege required.
+# permissions:
+#   actions: write
+#   contents: read
 
 jobs:
   build:
@@ -35,23 +37,23 @@ jobs:
         run: dotnet publish -c Release -o build_output
       
         # Artifact cleanup to avoid storage quota errors
-      - name: Delete old workflow artifacts
-        uses: actions/github-script@v7
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const runs = await github.rest.actions.listWorkflowRunsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              per_page: 100
-            });
-            for (const run of runs.data.workflow_runs) {
-              await github.rest.actions.deleteWorkflowRun({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                run_id: run.id
-              });
-            }
+      # - name: Delete old workflow artifacts
+      #   uses: actions/github-script@v7
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     script: |
+      #       const runs = await github.rest.actions.listWorkflowRunsForRepo({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         per_page: 100
+      #       });
+      #       for (const run of runs.data.workflow_runs) {
+      #         await github.rest.actions.deleteWorkflowRun({
+      #           owner: context.repo.owner,
+      #           repo: context.repo.repo,
+      #           run_id: run.id
+      #         });
+      #       }
 
 
       - name: Upload build artifacts # Upload the published output for use in the deploy job
