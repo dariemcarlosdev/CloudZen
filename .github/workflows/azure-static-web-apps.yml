@@ -36,7 +36,10 @@ jobs:
       - name: Publish # Publish the project to the build_output directory
         run: dotnet publish -c Release -o build_output
       
-        # Artifact cleanup to avoid storage quota errors
+      # Artifact cleanup to avoid storage quota errors
+      
+      # Uncomment the following lines to enable automatic cleanup of old workflow artifacts
+      
       # - name: Delete old workflow artifacts
       #   uses: actions/github-script@v7
       #   with:
