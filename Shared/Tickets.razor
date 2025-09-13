@@ -1,0 +1,38 @@
+@page "/tickets"
+
+@using CloudZen.Services
+@using CloudZen.Services.Abstractions
+@inject ITicketService TicketService
+
+<div class="max-w-xl mx-auto mt-16 bg-white rounded-xl shadow-lg p-8">
+    <h2 class="text-2xl font-bold mb-8 text-center">Ticket Incidents Overview</h2>
+        <div class="flex flex-col sm:flex-row justify-center items-center gap-10">
+            <AnimatedCounterCircle Label="All" Value="@totalCount" Color="#6366f1" />      <!-- Indigo -->
+            <AnimatedCounterCircle Label="Open" Value="@openCount" Color="#16a34a" />      <!-- Green -->
+            <AnimatedCounterCircle Label="Closed" Value="@closedCount" Color="#6b7280" />  <!-- Gray -->
+        </div>
+</div>
+<div>Debug: total=@totalCount, open=@openCount, closed=@closedCount</div>
+
+@code {
+    private int totalCount;
+    private int openCount;
+    private int closedCount;
+    private bool isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        var tickets = await TicketService.GetAllTicketsAsync() ?? new List<TicketDto>();
+        // totalCount = tickets.Count;
+        totalCount = 30;
+        // openCount = tickets.Count(t => t.IsOpen);
+        openCount = 14;
+        closedCount = totalCount - openCount;
+        isLoading = false;
+    }
+
+}
+
+
+
