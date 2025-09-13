@@ -30,6 +30,9 @@ var blobServiceEndpoint = builder.Configuration["CloudZenBlobStorageConnection:b
 // Register GoogleCalendarUrlService as a singleton
 builder.Services.AddSingleton<GoogleCalendarUrlService>();
 
+// Register TicketService as the implementation for ITicketService
+builder.Services.AddSingleton<ITicketService, TicketService>();
+
 // Register ResumeService after HttpClient
 builder.Services.AddScoped(sp => new ResumeService(
     sp.GetRequiredService<HttpClient>(),

@@ -1,0 +1,104 @@
+@using Microsoft.AspNetCore.Components
+
+<!--
+    AnimatedCounterCircle Component
+    Displays a circular counter with animated fill and a progressive color gradient for the counter value.
+    Parameters:
+      - Label: Text label below the counter.
+      - Value: Target value to count up to.
+      - Color: Fill color for the circle.
+      - DurationMs: Animation duration in milliseconds.
+-->
+
+<div class="flex flex-col items-center justify-center">
+    <!-- Outer circle container with shadow and border -->
+    <div class="relative w-24 h-24 rounded-full overflow-hidden shadow-lg mb-2 flex items-center justify-center border-4 border-gray-200">
+        <!-- Animated fill bar, height changes based on FillPercent -->
+        <div class="absolute bottom-0 left-0 w-full"
+             style="height:@($"{FillPercent}%"); background:@Color; opacity:0.85; transition:height 0.2s;">
+        </div>
+        <!-- Counter value, color transitions from red to white as filled -->
+        <div class="absolute inset-0 flex items-center justify-center text-3xl z-10"
+             style="text-shadow: 0 2px 8px #0002; color:@GetGradientColor(FillPercent);">
+            @currentValue
+        </div>
+    </div>
+    <!-- Label displayed below the counter -->
+    <div class="text-base font-semibold text-gray-700">
+        @Label
+    </div>
+</div>
+
+@code {
+    [Parameter] public string Label { get; set; } = "";
+    [Parameter] public int Value { get; set; }
+    [Parameter] public string Color { get; set; } = "#6366f1";
+    [Parameter] public int DurationMs { get; set; } = 800;
+
+    private int currentValue = 0;
+    private System.Timers.Timer? timer;
+    private double FillPercent => Value == 0 ? 0 : Math.Round((double)currentValue / Value * 100, 1);
+
+    protected override void OnParametersSet()
+    {
+        if (currentValue != Value)
+        {
+            StartAnimation();
+        }
+    }
+
+    // Starts the counter animation using a timer
+    private void StartAnimation()
+    {
+        timer?.Dispose();      // Dispose any existing timer
+        currentValue = 0;      // Reset counter
+        if (Value == 0)
+            return;
+
+        int steps = Math.Min(Value, 40);                // Limit animation steps for smoothness
+        double interval = DurationMs / (double)steps;   // Calculate timer interval
+        int increment = Math.Max(1, Value / steps);     // Value increment per step
+
+        timer = new System.Timers.Timer(interval);
+        timer.Elapsed += (s, e) =>
+        {
+            // If next increment reaches or exceeds target, set to Value and stop timer
+            if (currentValue + increment >= Value)
+            {
+                currentValue = Value;
+                timer?.Dispose();
+                InvokeAsync(StateHasChanged);
+            }
+            else
+            {
+                // Otherwise, increment and update UI
+                currentValue += increment;
+                InvokeAsync(StateHasChanged);
+            }
+        };
+        timer.AutoReset = true;
+        timer.Start();
+    }
+
+    // Dispose timer when component is disposed
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+
+    // Returns a color string interpolated between red and white based on fill percent
+    private string GetGradientColor(double percent)
+    {
+        // Start: Red (#ef4444), End: White (#ffffff)
+        var start = (239, 68, 68);   // #ef4444
+        var end = (255, 255, 255);   // #ffffff
+
+        double t = Math.Clamp(percent / 100.0, 0, 1);
+
+        int r = (int)(start.Item1 + (end.Item1 - start.Item1) * t);
+        int g = (int)(start.Item2 + (end.Item2 - start.Item2) * t);
+        int b = (int)(start.Item3 + (end.Item3 - start.Item3) * t);
+
+        return $"rgb({r},{g},{b})";
+    }
+}
