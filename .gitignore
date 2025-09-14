@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /Properties/ServiceDependencies/local/storage1.arm.json
 /Properties/ServiceDependencies/local/secrets2.arm.json
+/wwwroot/appsettings.json
