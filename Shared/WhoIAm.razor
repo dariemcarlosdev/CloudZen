@@ -97,7 +97,10 @@
                     <div class="bg-white rounded-2xl shadow p-6 flex flex-col gap-4">
                         <div class="flex flex-col md:flex-row items-center gap-3">
                             <span class="text-xl font-semibold w-full text-center md:text-left">@project.Name</span>
-                            <span class="px-3 py-1 rounded-full text-xs font-bold @GetStatusColor(project.Status) mt-1 md:mt-0">@project.Status</span>
+                            <!-- Status badge: increased horizontal padding and ensured no text wrapping/clipping -->
+                            <span class="px-4 py-1 rounded-full text-xs font-bold @GetStatusColor(project.Status) mt-1 md:mt-0 min-w-0 whitespace-nowrap">
+                                @project.Status
+                            </span>
                         </div>                        
                         <!-- Role property with glyph icon -->
                         @if (!string.IsNullOrWhiteSpace(project.Role))
