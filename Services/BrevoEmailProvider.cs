@@ -28,7 +28,7 @@ namespace CloudZen.Services
             // Configure Brevo client
             //Configuration.Default.ApiKey["api-key"] = _config["EmailSettings:BrevoApiKey"];
             
-            // reading from environment variable for better security
+            // reading from environment variable for better security 
             Configuration.Default.ApiKey["api-key"] = apikey;
             var apiInstance = new TransactionalEmailsApi();
 
