@@ -18,10 +18,20 @@ namespace CloudZen.Services
         }
 
         public async System.Threading.Tasks.Task SendEmailAsync(string subject, string message, string fromName, string fromEmail)
-        {
+         {
+            var apikey = Environment.GetEnvironmentVariable("BREVO_API_KEY");
+            if (string.IsNullOrEmpty(apikey))
+            {
+                throw new InvalidOperationException("Brevo API key is not configured.");
+            }
+
             // Configure Brevo client
-            Configuration.Default.ApiKey["api-key"] = _config["EmailSettings:BrevoApiKey"];
+            //Configuration.Default.ApiKey["api-key"] = _config["EmailSettings:BrevoApiKey"];
+            
+            // reading from environment variable for better security
+            Configuration.Default.ApiKey["api-key"] = apikey;
             var apiInstance = new TransactionalEmailsApi();
+
 
             // SendSmtpEmailSender is the sender object for the email (From)
             var sender = new SendSmtpEmailSender() { Email= _config["EmailSettings:FromEmail"] };
