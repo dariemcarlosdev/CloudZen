@@ -2,8 +2,9 @@ name: Create PR to Master (Prompted & Customized)
 
 on:
   push:
+  # The workflow trigger below uses a non-existent branch ("never-trigger-this-branch") to effectively disable automatic runs.  
     branches:
-      - master
+      - never-trigger-this-branch 
   workflow_dispatch:
     inputs:
       source_branch:
