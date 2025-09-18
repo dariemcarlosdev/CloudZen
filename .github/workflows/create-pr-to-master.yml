@@ -8,7 +8,7 @@ on:
     inputs:
       source_branch:
         description: 'Branch to merge into master'
-        required: true
+        required: false
         default: ''
       create_pr:
         description: 'Do you want to create the PR? (yes/no)'
@@ -96,28 +96,28 @@ jobs:
       #     }"
       #     curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK
 
-  auto_merge:
-    name: Auto-Merge If Enabled
-    needs: create_pr
-    runs-on: ubuntu-latest
-    if: github.event.inputs.auto_merge == 'yes'
-    steps:
-      - name: Get PR number
-        id: getpr
-        run: |
-          pr_url=$(gh pr list --base master --state open --json number,url --jq '.[0].url')
-          echo "pr_url=$pr_url" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # auto_merge:
+  #   name: Auto-Merge If Enabled
+  #   needs: create_pr
+  #   runs-on: ubuntu-latest
+  #   if: github.event.inputs.auto_merge == 'yes'
+  #   steps:
+  #     - name: Get PR number
+  #       id: getpr
+  #       run: |
+  #         pr_url=$(gh pr list --base master --state open --json number,url --jq '.[0].url')
+  #         echo "pr_url=$pr_url" >> $GITHUB_OUTPUT
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Enforce branch protection (optional, checks for required status checks)
-      # You must have branch protection rules configured in your repo settings.
+  #     # Enforce branch protection (optional, checks for required status checks)
+  #     # You must have branch protection rules configured in your repo settings.
 
-      - name: Merge PR if checks pass (branch protection)
-        run: |
-          gh pr merge ${{ steps.getpr.outputs.pr_url }} --auto --squash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Merge PR if checks pass (branch protection)
+  #       run: |
+  #         gh pr merge ${{ steps.getpr.outputs.pr_url }} --auto --squash
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 # Comments on customizations:
 # - Reviewers: Assign yourself by GitHub username (dariemcarlosdev).
