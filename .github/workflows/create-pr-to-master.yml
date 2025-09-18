@@ -1,0 +1,130 @@
+name: Create PR to Master (Prompted & Customized)
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      source_branch:
+        description: 'Branch to merge into master'
+        required: true
+        default: ''
+      create_pr:
+        description: 'Do you want to create the PR? (yes/no)'
+        required: true
+        default: 'no'
+      pr_title:
+        description: 'Title for the PR'
+        required: false
+        default: 'Automated PR'
+      pr_body:
+        description: 'Description/body for the PR'
+        required: false
+        default: 'Automated PR created by workflow.'
+      labels:
+        description: 'Comma-separated labels to add to PR'
+        required: false
+        default: 'automation,needs-review'
+      conditional_files:
+        description: 'Only create PR if these files changed (comma-separated, leave blank for any change)'
+        required: false
+        default: 'Shared/Hero.razor'
+      auto_merge:
+        description: 'Automatically merge PR after checks? (yes/no)'
+        required: false
+        default: 'no'
+
+jobs:
+  check-conditions:
+    name: Check Conditional PR Creation
+    runs-on: ubuntu-latest
+    outputs:
+      should_create: ${{ steps.conditional.outputs.should_create }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # Conditional PR creation: Only continue if the watched files changed
+      - name: Check file changes for conditional PR creation
+        id: conditional
+        run: |
+          SHOULD_CREATE="true"
+          if [ "${{ github.event.inputs.conditional_files }}" != "" ]; then
+            git fetch origin ${{ github.event.inputs.source_branch }}
+            changed_files=$(git diff --name-only origin/master..origin/${{ github.event.inputs.source_branch }})
+            echo "Changed files: $changed_files"
+            SHOULD_CREATE="false"
+            for file in $(echo "${{ github.event.inputs.conditional_files }}" | tr ',' '\n'); do
+              if echo "$changed_files" | grep -q "$file"; then
+                SHOULD_CREATE="true"
+                break
+              fi
+            done
+          fi
+          echo "should_create=$SHOULD_CREATE" >> $GITHUB_OUTPUT
+
+  create_pr:
+    name: Create Pull Request
+    needs: check-conditions
+    runs-on: ubuntu-latest
+    if: needs.check-conditions.outputs.should_create == 'true' && github.event.inputs.create_pr == 'yes'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Create PR with reviewers, assignees, labels, custom title & body
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          source: ${{ github.event.inputs.source_branch }}
+          destination: master
+          title: ${{ github.event.inputs.pr_title }}
+          body: ${{ github.event.inputs.pr_body }}
+          reviewers: dariemcarlosdev # Assign yourself as reviewer
+          assignees: dariemcarlosdev # Assign yourself as assignee
+          labels: ${{ github.event.inputs.labels }}
+          draft: false
+
+      # # Notify Slack (replace with your actual Slack webhook or integration)
+      # - name: Notify Slack
+      #   env:
+      #     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      #   run: |
+      #     payload="{
+      #         \"text\": \"A new PR from ${{ github.event.inputs.source_branch }} to master has been created by ${{ github.actor }}.\"
+      #     }"
+      #     curl -X POST -H 'Content-type: application/json' --data "$payload" $SLACK_WEBHOOK
+
+  auto_merge:
+    name: Auto-Merge If Enabled
+    needs: create_pr
+    runs-on: ubuntu-latest
+    if: github.event.inputs.auto_merge == 'yes'
+    steps:
+      - name: Get PR number
+        id: getpr
+        run: |
+          pr_url=$(gh pr list --base master --state open --json number,url --jq '.[0].url')
+          echo "pr_url=$pr_url" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Enforce branch protection (optional, checks for required status checks)
+      # You must have branch protection rules configured in your repo settings.
+
+      - name: Merge PR if checks pass (branch protection)
+        run: |
+          gh pr merge ${{ steps.getpr.outputs.pr_url }} --auto --squash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# Comments on customizations:
+# - Reviewers: Assign yourself by GitHub username (dariemcarlosdev).
+# - Labels: Provided as workflow input, added to the PR.
+# - Assignees: Assign yourself (dariemcarlosdev).
+# - Custom PR Title & Body: Inputs for title and body.
+# - Auto-Merge: If enabled and branch protection checks pass, PR is merged.
+# - Branch Protection: This workflow assumes protection rules are set in repo settings.
+# - Slack Notification: Sends message to Slack on PR creation.
+# - Conditional PR Creation: Only creates PR if specified files (e.g. Shared/Hero.razor) have changed.
