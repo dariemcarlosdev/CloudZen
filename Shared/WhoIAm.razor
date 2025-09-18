@@ -149,7 +149,7 @@
                             </div>
                         }
                         <div class="w-full bg-gray-100 rounded-full h-3 mt-2">
-                            <div class="h-3 rounded-full @GetProgressColor(project.Progress)" style="width: @project.Progress%"></div>
+                            <div class="progress-bar-fill @GetProgressColor(project.Progress)" style="width: @($"{project.Progress}%")"></div>
                         </div>
                         <div class="text-xs text-gray-600">Progress: @project.Progress%</div>
                     </div>

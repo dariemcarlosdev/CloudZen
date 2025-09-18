@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&display=swap');
 
 html, body {
@@ -114,4 +113,11 @@ code {
 }
 .cloudzen-hover:hover {
     color: #6366f1 !important; /* Tailwind text-indigo-400 */
+}
+
+/* Used in Shared\WhoIAm.razor: Progress bar fill */
+.progress-bar-fill {
+    height: 0.75rem; /* Equivalent to h-3 */
+    border-radius: 9999px; /* Equivalent to rounded-full */
+    transition: width 0.3s ease;
 }
