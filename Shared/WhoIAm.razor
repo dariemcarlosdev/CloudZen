@@ -9,12 +9,12 @@
     <div class="max-w-6xl mx-auto px-6 lg:px-8">
         <div class="text-center mb-6">
             <!-- Avatar/Photo commented out: Temporarily disabled, possibly for redesign, privacy, or to focus on textual content.-->
-@*             <!-- Avatar/Photo -->
+            <!-- Avatar/Photo -->
             <div class="flex justify-center mb-6">
-                <img src="/images/dariem-avatar.jpg"
+                <img src="/images/dariem-avatar.png"
                      alt="Dariem C. Macias - CloudZen"
                      class="w-40 h-40 rounded-full shadow-lg object-cover border-4 border-indigo-700" />
-            </div> *@
+            </div>
             <h2 class="text-4xl font-bold text-gray-900">Who I Am</h2>
             <p class="mt-4 text-lg text-gray-600">
                 <strong>Dariem C. Macias here</strong>  - Software Engineer and Principal Consultant at <strong>CloudZen Inc. </strong>, where I turn complex business challenges into elegant, cloud-first solutions.
@@ -101,13 +101,28 @@
                             <span class="px-4 py-1 rounded-full text-xs font-bold @GetStatusColor(project.Status) mt-1 md:mt-0 min-w-0 whitespace-nowrap">
                                 @project.Status
                             </span>
-                        </div>                        
+                        </div>
                         <!-- Role property with glyph icon -->
                         @if (!string.IsNullOrWhiteSpace(project.Role))
                         {
                             <div class="flex items-center gap-2 text-indigo-700 text-sm">
                                 <i class="bi bi-person-badge text-lg"></i>
                                 <span class="font-semibold">@project.Role</span>
+                            </div>
+                        }
+
+                        @* Participant Avatars *@
+                        @if (project.Participants != null && project.Participants.Any())
+                        {
+                            <div class="flex items-center gap-2 mt-1">
+                                @foreach (var participant in project.Participants)
+                                {
+                                    <img src="@participant.ImageUrl"
+                                         alt="@participant.Name"
+                                         title="@participant.Name"
+                                         class="w-10 h-10 rounded-full border-2 border-indigo-500 shadow object-cover" />
+                                    <span class="text-sm text-gray-700 font-medium">@participant.Name</span>
+                                }
                             </div>
                         }
                         <p class="text-gray-700">@project.Description</p>
@@ -193,7 +208,7 @@
             },
             Participants = new[]
             {
-                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" },
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.png" },
             },
             Role = "Principal Consultant / Lead Developer / Solution Architect",
             Challenges = new List<string>
@@ -220,7 +235,7 @@
             },
             Participants = new[]
             {
-                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" },
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.png" },
             },
             Role = "Lead ETL Engineer / Solution Architect",
             Challenges = new List<string>
@@ -263,7 +278,7 @@
             },
             Participants = new[]
             {
-                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" }
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.png" }
             },
             Role = "Principal Consultant / AI Solution Architect",
             Challenges = new List<string>
@@ -308,7 +323,7 @@
             },
             Participants = new[]
             {
-                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" }
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.png" }
             },
             Role = "Principal Consultant / Cloud Solution Architect",
             Challenges = new List<string>
@@ -347,7 +362,7 @@
             },
             Participants = new[]
             {
-                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.jpg" }
+                new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.png" }
             },
             Role = "Principal Consultant / Product Architect",
             Challenges = new List<string>
@@ -361,9 +376,9 @@
 
     protected override void OnInitialized()
     {
-        var statusOrder = new List<string> { "Completed", "In Progress", "Planning" };
+        var statusProject = new List<string> { "Completed", "In Progress", "Planning" };
         // Sort projects based on the defined status order
-        Projects = Projects.OrderBy(p => statusOrder.IndexOf(p.Status)).ToList();
+        Projects = Projects.OrderBy(p => statusProject.IndexOf(p.Status)).ToList();
     }
 
     private string GetStatusColor(string status) => status switch
