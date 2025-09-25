@@ -23,7 +23,10 @@
 
 <header class="fixed top-0 left-0 z-50 w-full flex justify-between items-center p-6 bg-gray-900 backdrop-blur shadow">
     <div class="text-2xl font-semibold flex items-center gap-2">
-        <a href="#hero" class="cloudzen-hover" @onclick='() => SetActive("#hero")'>CloudZen</a>
+        <a href="#hero" class="cloudzen-hover flex items-center gap-2" @onclick='() => SetActive("#hero")'>
+            CloudZen
+            <img src="/images/cloudzen-logo.png" alt="CloudZen Logo" class="w-9 h-9  object-cover" />
+        </a>
         @if (isWhoIAmPage && !isMobileMenuOpen)
         {
             <button class="ml-2 text-indigo-500 hover:text-indigo-700 transition flex items-center" @onclick="NavigateToHero" title="Back to Home">
