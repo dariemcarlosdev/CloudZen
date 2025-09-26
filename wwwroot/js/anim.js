@@ -39,10 +39,30 @@ window.saveAsFile = function (filename, bytes) {
     URL.revokeObjectURL(link.href);
 }
 
+//window.scrollToHero = function () {
+//    var hero = document.getElementById('hero');
+//    if (hero) {
+//        hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+//    }
+//};
+
+
 window.scrollToHero = function () {
     var hero = document.getElementById('hero');
+    var header = document.querySelector('header');
     if (hero) {
-        hero.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        var headerHeight = header ? header.offsetHeight : 0;
+        var heroTop = hero.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+        window.scrollTo({ top: heroTop, behavior: 'smooth' });
+    }
+};
+window.scrollToHero = function () {
+    var hero = document.getElementById('hero');
+    var header = document.querySelector('header');
+    if (hero) {
+        var headerHeight = header ? header.offsetHeight : 0;
+        var heroTop = hero.getBoundingClientRect().top + window.pageYOffset - headerHeight;
+        window.scrollTo({ top: heroTop, behavior: 'smooth' });
     }
 };
 
