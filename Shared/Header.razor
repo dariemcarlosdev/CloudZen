@@ -20,16 +20,20 @@
    4. Unsubscribe in Dispose.
 *@
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 
 <header class="fixed top-0 left-0 z-50 w-full flex justify-between items-center p-6 bg-gray-900 backdrop-blur shadow">
     <div class="text-2xl font-semibold flex items-center gap-2">
-        <a href="#hero" class="cloudzen-hover flex items-center gap-2" @onclick='() => SetActive("#hero")'>
+        <a href="" class="cloudzen-hover flex items-center gap-2"
+           @* @onclick='() => ScrollToHero()' *@>            
             CloudZen
             <img src="/images/cloudzen-logo.png" alt="CloudZen Logo" class="w-9 h-9  object-cover" />
         </a>
+        @* Show "Back to Home" button only when on the Who I Am page and mobile menu is closed.
+           The button navigates back to the home/hero section when clicked. *@
         @if (isWhoIAmPage && !isMobileMenuOpen)
         {
-            <button class="ml-2 text-indigo-500 hover:text-indigo-700 transition flex items-center" @onclick="NavigateToHero" title="Back to Home">
+            <button class="ml-2 text-cyan-300 hover:text-cyan-700 transition flex items-center" @onclick="NavigateToHero" title="Back to Home">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
@@ -37,8 +41,16 @@
             </button>
         }
     </div>
-    <!-- Hamburger for mobile -->
+@*     <!-- Hamburger for mobile -->
     <button class="md:hidden text-white focus:outline-none" @onclick="ToggleMobileMenu" aria-label="Open menu">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+    </button> *@
+    <!-- Hamburger for mobile -->
+    <button class="md:hidden text-white focus:outline-none transition-transform duration-150 @(isHamburgerActive ? "hamburger-active" : "")"
+            @onclick="OnHamburgerClick"
+            aria-label="Open menu">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
@@ -72,46 +84,80 @@
     private string activeSection = "#hero";
     private bool isMobileMenuOpen = false;
     private bool isWhoIAmPage;
+	private bool isHamburgerActive = false;
 
+    // Handles the hamburger menu click animation and toggles the mobile menu.
+    private async void OnHamburgerClick()
+    {
+        isHamburgerActive = true;
+        ToggleMobileMenu();
+        await Task.Delay(150); // Match the CSS transition duration
+        isHamburgerActive = false;
+        StateHasChanged();
+    }
+
+	// Called when the component is initialized. Subscribes to location changes to update isWhoIAmPage.
     protected override void OnInitialized()
     {
         UpdateIsWhoIAmPage();
         NavigationManager.LocationChanged += HandleLocationChanged;
     }
 
+    // Handles route changes and updates the header state accordingly.
     private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         UpdateIsWhoIAmPage();
         InvokeAsync(StateHasChanged);
     }
 
+	// Updates the isWhoIAmPage flag based on the current URI.
     private void UpdateIsWhoIAmPage()
     {
         isWhoIAmPage = NavigationManager.Uri.EndsWith("/whoiam", StringComparison.OrdinalIgnoreCase);
     }
 
+    // Unsubscribes from the location changed event to avoid memory leaks.
     public void Dispose()
     {
         NavigationManager.LocationChanged -= HandleLocationChanged;
     }
 
+    // Sets the currently active section in the header.
     private void SetActive(string section) => activeSection = section;
+    
+	// Toggles the mobile menu open or closed.
     private void ToggleMobileMenu() => isMobileMenuOpen = !isMobileMenuOpen;
+    
+	// Closes the mobile menu.
     private void CloseMobileMenu() => isMobileMenuOpen = false;
+    
+	// Sets the active section and closes the mobile menu when a mobile nav link is clicked.
     private void OnMobileNavClick(string section)
     {
         SetActive(section);
         CloseMobileMenu();
     }
 
+    // NOTE: This method is currently unused. It scrolls smoothly to the #hero section using JS interop,
+    // sets the active section to "#hero", and closes the mobile menu.
+    private async Task ScrollToHero()
+    {
+        await JS.InvokeVoidAsync("scrollToHero");
+        SetActive("#hero");
+        CloseMobileMenu();
+    }
+
+    // Returns the CSS class for a navigation link based on the active section.
     private string GetNavClass(string section) =>
         activeSection == section
-            ? "text-indigo-400 hover:text-indigo-400"
-            : "text-white hover:text-indigo-400";
+            ? "text-teal-400"
+            : "text-white";
 
+    // Returns the CSS class for the contact link, including highlighting if active.
     private string GetContactClass() =>
         $"px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition {(activeSection == "#contact" ? "ring-2 ring-blue-400" : "")}";
 
+    // Navigates to the home page ("/").
     private void NavigateToHero()
     {
         NavigationManager.NavigateTo("/");
