@@ -12,7 +12,7 @@ a, .btn-link {
     color: #61C2C8;
 }
 nav a:hover {
-    color: #61C2C8 !important; /* teal-400 or your preferred color */
+    color: #74b7bb !important; /* teal-400 or your preferred color */
     /* This rule ensures nav links use teal color on hover, overriding any global anchor styles. */
 }
 
@@ -71,27 +71,6 @@ nav a:hover {
         content: "An error has occurred."
     }
 
-.loading-progress {
-    position: relative;
-    display: block;
-    width: 8rem;
-    height: 8rem;
-    margin: 20vh auto 1rem auto;
-}
-
-    .loading-progress circle {
-        fill: none;
-        stroke: #e0e0e0;
-        stroke-width: 0.6rem;
-        transform-origin: 50% 50%;
-        transform: rotate(-90deg);
-    }
-
-        .loading-progress circle:last-child {
-            stroke: #1b6ec2;
-            stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
-            transition: stroke-dasharray 0.05s ease-in-out;
-        }
 
 .loading-progress-text {
     position: absolute;
@@ -128,7 +107,7 @@ code {
 /* Used in Shared\Header.razor: Hamburger menu button */
 .hamburger-active {
     /* Subtle background highlight and gentle scale for better UX */
-    background-color: #61C2C8;
+    background-color: #74b7bb;
     box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
     border-radius: 0.5rem;
     transform: scale(1.08);
