@@ -1,6 +1,6 @@
-# ?? CRITICAL SECURITY ALERT ??
+﻿# 🚨 CRITICAL SECURITY ALERT 🚨
 
-## Exposed API Key in Your Repository
+## 🔓 Exposed API Key in Your Repository
 
 Your Brevo API key is **publicly exposed** in `wwwroot/appsettings.json`:
 
@@ -8,26 +8,26 @@ Your Brevo API key is **publicly exposed** in `wwwroot/appsettings.json`:
 "BrevoApiKey": "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"
 ```
 
-### Why This Is Critical
+### ⚠️ Why This Is Critical
 
 Since your app is **Blazor WebAssembly**, all files in `wwwroot/` (including `appsettings.json`) are downloaded to the user's browser and are **publicly accessible**. Anyone can:
 
-1. View the file at `https://your-site.com/appsettings.json`
-2. Extract your API key from browser DevTools
-3. Use your API key to send emails at your expense
-4. Potentially exceed your Brevo quota or send spam
+1. 👁️ View the file at `https://your-site.com/appsettings.json`
+2. 🔍 Extract your API key from browser DevTools
+3. 💸 Use your API key to send emails at your expense
+4. 📧 Potentially exceed your Brevo quota or send spam
 
-### Immediate Actions Required
+### 🛠️ Immediate Actions Required
 
-#### 1. Rotate Your Brevo API Key (DO THIS NOW!)
+#### 1. 🔄 Rotate Your Brevo API Key (DO THIS NOW!)
 
-1. Go to [Brevo Dashboard](https://app.brevo.com)
-2. Navigate to **SMTP & API** > **API Keys**
-3. Delete the exposed key: `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`
-4. Generate a new API key
-5. Store it securely in Azure Key Vault (see deployment guide)
+1. 🌐 Go to [Brevo Dashboard](https://app.brevo.com)
+2. 🗂️ Navigate to **SMTP & API** > **API Keys**
+3. 🗑️ Delete the exposed key: `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`
+4. ✨ Generate a new API key
+5. 🔐 Store it securely in Azure Key Vault (see deployment guide)
 
-#### 2. Remove Secret from Repository
+#### 2. 🧹 Remove Secret from Repository
 
 ```bash
 # Remove the secret from the file
@@ -42,7 +42,7 @@ git filter-branch --force --index-filter \
 git push origin --force --all
 ```
 
-#### 3. Prevent Future Exposure
+#### 3. 🛡️ Prevent Future Exposure
 
 Add to `.gitignore`:
 ```
@@ -64,48 +64,49 @@ Then create a template `appsettings.json` with no secrets:
 }
 ```
 
-### Correct Architecture for Blazor WebAssembly
+### 🏗️ Correct Architecture for Blazor WebAssembly
 
-**Never store secrets in Blazor WebAssembly apps!** Use this architecture instead:
+**❌ Never store secrets in Blazor WebAssembly apps!** Use this architecture instead:
 
 ```
-???????????????????????????
-?   Blazor WebAssembly    ? (Client-side, public)
-?   (Browser)             ?
-???????????????????????????
-            ? HTTPS
-            ?
-???????????????????????????
-?   Azure Functions API   ? (Server-side, secure)
-?   - SendEmail endpoint  ?
-?   - Reads secrets from  ?
-?     Key Vault           ?
-???????????????????????????
-            ?
-            ?
-???????????????????????????
-?   Azure Key Vault       ?
-?   - BREVO_API_KEY       ?
-?   - Other secrets       ?
-???????????????????????????
+┌─────────────────────────────┐
+│  🌐 Blazor WebAssembly      │ (Client-side, public)
+│     (Browser)               │
+│  ⚠️  NO SECRETS HERE!       │
+└─────────────────────────────┘
+            │ 🔒 HTTPS
+            ▼
+┌─────────────────────────────┐
+│  ⚡ Azure Functions API      │ (Server-side, secure)
+│     • 📧 SendEmail endpoint │
+│     • 🔑 Reads secrets from │
+│          Key Vault          │
+└─────────────────────────────┘
+            │ 🔐 Managed Identity
+            ▼
+┌─────────────────────────────┐
+│  🔐 Azure Key Vault          │
+│     • 🔑 BREVO_API_KEY      │
+│     • 🗝️  Other secrets      │
+└─────────────────────────────┘
 ```
 
-### Required Changes
+### 📝 Required Changes
 
-1. **Create Azure Functions backend** (see `deployment_guide.md` section 5)
-2. **Move email sending logic** from `BrevoEmailProvider.cs` to Azure Function
-3. **Update Blazor app** to call the Function endpoint instead
-4. **Store secrets** in Azure Key Vault, accessed only by the Function
+1. ⚡ **Create Azure Functions backend** (see `deployment_guide.md` section 5)
+2. 📤 **Move email sending logic** from `BrevoEmailProvider.cs` to Azure Function
+3. 🔗 **Update Blazor app** to call the Function endpoint instead
+4. 🔐 **Store secrets** in Azure Key Vault, accessed only by the Function
 
-### Example Migration
+### 💡 Example Migration
 
-**Before (? INSECURE):**
+**❌ Before (INSECURE):**
 ```csharp
 // In BrevoEmailProvider.cs (Blazor WASM)
 var apikey = Environment.GetEnvironmentVariable("BREVO_API_KEY"); // Won't work!
 ```
 
-**After (?? SECURE):**
+**✅ After (SECURE):**
 ```csharp
 // In EmailService.cs (Blazor WASM)
 public async Task SendEmailAsync(EmailRequest request)
@@ -124,30 +125,30 @@ public async Task<IActionResult> Run([HttpTrigger] HttpRequest req)
 }
 ```
 
-### Cost of Not Fixing This
+### 💰 Cost of Not Fixing This
 
-- ?? Unauthorized use of your Brevo account
-- ?? Potential quota exhaustion
-- ?? Spam sent from your account
-- ?? Account suspension by Brevo
-- ?? Reputational damage
+- 🚫 Unauthorized use of your Brevo account
+- 📊 Potential quota exhaustion
+- 📧 Spam sent from your account
+- ⛔ Account suspension by Brevo
+- 💔 Reputational damage
 
-### Next Steps
+### ✅ Next Steps
 
-1. ?? Read `deployment_guide.md` (updated with full details)
-2. ?? Rotate your Brevo API key immediately
-3. ?? Create Azure Functions backend
-4. ?? Move sensitive operations to Functions
-5. ?? Remove all secrets from `appsettings.json`
-6. ?? Test the new architecture locally
-7. ?? Deploy to Azure
+1. 📖 Read `deployment_guide.md` (updated with full details)
+2. 🔄 Rotate your Brevo API key immediately
+3. ⚡ Create Azure Functions backend
+4. 📤 Move sensitive operations to Functions
+5. 🧹 Remove all secrets from `appsettings.json`
+6. 🧪 Test the new architecture locally
+7. 🚀 Deploy to Azure
 
-### Need Help?
+### 💬 Need Help?
 
 Refer to:
-- `deployment_guide.md` - Complete Azure setup instructions
-- `wwwroot/staticwebapp.config.json` - Required configuration (already created)
+- 📚 `deployment_guide.md` - Complete Azure setup instructions
+- ⚙️ `wwwroot/staticwebapp.config.json` - Required configuration (already created)
 
 ---
 
-**This is a critical security issue. Please address it before deploying to production.**
+**⚠️ This is a critical security issue. Please address it before deploying to production.**
