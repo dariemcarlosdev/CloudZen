@@ -146,6 +146,118 @@ CloudZen/
 
 ---
 
+## 🔄 **Component Interaction: ProjectFilter ↔ WhoIAm**
+
+### **Communication Pattern**
+Child-to-Parent via `EventCallback<T>` - Blazor's standard type-safe event handling
+
+### **Flow Diagram**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                 User Action (ProjectFilter)                  │
+│  • Dropdown selection changes (Status/Type)                 │
+│  • Clear All button clicked                                 │
+│  • Individual filter badge removed                          │
+└──────────────────────────────────────────────────────────────┘
+                          ↓
+┌──────────────────────────────────────────────────────────────┐
+│           Status/Type Selection Changed (@bind)              │
+│  SelectedStatus or SelectedProjectType updated              │
+└──────────────────────────────────────────────────────────────┘
+                          ↓
+┌──────────────────────────────────────────────────────────────┐
+│        OnFilterChanged() called (@bind:after trigger)        │
+│  private async Task OnFilterChanged()                       │
+└──────────────────────────────────────────────────────────────┘
+                          ↓
+┌──────────────────────────────────────────────────────────────┐
+│   OnFilterChange.InvokeAsync((Status, Type)) [Child→Parent] │
+│  await OnFilterChange.InvokeAsync(                          │
+│      (SelectedStatus, SelectedProjectType));                │
+└──────────────────────────────────────────────────────────────┘
+                          ↓
+┌──────────────────────────────────────────────────────────────┐
+│     HandleFilterChange((Status, Type)) invoked (WhoIAm)      │
+│  Parent receives tuple with current filter values           │
+└──────────────────────────────────────────────────────────────┘
+                          ↓
+┌──────────────────────────────────────────────────────────────┐
+│          FilteredProjects = Projects.Where(...)              │
+│  LINQ filtering applied:                                     │
+│  • Filter by Status (if not empty)                          │
+│  • Filter by ProjectType (if not empty)                     │
+│  • Update FilteredProjects list                             │
+└──────────────────────────────────────────────────────────────┘
+                          ↓
+┌──────────────────────────────────────────────────────────────┐
+│             StateHasChanged() (implicit)                     │
+│  Blazor detects component state change automatically        │
+└──────────────────────────────────────────────────────────────┘
+                          ↓
+┌──────────────────────────────────────────────────────────────┐
+│          UI Re-renders with Filtered Projects                │
+│  • ProjectCard components render with FilteredProjects      │
+│  • Empty state shown if no matches                          │
+│  • Smooth transition with filtered results                  │
+└──────────────────────────────────────────────────────────────┘
+```
+
+### **Execution Steps**
+
+| Step | Component | Action |
+|------|-----------|--------|
+| **1** | WhoIAm (Parent) | Passes `HandleFilterChange` method to child's `OnFilterChange` parameter |
+| **2** | ProjectFilter (Child) | User changes dropdown/clicks button → triggers `OnFilterChanged()` |
+| **3** | ProjectFilter (Child) | Invokes parent callback: `OnFilterChange.InvokeAsync((Status, Type))` |
+| **4** | WhoIAm (Parent) | Receives tuple, applies LINQ filtering, updates `FilteredProjects` |
+| **5** | Blazor Framework | Detects state change, re-renders ProjectCard components with filtered data |
+
+### **Code Implementation**
+
+**Parent (WhoIAm.razor)**
+```razor
+<ProjectFilter OnFilterChange="HandleFilterChange" />
+
+@code {
+    private List<ProjectInfo> FilteredProjects = new();
+    
+    private void HandleFilterChange((string Status, string ProjectType) filters)
+    {
+        FilteredProjects = Projects
+            .Where(p => string.IsNullOrEmpty(filters.Status) || p.Status == filters.Status)
+            .Where(p => string.IsNullOrEmpty(filters.ProjectType) || 
+                        (filters.ProjectType == "Customer" 
+                            ? p.ProjectType.StartsWith("Customer:") 
+                            : p.ProjectType == filters.ProjectType))
+            .ToList();
+    }
+}
+```
+
+**Child (ProjectFilter.razor)**
+```razor
+@code {
+    [Parameter]
+    public EventCallback<(string Status, string ProjectType)> OnFilterChange { get; set; }
+    
+    private async Task OnFilterChanged()
+    {
+        await OnFilterChange.InvokeAsync((SelectedStatus, SelectedProjectType));
+    }
+}
+```
+
+### **Key Benefits**
+
+✅ **Type Safety**: Compile-time checking via tuple `(string, string)`  
+✅ **Async Support**: Native async/await compatibility  
+✅ **Loose Coupling**: Child doesn't know parent's implementation  
+✅ **Blazor Optimized**: Efficient automatic re-rendering  
+✅ **Reusability**: ProjectFilter can be used with any parent component  
+
+---
+
 ## 📊 Data Models
 
 ### **ProjectInfo.cs**
@@ -585,6 +697,18 @@ new ProjectInfo
 - [x] Performance not degraded
 - [x] Documentation updated
 
+### **ProjectFilter Component Verification**
+- [x] Status filter dropdown works correctly
+- [x] Project type filter dropdown works correctly
+- [x] Filters can be combined (status + type)
+- [x] Clear all button resets both filters
+- [x] Individual filter remove buttons work
+- [x] Active filter counter updates correctly
+- [x] Empty state displays when no matches
+- [x] Responsive layout on mobile/desktop
+- [x] All animations and transitions smooth
+- [x] Icons display correctly in dropdowns
+
 ---
 
 ---
@@ -625,6 +749,6 @@ This architecture is part of the CloudZen Inc. portfolio application.
 
 ---
 
-**Last Updated**: December 8, 2025  
-**Document Version**: 1.1  
+**Last Updated**: December 2025  
+**Document Version**: 1.2  
 **Maintained By**: CloudZen Development Team

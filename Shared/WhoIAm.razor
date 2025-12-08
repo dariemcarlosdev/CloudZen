@@ -36,24 +36,63 @@
         <div class="mt-20">
             <h3 id="highlighted-projects" class="text-2xl font-bold text-gray-900 mb-8 text-center">Highlighted Projects</h3>
             <p class="text-gray-600 text-center mt-2 mb-8">This project showcases how I bring together software engineering, cloud - native design, and applied AI to solve a concrete business problem while also reflecting my ability to start from scratch, iterate quickly, and deliver production-ready systems.</p>
-            <div class="flex flex-col gap-8">
-                @foreach (var project in Projects)
-                {
-                    <ProjectCard Project="@project" />
-                }
-            </div>
+            
+            <!-- Project Filter Component -->
+            <ProjectFilter OnFilterChange="HandleFilterChange" />
+            
+            <!-- Projects List -->
+            @if (FilteredProjects.Any())
+            {
+                <div class="flex flex-col gap-8">
+                    @foreach (var project in FilteredProjects)
+                    {
+                        <ProjectCard Project="@project" />
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-12">
+                    <i class="bi bi-inbox text-6xl text-gray-300 mb-4"></i>
+                    <p class="text-gray-500 text-lg">No projects match the selected filters.</p>
+                    <p class="text-gray-400 text-sm mt-2">Try adjusting or clearing your filters.</p>
+                </div>
+            }
         </div>
     </div>
 </section>
 
 @code {
+
+    // Attributes to hold all projects and filtered projects
     private List<ProjectInfo> Projects = new();
+    private List<ProjectInfo> FilteredProjects = new();
 
     protected override void OnInitialized()
     {
         // Load projects from ProjectService
         Projects = ProjectService.GetAllProjects();
+        // Initially show all projects, FilteredProjects is same as Projects for no filters applied.
+        FilteredProjects = Projects;
     }
+
+    /// <summary>
+    /// Handles filter changes from the ProjectFilter component.
+    /// Filters projects based on selected status and project type.
+    /// This method is passed as a callback to the ProjectFilter component.
+    /// </summary>
+/// <param name="filters">Tuple containing status and project type filter values.</param>
+private void HandleFilterChange((string Status, string ProjectType) filters)
+{
+        // Apply filtering logic
+    FilteredProjects = Projects
+        .Where(p => string.IsNullOrEmpty(filters.Status) || p.Status == filters.Status)
+        .Where(p => string.IsNullOrEmpty(filters.ProjectType) || 
+                    (filters.ProjectType == "Customer" 
+                        ? p.ProjectType.StartsWith("Customer:") 
+                        : p.ProjectType == filters.ProjectType))
+        .ToList();
+}
 
     /// <summary>
     /// Method to download the resume using ResumeService and JS interop.
@@ -82,3 +121,4 @@
         }
     }
 }
+
