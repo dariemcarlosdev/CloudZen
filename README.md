@@ -1,65 +1,104 @@
-# CloudZen Doc.
+﻿# CloudZen
 
-CloudZen is a modern Blazor WebAssembly application designed as a professional portfolio and consulting showcase for Dariem C. Macias, founder and principal consultant at CloudZen Inc.
+A modern Blazor WebAssembly portfolio and consulting showcase built with .NET 8, demonstrating expertise in building scalable, secure cloud applications with Azure integration.
 
-## Project Description
-CloudZen demonstrates expertise in building scalable, secure, and modern web applications using .NET 8, Blazor, and Azure Cloud. The project highlights real-world results in application modernization, DevOps, AI-driven automation, and enterprise backend systems. It features a clean, responsive UI and integrates best practices for performance, maintainability, and cloud readiness.
+## 🚀 Features
 
-## Features
-- Professional portfolio and consulting showcase
+- Professional portfolio with project showcase and filtering
 - Modern, responsive UI with Tailwind CSS
-- Blazor WebAssembly SPA architecture
-- Downloadable resume and case studies
-- Contact form and testimonials
-- Highlights of key results and core expertise
-- Integration with Azure and AI services (showcased in content)
+- Component-based architecture for maintainability
+- Resume download and contact form
+- GitHub Actions CI/CD pipeline
+- Azure Static Web Apps deployment ready
 
-## Services Tech Stack
-- Blazor WebAssembly (.NET 8)
-- C#
-- ASP.NET Core
-- Azure Cloud Services
-- Entity Framework Core
-- DevOps: Azure DevOps, GitHub Actions
-- Power BI & SSIS (for reporting/ETL)
-- Azure OpenAI & Cognitive Services
-- SQL & Relational Databases
-- RESTful Web APIs
-- Tailwind CSS
-- JavaScript (for interop, if applicable)
+## 🛠️ Tech Stack
 
----
+**Frontend:** Blazor WebAssembly (.NET 8), C#, Tailwind CSS  
+**Backend:** Azure Functions, Azure Blob Storage  
+**Security:** Azure Key Vault for secrets management  
+**DevOps:** GitHub Actions, Azure Static Web Apps  
+**Services:** Brevo Email API, Application Insights
 
-## Azure Deployment Summary
+## 📚 Documentation
 
-- Deploy using Azure Static Web Apps and GitHub Actions workflow.
-- Add `staticwebapp.config.json` to `wwwroot/` for routing and security headers.
-- Store public configuration only in `appsettings.json` (never secrets).
-- Use Azure Blob Storage with SAS tokens for public files (e.g., resume download).
-- For secure operations (email, uploads), create an Azure Functions backend and store secrets in Azure Key Vault.
-- Configure CORS for Blob Storage to allow access from your Static Web App domain.
-- Application Insights recommended for monitoring.
+This project includes comprehensive documentation to help you understand the architecture, deploy to Azure, and maintain security:
 
-### Key Steps
-1. Create Azure Static Web App and link to GitHub.
-2. Create Azure Blob Storage and configure containers and CORS.
-3. Create Azure Key Vault and store secrets (API keys, connection strings).
-4. Create Azure Functions for backend operations (email, uploads) and grant Key Vault access via Managed Identity.
-5. Remove all secrets from `wwwroot/appsettings.json`.
-6. Test locally and deploy via GitHub Actions.
+- **[Component Architecture](COMPONENT_ARCHITECTURE.md)** - Detailed breakdown of the component-based design, including the WhoIAm page refactoring that reduced code by 90%. Learn about ProfileHeader, ProfileApproach, ProfileHighlights, ProjectCard, and ProjectFilter components, plus the ProjectService data layer.
 
----
+- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Complete step-by-step instructions for deploying to Azure, including Static Web Apps, Blob Storage, Key Vault, Azure Functions backend setup, and CORS configuration. Essential reading before deployment.
 
-## Critical Security Best Practices
+- **[Deployment Checklist](DEPLOYMENT_CHECKLIST.md)** - Quick reference checklist with all tasks, common issues, and success criteria. Perfect for tracking your deployment progress and troubleshooting.
 
-- **Never store API keys or secrets in Blazor WebAssembly config files.**
-- All files in `wwwroot/` are public and downloadable by anyone.
-- Use Azure Functions backend to handle sensitive operations and access secrets securely from Key Vault.
-- Rotate any exposed API keys immediately and remove them from the repository history.
-- Add sensitive config files (e.g., `appsettings.Development.json`) to `.gitignore`.
-- Review and follow the security checklist in `SECURITY_ALERT.md` and `deployment_guide.md`.
+- **[Security Alert](SECURITY_ALERT.md)** - Critical security information about Blazor WebAssembly limitations and proper secret management. **Read this first** to avoid exposing API keys and understand the required Azure Functions architecture.
 
----
+## ⚡ Quick Start
 
-## License
+```bash
+# Clone the repository
+git clone https://github.com/dariemcarlosdev/CloudZen.git
+
+# Navigate to project
+cd CloudZen
+
+# Restore dependencies
+dotnet restore
+
+# Run locally
+dotnet run
+```
+
+## 🔐 Security First
+
+**Important:** Blazor WebAssembly runs entirely in the browser. Never store secrets in `appsettings.json`. Use Azure Functions backend with Key Vault for secure operations. See [SECURITY_ALERT.md](SECURITY_ALERT.md) for details.
+
+## 🏗️ Architecture
+
+```
+Blazor WASM (Client) → Azure Functions (Backend) → Azure Services
+                              ↓
+                       Azure Key Vault (Secrets)
+```
+
+See [COMPONENT_ARCHITECTURE.md](COMPONENT_ARCHITECTURE.md) for detailed component breakdown and data flow.
+
+## 📦 Project Structure
+
+```
+CloudZen/
+├── Models/              # Data models (ProjectInfo, ProjectParticipant)
+├── Services/            # Business logic (ProjectService, EmailService)
+├── Shared/              # Reusable components
+│   ├── Profile/        # Profile components
+│   ├── Projects/       # Project display components
+│   └── WhoIAm.razor    # Main portfolio page
+├── wwwroot/            # Static assets and configuration
+└── Program.cs          # Application entry point
+```
+
+## 🚀 Deployment
+
+Ready to deploy? Follow these steps:
+
+1. Read [SECURITY_ALERT.md](SECURITY_ALERT.md) - Critical security information
+2. Follow [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - Complete setup instructions
+3. Use [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Track your progress
+
+The GitHub Actions workflow automatically deploys to Azure Static Web Apps on push to `master`.
+
+## 📊 Project Highlights
+
+- **90% code reduction** in main page through component refactoring
+- **4 reusable components** with clear separation of concerns
+- **Centralized data management** via ProjectService
+- **Type-safe filtering** with EventCallback pattern
+- **Modern UI/UX** with Tailwind CSS and responsive design
+
+## 📄 License
+
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## 👤 Author
+
+**Dariem C. Macias**  
+Principal Consultant, CloudZen Inc.  
+[LinkedIn](https://www.linkedin.com/in/dariemcmacias) | [GitHub](https://github.com/dariemcarlosdev)
