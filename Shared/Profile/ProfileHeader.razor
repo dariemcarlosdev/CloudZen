@@ -1,0 +1,95 @@
+@* Profile Header Component - Displays avatar, name, intro, and social links *@
+
+<div class="text-center mb-6">
+    <!-- Avatar/Photo -->
+    <div class="flex justify-center mb-6">
+        <img src="@AvatarUrl"
+             alt="@AltText"
+             class="w-40 h-40 rounded-full shadow-lg object-cover border-4 border-indigo-700" />
+    </div>
+
+    <!-- Name/Title -->
+    <h2 class="text-4xl font-bold text-gray-900">@Title</h2>
+
+    <!-- Introduction Paragraphs -->
+    <p class="mt-4 text-lg text-gray-600">
+        <strong>@NameHighlight</strong> - @RoleDescription
+    </p>
+    <p class="mt-4 text-lg text-gray-600">
+        @DetailedDescription
+    </p>
+
+    <!-- Social Links -->
+    <div class="flex justify-center gap-6 mt-6">
+        @if (!string.IsNullOrWhiteSpace(LinkedInUrl))
+        {
+            <a href="@LinkedInUrl" 
+               target="_blank" 
+               rel="noopener" 
+               class="text-indigo-700 hover:text-indigo-900 text-2xl" 
+               title="LinkedIn">
+                <i class="bi bi-linkedin"></i>
+            </a>
+        }
+        @if (!string.IsNullOrWhiteSpace(GitHubUrl))
+        {
+            <a href="@GitHubUrl" 
+               target="_blank" 
+               rel="noopener" 
+               class="text-gray-800 hover:text-black text-2xl" 
+               title="GitHub">
+                <i class="bi bi-github"></i>
+            </a>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// URL to the profile avatar image.
+    /// </summary>
+    [Parameter]
+    public string AvatarUrl { get; set; } = "/images/dariem-avatar.png";
+
+    /// <summary>
+    /// Alt text for the avatar image (accessibility).
+    /// </summary>
+    [Parameter]
+    public string AltText { get; set; } = "Profile Avatar";
+
+    /// <summary>
+    /// Main title/heading for the profile section.
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = "Who I Am";
+
+    /// <summary>
+    /// Highlighted name portion in the introduction.
+    /// </summary>
+    [Parameter]
+    public string NameHighlight { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Short role description following the name.
+    /// </summary>
+    [Parameter]
+    public string RoleDescription { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Detailed description paragraph about experience and expertise.
+    /// </summary>
+    [Parameter]
+    public string DetailedDescription { get; set; } = string.Empty;
+
+    /// <summary>
+    /// LinkedIn profile URL (optional).
+    /// </summary>
+    [Parameter]
+    public string? LinkedInUrl { get; set; }
+
+    /// <summary>
+    /// GitHub profile URL (optional).
+    /// </summary>
+    [Parameter]
+    public string? GitHubUrl { get; set; }
+}
