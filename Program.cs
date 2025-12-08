@@ -43,5 +43,8 @@ builder.Services.AddScoped(sp => new ResumeService(
 // Register EmailServiceFactory as the implementation for IEmailProvider
 builder.Services.AddScoped<IEmailProvider, EmailServiceFactory>();
 
+// Register ProjectService for managing portfolio projects
+builder.Services.AddScoped<ProjectService>();
+
 
 await builder.Build().RunAsync();
