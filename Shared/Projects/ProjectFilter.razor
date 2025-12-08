@@ -1,0 +1,193 @@
+﻿@* Project Filter Component - Modern UI/UX with enhanced visual design *@
+
+<div class="bg-gradient-to-br from-white via-indigo-50/30 to-white rounded-3xl shadow-xl border border-indigo-100/50 p-8 mb-10 backdrop-blur-sm">
+    <!-- Header with Icon -->
+    <div class="flex items-center gap-3 mb-6">
+        <div class="flex items-center justify-center w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl shadow-lg shadow-indigo-500/30">
+            <i class="bi bi-funnel-fill text-white"></i>
+        </div>
+        <div>
+            <h4 class="text-lg font-bold text-gray-900">Filter Projects</h4>
+            <p class="text-xs text-gray-500 mt-0.5">Refine your search to find what you're looking for</p>
+        </div>
+    </div>
+    
+    <div class="grid md:grid-cols-3 gap-6">
+        <!-- Status Filter with Modern Design -->
+        <div class="flex flex-col gap-2">
+            <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-700">
+                <i class="bi bi-clipboard-check text-indigo-500 text-sm"></i>
+                <span>Status</span>
+            </label>
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i class="bi bi-funnel text-indigo-400 text-sm"></i>
+                </div>
+                <select @bind="SelectedStatus" 
+                        @bind:after="OnFilterChanged"
+                        class="w-full pl-9 pr-9 py-2.5 border-2 border-gray-200 bg-white rounded-xl 
+                               focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 
+                               hover:border-indigo-300 transition-all duration-200 appearance-none 
+                               cursor-pointer font-medium text-sm text-gray-700 shadow-sm
+                               group-hover:shadow-md">
+                    <option value="">All Statuses</option>
+                    <option value="Completed">Completed</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Planning">Planning</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <i class="bi bi-chevron-down text-gray-400 group-hover:text-indigo-500 transition-colors text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Type Filter with Modern Design -->
+        <div class="flex flex-col gap-2">
+            <label class="flex items-center gap-1.5 text-xs font-semibold text-gray-700">
+                <i class="bi bi-folder-fill text-amber-500 text-sm"></i>
+                <span>Project Type</span>
+            </label>
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <i class="bi bi-diagram-3 text-amber-400 text-sm"></i>
+                </div>
+                <select @bind="SelectedProjectType" 
+                        @bind:after="OnFilterChanged"
+                        class="w-full pl-9 pr-9 py-2.5 border-2 border-gray-200 bg-white rounded-xl 
+                               focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 
+                               hover:border-amber-300 transition-all duration-200 appearance-none 
+                               cursor-pointer font-medium text-sm text-gray-700 shadow-sm
+                               group-hover:shadow-md">
+                    <option value="">All Types</option>
+                    <option value="Side Project">Side Projects</option>
+                    <option value="Customer">Customer Projects</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <i class="bi bi-chevron-down text-gray-400 group-hover:text-amber-500 transition-colors text-xs"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Clear Filters Button with Modern Design -->
+        <div class="flex flex-col gap-2 justify-end">
+            <label class="text-xs font-semibold text-transparent select-none">Actions</label>
+            <button @onclick="ClearFilters"
+                    class="px-4 py-2.5 bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 
+                           text-white font-semibold text-sm rounded-xl transition-all duration-200 
+                           flex items-center justify-center gap-2 shadow-md hover:shadow-lg 
+                           shadow-indigo-500/30 hover:shadow-indigo-500/40
+                           border-2 border-indigo-400 hover:border-indigo-500
+                           active:scale-95 group">
+                <i class="bi bi-arrow-counterclockwise group-hover:rotate-180 transition-transform duration-300"></i>
+                <span>Clear All</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Active Filters Display with Enhanced Design -->
+    @if (!string.IsNullOrEmpty(SelectedStatus) || !string.IsNullOrEmpty(SelectedProjectType))
+    {
+        <div class="mt-6 pt-6 border-t-2 border-gray-100">
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-gray-700 px-2.5 py-1.5 bg-gray-100 rounded-lg">
+                    <i class="bi bi-filter-circle-fill text-indigo-500 text-sm"></i>
+                    <span>Active Filters</span>
+                    <span class="inline-flex items-center justify-center w-4 h-4 bg-indigo-500 text-white text-xs font-bold rounded-full">
+                        @((!string.IsNullOrEmpty(SelectedStatus) ? 1 : 0) + (!string.IsNullOrEmpty(SelectedProjectType) ? 1 : 0))
+                    </span>
+                </div>
+                <!-- Individual Active Filter Tags -->
+                @if (!string.IsNullOrEmpty(SelectedStatus))
+                {
+                    <span class="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 
+                                 text-white text-xs font-semibold rounded-full shadow-lg shadow-indigo-500/30 
+                                 hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200 
+                                 border-2 border-indigo-400">
+                        <span class="flex items-center gap-1">
+                            <i class="bi bi-clipboard-check-fill text-sm"></i>
+                            Status: @SelectedStatus
+                        </span>
+                        <button @onclick="ClearStatusFilter"
+                                class="flex items-center justify-center w-5 h-5 bg-white/20 hover:bg-white/30 
+                                       rounded-full transition-all duration-200 active:scale-90 group">
+                            <i class="bi bi-x-lg text-xs group-hover:rotate-90 transition-transform duration-200"></i>
+                        </button>
+                    </span>
+                }
+                
+                @if (!string.IsNullOrEmpty(SelectedProjectType))
+                {
+                    <span class="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 
+                                 text-white text-xs font-semibold rounded-full shadow-lg shadow-amber-500/30 
+                                 hover:shadow-xl hover:shadow-amber-500/40 transition-all duration-200 
+                                 border-2 border-amber-400">
+                        <span class="flex items-center gap-1">
+                            <i class="bi bi-folder-fill text-sm"></i>
+                            Type: @SelectedProjectType
+                        </span>
+                        <button @onclick="ClearProjectTypeFilter"
+                                class="flex items-center justify-center w-5 h-5 bg-white/20 hover:bg-white/30 
+                                       rounded-full transition-all duration-200 active:scale-90 group">
+                            <i class="bi bi-x-lg text-xs group-hover:rotate-90 transition-transform duration-200"></i>
+                        </button>
+                    </span>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>
+    /// Currently selected status filter value.
+    /// </summary>
+    private string SelectedStatus { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Currently selected project type filter value.
+    /// </summary>
+    private string SelectedProjectType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Event callback that fires when filter values change.
+    /// Passes the selected status and project type back to the parent component.
+    /// </summary>
+    [Parameter]
+    public EventCallback<(string Status, string ProjectType)> OnFilterChange { get; set; }
+
+    /// <summary>
+    /// Invokes the filter change callback with current filter values.
+    /// </summary>
+    private async Task OnFilterChanged()
+    {
+        await OnFilterChange.InvokeAsync((SelectedStatus, SelectedProjectType));
+    }
+
+    /// <summary>
+    /// Clears all active filters and triggers filter change event.
+    /// </summary>
+    private async Task ClearFilters()
+    {
+        SelectedStatus = string.Empty;
+        SelectedProjectType = string.Empty;
+        await OnFilterChanged();
+    }
+
+        /// <summary>
+    /// Clears the status filter and triggers filter change event.
+    /// </summary>
+    private async Task ClearStatusFilter()
+    {
+        SelectedStatus = string.Empty;
+        await OnFilterChanged();
+    }
+
+    /// <summary>
+    /// Clears the project type filter and triggers filter change event.
+    /// </summary>
+    private async Task ClearProjectTypeFilter()
+    {
+        SelectedProjectType = string.Empty;
+        await OnFilterChanged();
+    }
+}
