@@ -1,0 +1,154 @@
+@using CloudZen.Models
+
+<div class="bg-white rounded-2xl shadow p-6 flex flex-col gap-4">
+    <!-- Project Header: Name and Status -->
+    <div class="flex flex-col md:flex-row items-center gap-3">
+        <span class="text-xl font-semibold w-full text-center md:text-left">@Project.Name</span>
+        <span class="px-4 py-1 rounded-full text-xs font-bold @GetStatusColor(Project.Status) mt-1 md:mt-0 min-w-0 whitespace-nowrap">
+            @Project.Status
+        </span>
+    </div>
+
+    <!-- Role -->
+    @if (!string.IsNullOrWhiteSpace(Project.Role))
+    {
+        <div class="flex items-center gap-2 text-indigo-700 text-sm">
+            <i class="bi bi-person-badge text-lg"></i>
+            <span class="font-semibold">@Project.Role</span>
+        </div>
+    }
+
+    <!-- Project Type Indicator -->
+    @if (!string.IsNullOrWhiteSpace(Project.ProjectType))
+    {
+        <div class="flex items-center gap-2 text-sm">
+            @if (Project.ProjectType == "Side Project")
+            {
+                <i class="bi bi-rocket-takeoff-fill text-amber-500"></i>
+                <span class="text-gray-600"><strong class="text-amber-600">@Project.ProjectType</strong></span>
+            }
+            else if (Project.ProjectType.StartsWith("Customer:"))
+            {
+                <i class="bi bi-briefcase-fill text-blue-600"></i>
+                <span class="text-gray-600"><strong class="text-blue-600">@Project.ProjectType</strong></span>
+            }
+            else
+            {
+                <i class="bi bi-folder-fill text-gray-500"></i>
+                <span class="text-gray-600"><strong>@Project.ProjectType</strong></span>
+            }
+        </div>
+    }
+
+    <!-- Participant Avatars -->
+    @if (Project.Participants != null && Project.Participants.Any())
+    {
+        <div class="flex items-center gap-2 mt-1">
+            @foreach (var participant in Project.Participants)
+            {
+                <img src="@participant.ImageUrl"
+                     alt="@participant.Name"
+                     title="@participant.Name"
+                     class="w-10 h-10 rounded-full border-2 border-indigo-500 shadow object-cover" />
+                <span class="text-sm text-gray-700 font-medium">@participant.Name</span>
+            }
+        </div>
+    }
+
+    <!-- Description -->
+    <p class="text-gray-700">@Project.Description</p>
+
+    <!-- Tech Stack -->
+    <div class="flex flex-wrap gap-2">
+        @foreach (var tech in Project.TechStack)
+        {
+            <span class="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs rounded-full">@tech</span>
+        }
+    </div>
+
+    <!-- GitHub Link -->
+    @if (!string.IsNullOrWhiteSpace(Project.GithubUrl))
+    {
+        <div class="mt-2">
+            <a href="@Project.GithubUrl"
+               target="_blank"
+               rel="noopener noreferrer"
+               class="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-md hover:bg-gray-800 transition">
+                <i class="bi bi-github"></i>
+                <span>View on GitHub</span>
+            </a>
+        </div>
+    }
+
+    <!-- Challenges -->
+    @if (Project.Challenges != null && Project.Challenges.Count > 0)
+    {
+        <div class="mt-1">
+            <span class="text-xs text-gray-700 font-semibold">Main Challenges:</span>
+            <div class="flex flex-wrap gap-3 text-xs text-gray-500 mt-1">
+                @foreach (var challenge in Project.Challenges)
+                {
+                    <span class="flex items-center gap-2 text-gray-700 text-xs">
+                        <i class="bi bi-lightning text-green-600"></i>
+                        <span>@challenge</span>
+                    </span>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Outcomes/Results -->
+    @if (Project.Results != null && Project.Results.Count > 0)
+    {
+        <div class="mt-2">
+            <span class="text-xs text-gray-700 font-semibold">Outcomes:</span>
+            <div class="flex flex-wrap gap-3 text-xs text-gray-500 mt-1">
+                @foreach (var result in Project.Results)
+                {
+                    <span class="flex items-center gap-1 bg-gray-100 rounded-full px-1 py-1">
+                        <i class="bi bi-award text-green-600"></i>
+                        @result
+                    </span>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Progress Bar -->
+    <div class="w-full bg-gray-100 rounded-full h-3 mt-2">
+        <div class="progress-bar-fill @GetProgressColor(Project.Progress)" style="width: @($"{Project.Progress}%")"></div>
+    </div>
+    <div class="text-xs text-gray-600">Progress: @Project.Progress%</div>
+</div>
+
+@code {
+    /// <summary>
+    /// The project information to display in the card. EditorRequired ensures this parameter must be set.
+    /// It includes details such as name, status, role, type, participants, description, tech stack, GitHub link, challenges, results, and progress.
+    /// which are asigned from the ProjectInfo model set in CloudZen.Models namespace and passed to this component from parent component WhoIAm.razor.
+    /// </summary>
+    [Parameter, EditorRequired]
+    public ProjectInfo Project { get; set; } = default!;
+
+    /// <summary>
+    /// Returns the CSS classes for the status badge based on project status.
+    /// </summary>
+    private string GetStatusColor(string status) => status switch
+    {
+        "Completed" => "bg-green-100 text-green-800",
+        "In Progress" => "bg-amber-300 text-yellow-800",
+        "Planning" => "bg-red-200 text-red-700",
+        _ => "bg-gray-100 text-gray-800"
+    };
+
+    /// <summary>
+    /// Returns the CSS classes for the progress bar fill based on completion percentage.
+    /// </summary>
+    private string GetProgressColor(int progress) => progress switch
+    {
+        >= 100 => "bg-blue-400",
+        >= 70 => "bg-emerald-600",
+        >= 40 => "bg-yellow-400",
+        _ => "bg-red-500"
+    };
+}
