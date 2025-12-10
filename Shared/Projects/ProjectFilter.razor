@@ -25,7 +25,7 @@
                 </div>
                 <select @bind="SelectedStatus" 
                         @bind:after="OnFilterChanged"
-                        class="w-full pl-9 pr-9 py-2.5 border-2 border-gray-200 bg-white rounded-xl 
+                        class="w-full pl-9 pr-9 py-2.5 border-1 border-gray-200 bg-white rounded-xl 
                                focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 
                                hover:border-indigo-300 transition-all duration-200 appearance-none 
                                cursor-pointer font-medium text-sm text-gray-700 shadow-sm
@@ -53,7 +53,7 @@
                 </div>
                 <select @bind="SelectedProjectType" 
                         @bind:after="OnFilterChanged"
-                        class="w-full pl-9 pr-9 py-2.5 border-2 border-gray-200 bg-white rounded-xl 
+                        class="w-full pl-9 pr-9 py-2.5 border-1 border-gray-200 bg-white rounded-xl 
                                focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 
                                hover:border-amber-300 transition-all duration-200 appearance-none 
                                cursor-pointer font-medium text-sm text-gray-700 shadow-sm
@@ -76,7 +76,7 @@
                            text-white font-semibold text-sm rounded-xl transition-all duration-200 
                            flex items-center justify-center gap-2 shadow-md hover:shadow-lg 
                            shadow-indigo-500/30 hover:shadow-indigo-500/40
-                           border-2 border-indigo-400 hover:border-indigo-500
+                           border-1 border-indigo-400 hover:border-indigo-500
                            active:scale-95 group">
                 <i class="bi bi-arrow-counterclockwise group-hover:rotate-180 transition-transform duration-300"></i>
                 <span>Clear All</span>
@@ -102,7 +102,7 @@
                     <span class="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 bg-gradient-to-r from-indigo-500 to-indigo-600 
                                  text-white text-xs font-semibold rounded-full shadow-lg shadow-indigo-500/30 
                                  hover:shadow-xl hover:shadow-indigo-500/40 transition-all duration-200 
-                                 border-2 border-indigo-400">
+                                 border-1 border-indigo-400">
                         <span class="flex items-center gap-1">
                             <i class="bi bi-clipboard-check-fill text-sm"></i>
                             Status: @SelectedStatus
@@ -120,7 +120,7 @@
                     <span class="inline-flex items-center gap-1.5 pl-3 pr-1.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 
                                  text-white text-xs font-semibold rounded-full shadow-lg shadow-amber-500/30 
                                  hover:shadow-xl hover:shadow-amber-500/40 transition-all duration-200 
-                                 border-2 border-amber-400">
+                                 border-1 border-amber-400">
                         <span class="flex items-center gap-1">
                             <i class="bi bi-folder-fill text-sm"></i>
                             Type: @SelectedProjectType

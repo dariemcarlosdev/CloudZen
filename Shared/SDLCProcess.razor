@@ -1,7 +1,7 @@
 @* SDLCProcess.razor - Selected Button Has Full Background Color *@
 <section id="sdlc-process" class="bg-gray-50 py-5">
     <div class="max-w-5xl mx-auto px-6">
-        <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">My Streamlined SDLC Process</h2>
+        <h2 class="text-3xl font-bold text-gray-700 text-center mb-8">My Streamlined SDLC Process</h2>
         <!-- SDLC Stage Button Group: Interactive selection, highlights current stage with full background color -->
         <div class="flex justify-center items-center relative mb-10 sm:mb-8">
             <div class="relative flex flex-col sm:flex-row justify-center gap-6 sm:gap-8 max-w-3xl mx-auto w-full items-center">
@@ -32,27 +32,27 @@
             @if (SelectedStage == SDLCStage.Strategy)
             {
                 <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center animate-fade-in">
-                    <h3 class="text-xl font-semibold mb-2 text-indigo-700 text-center">Strategy & Planning</h3>
-                    <p class="text-gray-700 text-center">I partner with stakeholders to define clear business goals, requirements, and success metrics. My approach emphasizes rapid prototyping, risk assessment, and solution architecture tailored to each client's needs.</p>
+                    <h3 class="text-xl font-semibold mb-2 text-indigo-700 text-center">Planning & Strategy</h3>
+                    <p class="text-gray-700 text-center">We start by understanding your business goals and challenges. Together, we define what success looks like, identify potential risks, and create a clear roadmap that fits your timeline and budget.</p>
                 </div>
             }
             else if (SelectedStage == SDLCStage.Delivery)
             {
                 <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center animate-fade-in">
-                    <h3 class="text-xl font-semibold mb-2 text-indigo-700 text-center">Continuous Integration & Delivery</h3>
-                    <p class="text-gray-700 text-center">I implement DevOps best practices - CI/CD pipelines, automated testing, and code reviews - to ensure fast, reliable, and repeatable delivery. This reduces manual effort, accelerates feedback, and improves quality at every stage.</p>
+                    <h3 class="text-xl font-semibold mb-2 text-indigo-700 text-center">Building & Testing</h3>
+                    <p class="text-gray-700 text-center">I build your solution using proven methods that catch issues early and deliver updates quickly. Everything is tested automatically, so you get reliable results without the wait—and you stay in the loop with regular progress updates.</p>
                 </div>
             }
             else if (SelectedStage == SDLCStage.Deployment)
             {
                 <div class="bg-white rounded-xl shadow p-6 flex flex-col items-center animate-fade-in">
-                    <h3 class="text-xl font-semibold mb-2 text-indigo-700 text-center">Production Deployment</h3>
-                    <p class="text-gray-700 text-center">I leverage cloud-native deployment strategies for zero - downtime releases, robust monitoring, and rapid rollback. My process ensures secure, scalable, and high-performing solutions in production environments.</p>
+                    <h3 class="text-xl font-semibold mb-2 text-indigo-700 text-center">Launch & Support</h3>
+                    <p class="text-gray-700 text-center">When it's time to go live, I ensure a smooth launch with no interruptions to your business. Your solution is monitored around the clock, and if anything needs adjusting, I can respond quickly to keep everything running smoothly.</p>
                 </div>
             }
         </div>
         <div class="mt-10 text-center">
-            <span class="inline-block px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full font-medium">From vision to value. Every step is automated, measured, and aligned with your business goals.</span>
+            <span class="inline-block px-4 py-2 bg-indigo-100 text-indigo-800 rounded-full font-medium">From your vision to real results—every step is transparent, tested, and aligned with what matters to your business.</span>
         </div>
     </div>
 </section>
@@ -60,6 +60,9 @@
 @code {
     private SDLCStage SelectedStage { get; set; } = SDLCStage.Strategy;
 
+    /// <summary
+    /// </summary>
+    /// <param name="stage"></param>
     private void SelectStage(SDLCStage stage)
     {
         SelectedStage = stage;

@@ -240,7 +240,7 @@ public class ProjectService
             {
                 Name = "WPBT Modernization:Scalable Assessment Services for MDCPS",
                 Status = "Completed",
-                Description = "Modernized WPBT Assessment Services platform for MDCPS by migrating from legacy ASP.NET Web Forms to modular ASP.NET Core architecture—enhanced scalability, security, and user experience while accelerating assessment cycles by 50%",
+                Description = "Modernized WPBT Assessment Services platform for MDCPS by migrating from legacy ASP.NET Web Forms to modular ASP.NET Core architecture, enhancing scalability, security, and user experience while accelerating assessment cycles by 50%",
                 TechStack = new[] { "LinQ", "T-SQL Server", "EF", "BootStrap", "ASP.NET Web-Form", ".NET Core",".NET 8", "C#" },
                 Progress = 100,
                 Results = new List<string>
@@ -340,7 +340,7 @@ public class ProjectService
             },
             new ProjectInfo
             {
-                Name = "VPKFILEPROCESSOR – Cloud-Enabled ETL Pipeline Modernization",
+                Name = "FILE PROCESSOR. A Cloud-Enabled ETL Pipeline.",
                 Status = "In Progress",
                 Description = "VPKFILEPROCESSOR is a cloud-native solution that modernizes ETL workflows for MDCPS by migrating SSIS pipelines from on-premise to Azure. It allows users to upload files, automate processing via Azure Data Factory, and retrieve results through a Blazor Server interface. The system's modular microservices communicate asynchronously using Azure Event Grid, enabling scalable, secure, and fault-tolerant operations.",
                 TechStack = new[] {
