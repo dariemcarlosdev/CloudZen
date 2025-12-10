@@ -25,10 +25,12 @@ CloudZen/
 ├── Models/
 │   ├── ProjectInfo.cs                  # Project data model
 │   └── ProjectParticipant.cs           # Project participant model
+│   └── ServiceInfo.cs                  # Service data model. Records service details
 │
 ├── Services/
 │   ├── ProjectService.cs               # Project data management service
 │   ├── ResumeService.cs                # Resume download service
+│   ├── PersonalService.cs              # Personal info service
 │   └── ... (other services)
 │
 ├── Shared/
@@ -298,6 +300,8 @@ public class ProjectParticipant
 ---
 
 ## 🔧 Services
+
+#### Service Layer Overview: Same approach should be applied to other services (e.g., ResumeService, PersonalService)
 
 ### **ProjectService.cs**
 Centralized service for project data management.
