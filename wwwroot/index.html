@@ -31,8 +31,54 @@
         <a class="dismiss">🗙</a>
     </div>
     <script src="js/anim.js"></script>
-    <script src="_framework/blazor.webassembly.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>  
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
+    <script>
+        Blazor.start({
+            loadBootResource: function (type, name, defaultUri, integrity) {
+                // Return default behavior
+                return defaultUri;
+            }
+        });
+    </script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS Custom Configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // custome palette
+                        "teal-cyan-aqua": {
+                            50: "#DAF6F9",  // Very light cyan
+                            100: "#B8EFF4", // Light cyan
+                            200: "#89D6DC", // Medium cyan
+                            300: "#78BCC2", // Teal
+                            400: "#659FA5", // Darker teal
+                            500: "#538488", // Teal-gray
+                            600: "#40676B", // Dark teal-gray
+                            700: "#2F4E51", // Very dark teal
+                            800: "#1F3638", // Almost black teal
+                            900: "#0F1E1F", // Nearly black
+                            950: "#081314"  // Almost pure black
+                        },
+                        // CloudZen brand colors custome pallete
+                        'cloudzen-teal': '#61C2C8',
+                        'cloudzen-teal-hover': '#74b7bb',
+                        'cloudzen-teal-light': '#76cbd2',
+                        'cloudzen-blue': '#1b6ec2',
+                        'cloudzen-blue-dark': '#1861ac',
+                        'cloudzen-blue-focus': '#258cfb',
+                    },
+                    fontFamily: {
+                        'ibm-plex': ['IBM Plex Sans', 'Arial', 'Helvetica', 'sans-serif'],
+                        'helvetica': ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <!-- Service Worker Registration( Service worker is used for PWA features), allowing the app to work offline -->
     <script>navigator.serviceWorker.register('service-worker.js');</script>
 </body>
 
