@@ -1,0 +1,153 @@
+@*
+    Scroll to Top Button Component
+    ================================
+    
+    PURPOSE:
+    A floating action button that appears when users scroll down the page (>300px)
+    and smoothly scrolls back to the top when clicked.
+    
+    HOW IT WORKS:
+    1. JavaScript in wwwroot/js/anim.js monitors scroll position using window.addEventListener
+    2. When scroll position changes, JS calls UpdateVisibility() via .NET interop
+    3. Component updates _isVisible state and re-renders with/without "visible" CSS class
+    4. CSS transitions handle smooth fade-in/fade-out animations
+    5. Click triggers ScrollToTop() which calls JS window.scrollTo({ behavior: 'smooth' })
+    
+    DEPENDENCIES:
+    - JavaScript: window.initScrollToTop() and window.scrollToTop() in wwwroot/js/anim.js
+    - CSS: .scroll-to-top and .scroll-to-top.visible classes in wwwroot/css/app.css
+    - Icons: Bootstrap Icons (bi-arrow-up)
+    
+    LIFECYCLE:
+    - OnAfterRenderAsync: Initializes JS listener with retry logic for timing issues
+    - UpdateVisibility: Called by JS when scroll position crosses threshold
+    - ScrollToTop: Invoked on button click to trigger smooth scroll
+    - Dispose: Cleans up DotNetObjectReference to prevent memory leaks
+    
+    USAGE:
+    Add <ScrollToTopButton /> to MainLayout.razor or any page component.
+    No parameters required - works out of the box.
+*@
+
+@implements IDisposable
+@inject IJSRuntime JSRuntime
+
+@* Scroll to Top Button - Modern floating action button *@
+<div id="scrollToTopButton" class="scroll-to-top @(_isVisible ? "visible" : "")">
+    <button @onclick="ScrollToTop"
+            class="flex items-center justify-center  w-14 h-14
+                   bg-gradient-to-br from-teal-cyan-aqua-300 to-teal-cyan-aqua-400 
+                   text-white rounded-full shadow-2xl 
+                   hover:shadow-teal-cyan-aqua-500/50 hover:scale-110 
+                   active:scale-90 transition-all duration-300 
+                   backdrop-blur-sm group"
+            title="Scroll to top"
+            aria-label="Scroll to top">
+        <i class="bi bi-arrow-up text-2xl font-bold group-hover:-translate-y-1 transition-transform duration-300"></i>
+    </button>
+</div>
+
+@code {
+    /// <summary>
+    /// Controls button visibility based on scroll position.
+    /// Updated by JavaScript via UpdateVisibility() method.
+    /// </summary>
+    private bool _isVisible;
+
+    /// <summary>
+    /// Reference passed to JavaScript for .NET interop callbacks.
+    /// Allows JS to call UpdateVisibility() method from C# code.
+    /// Must be disposed to prevent memory leaks.
+    /// </summary>
+    private DotNetObjectReference<ScrollToTopButton>? _dotNetHelper;
+
+    /// <summary>
+    /// Initializes JavaScript scroll listener after component first renders.
+    /// Uses retry logic with exponential backoff to handle timing issues where
+    /// anim.js may not be fully loaded when Blazor tries to call it.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Create .NET object reference that JavaScript can call back into
+            _dotNetHelper = DotNetObjectReference.Create(this);
+            
+            // Retry mechanism to ensure JavaScript is loaded
+            // Timing issue: anim.js might not be parsed yet when component renders
+            int maxRetries = 5;
+            int retryDelayMs = 100;
+            
+            for (int i = 0; i < maxRetries; i++)
+            {
+                try
+                {
+                    // Initialize JS scroll listener - passes reference so JS can call UpdateVisibility()
+                    await JSRuntime.InvokeVoidAsync("initScrollToTop", _dotNetHelper);
+                    break; // Success, exit loop
+                }
+                catch (JSException)
+                {
+                    if (i == maxRetries - 1)
+                    {
+                        // Last retry failed, log to console but don't crash the app
+                        // Button won't work but app continues functioning
+                        Console.WriteLine("Warning: Could not initialize scroll-to-top button. JavaScript may not be loaded yet.");
+                    }
+                    else
+                    {
+                        // Wait before retrying with exponential backoff (100ms, 200ms, 400ms, 800ms)
+                        await Task.Delay(retryDelayMs);
+                        retryDelayMs *= 2;
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Called by JavaScript when scroll position crosses the 300px threshold.
+    /// Updates button visibility state and triggers re-render.
+    /// [JSInvokable] attribute allows JavaScript to call this C# method.
+    /// </summary>
+    /// <param name="isVisible">True if user scrolled >300px, false otherwise</param>
+    [JSInvokable]
+    public void UpdateVisibility(bool isVisible)
+    {
+        // Only update and re-render if state actually changed
+        if (_isVisible != isVisible)
+        {
+            _isVisible = isVisible;
+            StateHasChanged(); // Triggers re-render to add/remove "visible" CSS class
+        }
+    }
+
+    /// <summary>
+    /// Invoked when user clicks the scroll-to-top button.
+    /// Calls JavaScript function to smoothly scroll the page to the top.
+    /// Error handling prevents crashes if JS is unavailable.
+    /// </summary>
+    private async Task ScrollToTop()
+    {
+        try
+        {
+            // Calls window.scrollTo({ top: 0, behavior: 'smooth' }) in anim.js
+            await JSRuntime.InvokeVoidAsync("scrollToTop");
+        }
+        catch (JSException ex)
+        {
+            // Log error but don't crash - graceful degradation
+            Console.WriteLine($"Error scrolling to top: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Cleans up the DotNetObjectReference when component is destroyed.
+    /// Essential to prevent memory leaks in Blazor WebAssembly.
+    /// Called automatically by Blazor framework when component is removed.
+    /// </summary>
+    public void Dispose()
+    {
+        _dotNetHelper?.Dispose();
+    }
+}
