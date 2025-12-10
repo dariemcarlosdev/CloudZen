@@ -73,3 +73,47 @@ window.scrollToElementById = function (id) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 };
+
+/**
+ * Initializes the scroll-to-top button functionality.
+ * Shows/hides the button based on scroll position and handles scroll visibility updates.
+ * @param {object} dotNetHelper - Reference to the Blazor component for state updates.
+ */
+window.initScrollToTop = function (dotNetHelper) {
+    let scrollThreshold = 300; // Show button after scrolling 300px
+    let ticking = false;
+
+    function updateButtonVisibility() {
+        const scrollY = window.pageYOffset || document.documentElement.scrollTop;
+        const shouldShow = scrollY > scrollThreshold;
+        
+        if (dotNetHelper) {
+            dotNetHelper.invokeMethodAsync('UpdateVisibility', shouldShow);
+        }
+        ticking = false;
+    }
+
+    // Use requestAnimationFrame for better performance
+    function handleScroll() {
+        if (!ticking) {
+            window.requestAnimationFrame(updateButtonVisibility);
+            ticking = true;
+        }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    // Initial check
+    updateButtonVisibility();
+};
+
+/**
+ * Smoothly scrolls the page to the top.
+ * Used by the scroll-to-top button component.
+ */
+window.scrollToTop = function () {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+};
