@@ -46,5 +46,8 @@ builder.Services.AddScoped<IEmailProvider, EmailServiceFactory>();
 // Register ProjectService for managing portfolio projects
 builder.Services.AddScoped<ProjectService>();
 
+// Register PersonalService for managing service offerings
+builder.Services.AddScoped<PersonalService>();
+
 
 await builder.Build().RunAsync();
