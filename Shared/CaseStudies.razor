@@ -1,29 +1,267 @@
-﻿<section id="cases" class="py-24 bg-gray-50 text-center">
-    <h2 class="text-3xl font-bold text-center mb-12">Case Studies</h2>
-    <div class="grid md:grid-cols-2 gap-10 max-w-6xl mx-auto">
-        <!-- Tailored to WPBT Modernization project from WhoIAm.razor -->
-        <div class="bg-white p-6 rounded-lg shadow">
-            <h3 class="font-semibold text-xl mb-2">WPBT assessment Service Modernization</h3>
-            <p class="text-gray-600">Migration from legacy ASP.NET Web Forms to modular ASP.NET Core architecture—enhanced scalability, security, and user experience while accelerating assessment cycles by 50%.</p>
-@*             <ul class="mt-4 text-left text-gray-700 list-disc list-inside text-sm">
-                <li>Streamlined assessment cycle cutting turnaround times by roughly 50%.</li>
-                <li>Delivered a responsive, modular interface for principals and administrators.</li>
-                <li>Enhanced traceability and precision in assessment records, minimizing errors and boosting confidence in reporting.</li>
-                <li>Supported increasing teachers and program volumes without performance degradation, ensuring long-term viability.</li>
-            </ul> *@
+﻿@using CloudZen.Models
+@* 
+    Case Studies Component
+    
+    PURPOSE:
+    Showcases real-world project case studies with measurable results and business impact.
+    Dynamically loads featured projects from ProjectService and presents them in an 
+    attractive, customer-friendly format.
+    
+    KEY FEATURES:
+    - Automatic project selection (completed customer work + impressive side projects)
+    - Technical jargon conversion to business-friendly language
+    - Responsive card grid layout (1-3 columns based on screen size)
+    - Hover effects and animations for better UX
+    - GitHub links for open-source projects
+    - CTA to view full project portfolio
+    
+    DEPENDENCIES:
+    - ProjectService: Provides project data
+    - Models.ProjectInfo: Project data model
+    - Tailwind CSS: For styling and responsive design
+    
+    CUSTOMIZATION:
+    - Modify OnInitialized() to change project selection criteria
+    - Update GetShortTitle() to add new title mappings
+    - Edit GetCustomerFriendlyDescription() to add more jargon replacements
+    - Adjust Take(3) to display more/fewer projects
+*@
+
+@inject CloudZen.Services.ProjectService ProjectService
+
+<section id="cases" class="py-24 bg-gradient-to-br from-gray-50 to-gray-100">
+    <div class="max-w-7xl mx-auto px-4">
+        <!-- Section Header -->
+        <div class="text-center mb-16">
+            <h2 class="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Real Results, Real Impact
+            </h2>
+            <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                See how I've helped businesses modernize their systems, boost efficiency, and achieve measurable results.
+            </p>
         </div>
-        <div class="bg-white p-6 rounded-lg shadow">
-            <h3 class="font-semibold text-xl mb-2">AI-powered Analytics and Insights</h3>
-            <p class="text-gray-600">Implemented Azure OpenAI + Cognitive Services for sentiment analysis, improving customer retention by 25%.</p>
+
+        <!-- Project Cards Grid - Responsive: 1 col mobile, 2 cols tablet, 3 cols desktop -->
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            @foreach (var project in _caseStudyProjects)
+            {
+                <!-- Individual Project Card with hover effects -->
+                <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 overflow-hidden group">
+                    
+                    <!-- Card Header - Gradient background with category badge -->
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6 relative">
+                        <!-- Category Badge (top-right) -->
+                        <div class="absolute top-4 right-4">
+                            <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-semibold">
+                                @GetProjectCategory(project.ProjectType)
+                            </span>
+                        </div>
+                        <!-- Project Title (shortened for display) -->
+                        <h3 class="font-bold text-xl text-white pr-24 leading-tight">
+                            @GetShortTitle(project.Name)
+                        </h3>
+                    </div>
+
+                    <!-- Card Body - Project details and results -->
+                    <div class="p-6">
+                        <!-- Project Description (simplified, max 3 lines) -->
+                        <p class="text-gray-600 text-sm mb-4 line-clamp-3">
+                            @GetCustomerFriendlyDescription(project.Description)
+                        </p>
+
+                        <!-- Key Results Section - Shows top 2 results with checkmark icons -->
+                        @if (project.Results != null && project.Results.Any())
+                        {
+                            <div class="mb-4">
+                                <h4 class="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-2">Key Results</h4>
+                                <ul class="space-y-2">
+                                    @* Display only first 2 results to keep cards uniform *@
+                                    @foreach (var result in project.Results.Take(2))
+                                    {
+                                        <li class="flex items-start text-xs text-gray-700">
+                                            <!-- Simple checkmark icon in custom teal -->
+                                            <svg class="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="#61C2C8" stroke-width="2.5" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <span>@GetSimplifiedResult(result)</span>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <!-- Card Footer - Status and GitHub link -->
+                        <div class="border-t pt-4 mt-4">
+                            <div class="flex justify-between items-center text-xs text-gray-500">
+                                <!-- Project Status (Completed/In Progress) -->
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    @project.Status
+                                </span>
+                                
+                                <!-- GitHub Link (only shown if URL exists) -->
+                                @if (!string.IsNullOrEmpty(project.GithubUrl))
+                                {
+                                    <a href="@project.GithubUrl" target="_blank" class="flex items-center font-medium hover:opacity-80 transition-opacity text-gray-700">
+                                        <!-- GitHub mark icon -->
+                                        <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd"/>
+                                        </svg>
+                                        View Code
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Call-to-Action Section -->
+        <div class="text-center">
+            <div class="inline-flex flex-col sm:flex-row gap-4 items-center">
+                <!-- Primary CTA Button - Links to full project portfolio -->
+                <a href="/whoiam?scroll=highlighted-projects" class="group">
+                    <button class="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center">
+                        Explore All Projects
+                        <!-- Animated arrow icon -->
+                        <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                        </svg>
+                    </button>
+                </a>
+                <!-- Secondary CTA Text -->
+                <p class="text-gray-500 text-sm">
+                    Want to see similar results? <a href="#contact" class="text-indigo-600 font-semibold hover:text-indigo-800">Let's talk</a>
+                </p>
+            </div>
         </div>
     </div>
-    <!-- Last significant change: Button now navigates to WhoIAm.razor with scroll query parameter for cross-page scroll to Highlighted Projects section. -->
-    <a href="/whoiam?scroll=highlighted-projects">
-        <button class="mt-12 px-6 py-3 bg-indigo-600 text-white font-medium rounded-xl shadow hover:bg-indigo-700 transition">See Highlighted Projects</button>
-    </a>
 </section>
 
 @code {
-    // JS interop removed, navigation now handled by anchor link since I am navigating to a different page - component. Blazor WebAssembly supports full page navigation via anchor links.
-    // Last significant change: Navigation to WhoIAm.razor with scroll query parameter for scroll-to-section logic.
+    /// <summary>
+    /// Collection of featured case study projects to display.
+    /// Populated in OnInitialized with filtered data from ProjectService.
+    /// </summary>
+    private List<ProjectInfo> _caseStudyProjects = new();
+
+    /// <summary>
+    /// Lifecycle method - Initializes component state when first rendered.
+    /// Filters and selects the most relevant projects for case study display.
+    /// 
+    /// SELECTION CRITERIA:
+    /// - Status: "Completed" or "In Progress"
+    /// - Type: Customer projects OR specific high-impact side projects
+    /// - Limit: Top 3 projects
+    /// 
+    /// TO MODIFY: Adjust filter criteria or Take() count to change displayed projects.
+    /// </summary>
+    protected override void OnInitialized()
+    {
+        // Fetch all projects from the service
+        var allProjects = ProjectService.GetAllProjects();
+        
+        // Filter for completed/in-progress projects that are either:
+        // 1. Customer work (contains "Customer" in ProjectType)
+        // 2. Notable side projects (VPKFILEPROCESSOR, Smart Menu)
+        _caseStudyProjects = allProjects
+            .Where(p => (p.Status == "Completed" || p.Status == "In Progress") &&
+                       (p.ProjectType.Contains("Customer") || 
+                        p.Name.Contains("FILE PROCESSOR") ||
+                        p.Name.Contains("Smart Menu")))
+            .Take(3)  // Limit to 3 featured projects
+            .ToList();
+    }
+
+    /// <summary>
+    /// Determines the display category badge for a project based on its type.
+    /// </summary>
+    /// <param name="projectType">The ProjectType property from ProjectInfo</param>
+    /// <returns>"Customer Success" for client work, "Innovation Project" for side projects</returns>
+    private string GetProjectCategory(string projectType)
+    {
+        if (projectType.Contains("Customer"))
+        {
+            return "Customer Success";
+        }
+        return "Innovation Project";
+    }
+
+    /// <summary>
+    /// Converts long project titles into shorter, more display-friendly versions.
+    /// Uses pattern matching to identify specific projects and provide simplified titles.
+    /// </summary>
+    /// <param name="title">Original project name from ProjectInfo</param>
+    /// <returns>Shortened title (max 50 chars) for better card layout</returns>
+    /// <remarks>
+    /// TO EXTEND: Add new if conditions for additional project name mappings.
+    /// Default behavior: Truncate titles longer than 50 characters with "..."
+    /// </remarks>
+    private string GetShortTitle(string title)
+    {
+        // Map known project names to simplified versions
+        if (title.Contains("WPBT"))
+            return "Assessment Platform Modernization";
+        if (title.Contains("ETL Optimization"))
+            return "Data Pipeline Optimization";
+        if (title.Contains("VPKFILEPROCESSOR"))
+            return "File Processing Automation";
+        if (title.Contains("Smart Menu"))
+            return "AI Menu Optimization";
+        
+        // Fallback: Truncate long titles
+        return title.Length > 50 ? title.Substring(0, 47) + "..." : title;
+    }
+
+    /// <summary>
+    /// Translates technical descriptions into business-friendly language.
+    /// Removes technical jargon and focuses on business value for non-technical readers.
+    /// </summary>
+    /// <param name="description">Technical project description from ProjectInfo</param>
+    /// <returns>Simplified, customer-friendly description (max 150 chars)</returns>
+    /// <remarks>
+    /// TO EXTEND: Add more .Replace() calls for additional technical terms.
+    /// This helps make the portfolio accessible to business decision-makers.
+    /// </remarks>
+    private string GetCustomerFriendlyDescription(string description)
+    {
+        // Replace technical terms with business-friendly equivalents
+        var simplified = description
+            .Replace("ASP.NET Web Forms to modular ASP.NET Core architecture", "outdated systems to modern technology")
+            .Replace("SSIS ETL pipeline", "data processing pipeline")
+            .Replace("ABAP-driven delta extraction", "smart data extraction")
+            .Replace("cloud-native solution", "modern online solution")
+            .Replace("Blazor Server interface", "user-friendly web interface")
+            .Replace("Azure Event Grid", "automated notifications");
+        
+        // Truncate if too long to maintain card uniformity
+        return simplified.Length > 150 ? simplified.Substring(0, 147) + "..." : simplified;
+    }
+
+    /// <summary>
+    /// Simplifies technical result statements for non-technical audiences.
+    /// Similar to GetCustomerFriendlyDescription but for individual result items.
+    /// </summary>
+    /// <param name="result">Technical result statement from ProjectInfo.Results</param>
+    /// <returns>Simplified result text (max 80 chars)</returns>
+    /// <remarks>
+    /// TO EXTEND: Add more .Replace() calls for additional technical terms found in results.
+    /// Keep additions aligned with your target audience's vocabulary.
+    /// </remarks>
+    private string GetSimplifiedResult(string result)
+    {
+        // Replace technical terminology with accessible language
+        var simplified = result
+            .Replace("turnaround times by roughly", "delivery speed by")
+            .Replace("Runtime Reduction through Delta Processing", "faster processing")
+            .Replace("Scales-Out efficiently with large datasets", "Handles growing data smoothly")
+            .Replace("CI/CD pipelines", "automated deployments")
+            .Replace("Azure Event Grid", "automated notifications");
+        
+        // Truncate for consistency in result lists
+        return simplified.Length > 80 ? simplified.Substring(0, 77) + "..." : simplified;
+    }
 }

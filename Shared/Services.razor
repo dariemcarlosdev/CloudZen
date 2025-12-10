@@ -1,11 +1,15 @@
-﻿<section id="services" class="py-24 bg-gray-50 text-center">
-    <h2 class="text-3xl font-bold mb-12">My Services</h2>
+﻿@using CloudZen.Models
+@using CloudZen.Services
+@inject PersonalService PersonalService
+
+<section id="services" class="py-24 bg-gray-50 text-center">
+    <h2 class="text-4xl font-bold mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">My Services</h2>
     <h3 class="text-xl font-semibold mb-4">Strategic Solutions. Tangible Results.</h3>
-    <p class="text-gray-700 max-w-2xl mx-auto mb-10">
+    <p class="text-gray-600 text-lg max-w-2xl mx-auto">
         I help you modernize outdated systems, simplify operations, and scale with confidence—without the tech overwhelm. Every solution is built around your goals, delivered with clarity, and designed to drive results.
     </p>
     <div class="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-        @foreach (var service in ServicesList)
+        @foreach (var service in _services)
         {
             <div class="p-6 bg-white rounded-xl shadow hover:shadow-lg transition-transform duration-300 hover:-translate-y-2">
                 <div class="text-4xl mb-4">@service.Icon</div>
@@ -17,35 +21,10 @@
 </section>
 
 @code {
-    private List<Service> ServicesList = new()
+    private List<ServiceInfo> _services = new();
+
+    protected override void OnInitialized()
     {
-        new Service("💻", "Business-Centered application Development.",
-            "Build secure, scalable applications that fit your business like a glove—no off-the-shelf compromises."),
-
-        new Service("☁️", "Cloud Strategy That Works",
-            "I help businesses move to the cloud with confidence—cutting costs, improving flexibility, and supporting growth. No tech headaches, just smart solutions that fit your goals."),
-
-        new Service("🚀", "Legacy Application Migration",
-            "Say goodbye to outdated systems. I transition your legacy platforms to modern, cloud-native environments with minimal disruption."),
-
-        new Service("🚚", "Faster Delivery, Fewer Bottlenecks",
-            "I help businesses speed up their digital workflows—so updates roll out smoothly, teams stay aligned, and customers get better experiences, faster."),
-
-        new Service("📊", "Reporting & Power BI Automation",
-            "Turn raw data into clear decisions. I build dashboards and workflows that give you real-time visibility and actionable insights."),
-
-        new Service("🤖", "AI & Intelligent Automation",
-            "Work smarter, not harder. I integrate AI to automate tasks, detect issues early, and enhance user experiences with natural language and predictive features."),
-
-        new Service("🤝", "Extended Expertise On-Demand",
-            "Need more than one skillset? I partner with trusted professionals to deliver complete solutions—without compromising quality or clarity."),
-
-        new Service("🧪", "Testing & Validation",
-            "No surprises at launch. I rigorously test every solution to ensure reliability, performance, and peace of mind."),
-
-        new Service("🔁", "Iterative Development Process",
-            "Your feedback drives the build. I work in short, focused cycles to refine features and deliver exactly what your business needs—step by step.")
-    };
-
-    record Service(string Icon, string Title, string Description);
+        _services = PersonalService.GetAllServices();
+    }
 }
