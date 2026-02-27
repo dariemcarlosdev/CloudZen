@@ -1,8 +1,6 @@
 using CloudZen;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.Azure;
-using Azure.Identity;
 using CloudZen.Services;
 using CloudZen.Services.Abstractions;
 
@@ -40,8 +38,9 @@ builder.Services.AddScoped(sp => new ResumeService(
     sp.GetRequiredService<ILogger<ResumeService>>()
 ));
 
-// Register EmailServiceFactory as the implementation for IEmailProvider
-builder.Services.AddScoped<IEmailProvider, EmailServiceFactory>();
+// Register ApiEmailService as the implementation for IEmailService
+// This sends emails through the Azure Functions API backend (secure for WebAssembly)
+builder.Services.AddScoped<IEmailService, ApiEmailService>();
 
 // Register ProjectService for managing portfolio projects
 builder.Services.AddScoped<ProjectService>();

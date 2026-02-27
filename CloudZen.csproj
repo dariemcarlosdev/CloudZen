@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
     <UserSecretsId>21460780-92de-4d50-aa0e-8113a148f085</UserSecretsId>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Api\**</DefaultItemExcludes>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,8 @@
     <PackageReference Include="Azure.Storage.Queues" Version="12.22.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.17" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.17" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.3.9" />
     <PackageReference Include="Microsoft.Extensions.Azure" Version="1.11.0" />
     <PackageReference Include="SendGrid" Version="9.29.3" />
     <PackageReference Include="sib_api_v3_sdk" Version="4.0.2" />
