@@ -1,5 +1,6 @@
 using Azure.Identity;
 using CloudZen.Api.Models;
+using CloudZen.Api.Models.Options;
 using CloudZen.Api.Security;
 using CloudZen.Api.Services;
 using Microsoft.Azure.Functions.Worker;

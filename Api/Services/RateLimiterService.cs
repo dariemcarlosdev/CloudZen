@@ -1,4 +1,5 @@
 using CloudZen.Api.Models;
+using CloudZen.Api.Models.Options;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Polly;
