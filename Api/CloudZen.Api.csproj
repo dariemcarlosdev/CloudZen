@@ -17,6 +17,8 @@
     <PackageReference Include="Microsoft.Azure.Functions.Worker.ApplicationInsights" Version="2.50.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Http.AspNetCore" Version="2.1.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Worker.Sdk" Version="2.0.7" />
+    <PackageReference Include="Polly" Version="8.6.5" />
+    <PackageReference Include="Polly.RateLimiting" Version="8.6.5" />
     <PackageReference Include="sib_api_v3_sdk" Version="4.0.2" />
   </ItemGroup>
 
