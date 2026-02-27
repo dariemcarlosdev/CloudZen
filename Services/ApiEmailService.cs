@@ -1,7 +1,8 @@
 using CloudZen.Models;
+using CloudZen.Models.Options;
 using CloudZen.Services.Abstractions;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -25,43 +26,54 @@ namespace CloudZen.Services;
 /// </list>
 /// </para>
 /// <para>
-/// Configuration:
-/// <list type="bullet">
-///   <item><description><c>ApiBaseUrl</c> - Base URL for the API (defaults to "/api" for linked Azure Functions)</description></item>
-/// </list>
+/// Configuration (in <c>appsettings.json</c>):
+/// <code>
+/// {
+///   "EmailService": {
+///     "ApiBaseUrl": "/api",
+///     "TimeoutSeconds": 30,
+///     "MaxRetries": 3,
+///     "SendEmailEndpoint": "send-email"
+///   }
+/// }
+/// </code>
 /// </para>
 /// </remarks>
 /// <example>
 /// Register the service in <c>Program.cs</c>:
 /// <code>
-/// builder.Services.AddHttpClient&lt;IEmailService, ApiEmailService&gt;();
+/// builder.Services.Configure&lt;EmailServiceOptions&gt;(
+///     builder.Configuration.GetSection(EmailServiceOptions.SectionName));
+/// builder.Services.AddScoped&lt;IEmailService, ApiEmailService&gt;();
 /// </code>
 /// </example>
 public class ApiEmailService : IEmailService
 {
     private readonly HttpClient _httpClient;
-    private readonly IConfiguration _config;
+    private readonly EmailServiceOptions _options;
     private readonly ILogger<ApiEmailService> _logger;
-    private readonly string _apiBaseUrl;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ApiEmailService"/> class.
     /// </summary>
     /// <param name="httpClient">The HTTP client used to communicate with the API backend.</param>
-    /// <param name="config">The configuration provider for accessing app settings.</param>
+    /// <param name="options">The email service configuration options.</param>
     /// <param name="logger">The logger instance for diagnostic output.</param>
     /// <remarks>
-    /// The API base URL is retrieved from the <c>ApiBaseUrl</c> configuration setting.
-    /// If not specified, it defaults to <c>/api</c> which works with Azure Static Web Apps linked APIs.
+    /// Uses the IOptions pattern for strongly-typed configuration access.
+    /// Configuration is read from the "EmailService" section of appsettings.json.
     /// </remarks>
-    public ApiEmailService(HttpClient httpClient, IConfiguration config, ILogger<ApiEmailService> logger)
+    public ApiEmailService(
+        HttpClient httpClient, 
+        IOptions<EmailServiceOptions> options, 
+        ILogger<ApiEmailService> logger)
     {
-        _httpClient = httpClient;
-        _config = config;
-        _logger = logger;
+        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
+        _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         
-        // Get API base URL from configuration, fallback to relative path for linked API
-        _apiBaseUrl = config["ApiBaseUrl"] ?? "/api";
+        // Configure HTTP client timeout from options
+        _httpClient.Timeout = TimeSpan.FromSeconds(_options.TimeoutSeconds);
     }
 
     /// <summary>
@@ -124,7 +136,7 @@ public class ApiEmailService : IEmailService
                 FromEmail = fromEmail
             };
 
-            var endpoint = $"{_apiBaseUrl.TrimEnd('/')}/send-email";
+            var endpoint = _options.SendEmailUrl;
             _logger.LogInformation("Sending email request to {Endpoint}", endpoint);
 
             var response = await _httpClient.PostAsJsonAsync(endpoint, request);
@@ -158,9 +170,9 @@ public class ApiEmailService : IEmailService
             _logger.LogError(ex, "Network error sending email: {Message}", ex.Message);
             return EmailResult.Fail("Unable to connect to email service. Please check your internet connection.");
         }
-        catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+        catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException || ex.CancellationToken.IsCancellationRequested == false)
         {
-            _logger.LogError(ex, "Timeout sending email");
+            _logger.LogError(ex, "Timeout sending email after {TimeoutSeconds} seconds", _options.TimeoutSeconds);
             return EmailResult.Fail("Request timed out. Please try again.");
         }
         catch (Exception ex)
