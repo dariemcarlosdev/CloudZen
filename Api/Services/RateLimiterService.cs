@@ -279,7 +279,7 @@ public class PollyRateLimiterService : IRateLimiterService, IDisposable
     /// </summary>
     /// <remarks>
     /// This internal class encapsulates the Polly rate limiter and resilience pipeline
-    /// along with tracking information for cleanup purposes. Keep it sealed and simple to avoid unintended side effects. It is only used internally by the <see cref="PollyRateLimiterService"/> and is not exposed outside of this context. So here is the right place to add any additional properties or methods needed for managing the client's rate limiter without affecting the public API of the service. The <see cref="Dispose"/> method ensures that resources are properly released when a client limiter is removed or when the service is disposed.
+    /// along with tracking information for cleanup purposes. Keep it sealed and simple to avoid unintended side effects. It is only used internally by the <see cref="PollyRateLimiterService"/> and is not exposed outside of this context.
     /// </remarks>
     private sealed class ClientRateLimiter : IDisposable
     {
