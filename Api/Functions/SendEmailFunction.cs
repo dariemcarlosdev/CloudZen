@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using sib_api_v3_sdk.Api;
 using sib_api_v3_sdk.Client;
 using sib_api_v3_sdk.Model;
@@ -36,24 +37,28 @@ public class SendEmailFunction
     private readonly IConfiguration _config;
     private readonly IRateLimiterService _rateLimiter;
     private readonly CorsSettings _corsSettings;
+    private readonly EmailSettings _emailSettings;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="SendEmailFunction"/> class.
     /// </summary>
     /// <param name="logger">The logger instance for diagnostic output.</param>
-    /// <param name="config">The configuration provider for accessing app settings and secrets.</param>
+    /// <param name="config">The configuration provider for accessing secrets (API keys).</param>
     /// <param name="rateLimiter">The rate limiter service for throttling requests.</param>
     /// <param name="corsSettings">The CORS settings for cross-origin requests.</param>
+    /// <param name="emailSettings">The email configuration settings.</param>
     public SendEmailFunction(
         ILogger<SendEmailFunction> logger,
         IConfiguration config,
         IRateLimiterService rateLimiter,
-        CorsSettings corsSettings)
+        CorsSettings corsSettings,
+        IOptions<EmailSettings> emailSettings)
     {
         _logger = logger;
         _config = config;
         _rateLimiter = rateLimiter;
         _corsSettings = corsSettings;
+        _emailSettings = emailSettings.Value;
     }
 
     /// <summary>
@@ -152,6 +157,7 @@ public class SendEmailFunction
             }
 
             // Get Brevo API key from configuration (environment variable or Key Vault)
+            // Note: API keys should NOT be in IOptions - they come from secure configuration
             var apiKey = _config["BREVO_API_KEY"] ?? Environment.GetEnvironmentVariable("BREVO_API_KEY");
 
             if (string.IsNullOrEmpty(apiKey))
@@ -163,22 +169,18 @@ public class SendEmailFunction
                 };
             }
 
-            // Get email settings from configuration
-            var fromEmail = _config["EmailSettings:FromEmail"] ?? "cloudzen.inc@gmail.com";
-            var ccEmail = _config["EmailSettings:CcEmail"];
-
             // Configure Brevo client
             Configuration.Default.ApiKey["api-key"] = apiKey;
             var apiInstance = new TransactionalEmailsApi();
 
-            // Build email with sanitized content
-            var sender = new SendSmtpEmailSender { Email = fromEmail };
-            var recipient = new SendSmtpEmailTo(fromEmail, InputValidator.SanitizeHtml(emailRequest.FromName));
+            // Build email using IOptions configuration
+            var sender = new SendSmtpEmailSender { Email = _emailSettings.FromEmail };
+            var recipient = new SendSmtpEmailTo(_emailSettings.FromEmail, InputValidator.SanitizeHtml(emailRequest.FromName));
 
             var ccList = new List<SendSmtpEmailCc>();
-            if (!string.IsNullOrEmpty(ccEmail))
+            if (!string.IsNullOrEmpty(_emailSettings.CcEmail))
             {
-                ccList.Add(new SendSmtpEmailCc(ccEmail));
+                ccList.Add(new SendSmtpEmailCc(_emailSettings.CcEmail));
             }
 
             var email = new SendSmtpEmail(

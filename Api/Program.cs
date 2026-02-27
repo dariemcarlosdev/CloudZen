@@ -10,7 +10,15 @@ using Microsoft.Extensions.Hosting;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 
-// Add configuration sources
+// =============================================================================
+// CONFIGURATION SOURCES
+// =============================================================================
+// Priority order (last wins):
+// 1. local.settings.json (local development)
+// 2. Environment variables (Azure App Settings in production)
+// 3. Azure Key Vault (secrets, if KEY_VAULT_ENDPOINT is set)
+// =============================================================================
+
 builder.Configuration
     .AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
@@ -35,11 +43,37 @@ if (!string.IsNullOrEmpty(keyVaultEndpoint))
         }));
 }
 
-// Determine if we're in development or production
+// =============================================================================
+// ENVIRONMENT DETECTION
+// =============================================================================
+
 var isDevelopment = builder.Environment.IsDevelopment() || 
     Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") == "Development";
 
-// Configure allowed origins for CORS
+// =============================================================================
+// IOPTIONS PATTERN CONFIGURATION
+// =============================================================================
+// Using AddOptions<T>().BindConfiguration() for consistency with Blazor WASM project
+// This pattern provides:
+// - Strongly-typed configuration access
+// - Support for validation with ValidateDataAnnotations()
+// - Consistent pattern across the solution
+// =============================================================================
+
+// Configure rate limiting options
+builder.Services.AddOptions<RateLimitOptions>()
+    .BindConfiguration(RateLimitOptions.SectionName);
+
+// Configure email settings options
+builder.Services.AddOptions<EmailSettings>()
+    .BindConfiguration(EmailSettings.SectionName);
+
+// =============================================================================
+// CORS CONFIGURATION
+// =============================================================================
+// Loaded from configuration with sensible defaults for local development
+// =============================================================================
+
 string[] allowedOrigins;
 var configuredOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>();
 var productionOrigin = builder.Configuration["ProductionOrigin"];
@@ -73,15 +107,15 @@ else
 // Add production origin if specified
 if (!string.IsNullOrEmpty(productionOrigin) && !allowedOrigins.Contains(productionOrigin))
 {
-    allowedOrigins = allowedOrigins.Append(productionOrigin).ToArray();
+    allowedOrigins = [.. allowedOrigins, productionOrigin];
 }
 
-// Register CORS settings as a service for use in functions (from CloudZen.Api.Security namespace)
+// Register CORS settings as a service for use in functions
 builder.Services.AddSingleton(new CorsSettings(allowedOrigins));
 
-// Configure rate limiting options from configuration
-builder.Services.Configure<RateLimitOptions>(
-    builder.Configuration.GetSection(RateLimitOptions.SectionName));
+// =============================================================================
+// SERVICE REGISTRATIONS
+// =============================================================================
 
 // Register Polly-based rate limiter service
 builder.Services.AddSingleton<IRateLimiterService, PollyRateLimiterService>();
@@ -93,7 +127,10 @@ builder.Services.AddHttpClient("SecureClient", client =>
     client.Timeout = TimeSpan.FromSeconds(30);
 });
 
-// Application Insights with security-conscious settings
+// =============================================================================
+// APPLICATION INSIGHTS
+// =============================================================================
+
 builder.Services
     .AddApplicationInsightsTelemetryWorkerService(options =>
     {
