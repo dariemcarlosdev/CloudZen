@@ -1,34 +1,31 @@
-// staticwebapp.config.json - Azure Static Web Apps configuration file
-// This file controls routing, security headers, MIME types, and API access for your Blazor WebAssembly app.
 {
-  // SPA fallback: rewrites all non-file requests to index.html for client-side routing
   "navigationFallback": {
-    "rewrite": "/index.html", // All unknown routes are served index.html
-    "exclude": ["/images/*.{png,jpg,gif,svg}", "/css/*", "/*.js"] // Exclude static assets from fallback
+    "rewrite": "/index.html",
+    "exclude": ["/images/*.{png,jpg,gif,svg}", "/css/*", "/*.js"]
   },
-  // Global HTTP headers for security
   "globalHeaders": {
-    "X-Content-Type-Options": "nosniff", // Prevents MIME type sniffing
-    "X-Frame-Options": "DENY", // Prevents clickjacking by disallowing framing
-    "Content-Security-Policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cloudzenstorage.blob.core.windows.net data:; img-src 'self' data: https:; font-src 'self' data: https://cdn.jsdelivr.net;" // Restricts resource loading to trusted sources
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Content-Security-Policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cloudzenstorage.blob.core.windows.net data:; img-src 'self' data: https:; font-src 'self' data: https://cdn.jsdelivr.net;",
+    "Content-Type": "text/html; charset=utf-8"
   },
-  // API route configuration
   "routes": [
     {
-      "route": "/api/*", // All /api/* routes
-      "allowedRoles": ["anonymous"] // Allow anonymous access (no authentication required)
+      "route": "/api/*",
+      "allowedRoles": ["anonymous"]
     }
   ],
-  // Custom response for 404 errors: serve index.html for SPA navigation
   "responseOverrides": {
     "404": {
-      "rewrite": "/index.html", // Rewrite 404s to index.html
-      "statusCode": 200 // Return HTTP 200 OK
+      "rewrite": "/index.html",
+      "statusCode": 200
     }
   },
-  // Custom MIME types for static files
   "mimeTypes": {
-    ".json": "application/json", // Serve .json files as application/json
-    ".webmanifest": "application/manifest+json" // Serve .webmanifest files as manifest+json
+    ".json": "application/json; charset=utf-8",
+    ".webmanifest": "application/manifest+json; charset=utf-8",
+    ".html": "text/html; charset=utf-8",
+    ".js": "application/javascript; charset=utf-8",
+    ".css": "text/css; charset=utf-8"
   }
 }
