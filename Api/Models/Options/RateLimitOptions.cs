@@ -1,4 +1,4 @@
-namespace CloudZen.Api.Models;
+namespace CloudZen.Api.Models.Options;
 
 /// <summary>
 /// Configuration options for rate limiting and resilience policies.
