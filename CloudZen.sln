@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.14.36212.18
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudZen", "CloudZen.csproj", "{82B4B2FF-740F-4AC0-8790-87DC56939090}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8238B8FB-64FF-4894-BEAB-E25781436287} = {8238B8FB-64FF-4894-BEAB-E25781436287}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{D82C56D6-B2CD-F611-9E31-04638F7EC30E}"
 EndProject
