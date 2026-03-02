@@ -1,8 +1,5 @@
 {
   "dependencies": {
-    "secrets1": {
-      "type": "secrets"
-    },
     "storage1": {
       "type": "storage",
       "connectionId": "CloudZenBlobStorageConnection"
@@ -10,6 +7,10 @@
     "secrets2": {
       "type": "secrets",
       "connectionId": "CloudZenVaultUri"
+    },
+    "secrets1": {
+      "type": "secrets",
+      "connectionId": null
     }
   }
 }
