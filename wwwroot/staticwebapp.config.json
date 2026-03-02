@@ -6,7 +6,7 @@
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
-    "Content-Security-Policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cloudzenstorage.blob.core.windows.net data:; img-src 'self' data: https:; font-src 'self' data: https://cdn.jsdelivr.net;",
+    "Content-Security-Policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cloudzenstorage.blob.core.windows.net https://cloudzen-api-func-e4gehdaef9ftdhbn.westus2-01.azurewebsites.net data:; img-src 'self' data: https:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self' https://cloudzen-api-func-e4gehdaef9ftdhbn.westus2-01.azurewebsites.net;",
     "Content-Type": "text/html; charset=utf-8"
   },
   "routes": [
