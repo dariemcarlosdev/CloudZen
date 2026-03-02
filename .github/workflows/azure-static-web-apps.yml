@@ -31,7 +31,7 @@ jobs:
         run: dotnet build CloudZen.csproj --configuration Release --no-restore
 
       - name: Publish Blazor App
-        run: dotnet publish CloudZen.csproj -c Release -o publish_output
+        run: dotnet publish CloudZen.csproj -c Release -o publish_output -p:BlazorEnableCompression=false
 
       - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
