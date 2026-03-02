@@ -353,14 +353,8 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 
+# Azure Functions local settings (contains secrets!)
+**/local.settings.json
+
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
-
-# Ionide (cross platform F# VS Code tools) working folder
-.ionide/
-
-# Fody - auto-generated XML schema
-FodyWeavers.xsd
-/Properties/ServiceDependencies/local/storage1.arm.json
-/Properties/ServiceDependencies/local/secrets2.arm.json
-/wwwroot/appsettings.json
