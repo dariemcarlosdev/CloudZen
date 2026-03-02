@@ -2,83 +2,216 @@
 @using CloudZen.Services.Abstractions
 @inject IEmailService EmailService
 
-<section id="contact" class="py-20 bg-gray-50">
-    <div class="max-w-3xl mx-auto bg-white p-10 rounded-xl shadow-lg">
-        <h2 class="text-4xl font-bold text-center mb-4 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Book a Consultation</h2>
-        <p class="text-center text-gray-600 mb-10">
-            Fill out the form below and I will contact you within 24 hours.
-        </p>
+<section id="contact" class="py-24 bg-gradient-to-br from-slate-50 via-white to-indigo-50">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <span class="inline-block px-4 py-1.5 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-full mb-4">
+                <i class="bi bi-envelope-paper mr-2"></i>Get In Touch
+            </span>
+            <h2 class="text-4xl md:text-5xl font-bold text-gray-700 mb-4">
+                Let's Start a
+                <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    Conversation
+                </span>
+            </h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Have a project in mind? Fill out the form below and I'll get back to you within 24 hours.
+            </p>
+        </div>
 
-        @if (!submitted)
-        {
-            <EditForm Model="@formModel" OnValidSubmit="HandleValidSubmit">
-                <DataAnnotationsValidator />
-                <ValidationSummary class="text-red-600 mb-4" />
-
-                <div class="mb-6">
-                    <label class="block text-gray-700 mb-2">Name</label>
-                    <InputText @bind-Value="formModel.Name" class="w-full p-3 border rounded-lg" disabled="@isSubmitting" />
-                    <ValidationMessage For="@(() => formModel.Name)" class="text-red-600 text-sm" />
-                </div>
-
-                <div class="mb-6">
-                    <label class="block text-gray-700 mb-2">Email</label>
-                    <InputText @bind-Value="formModel.Email" type="email" class="w-full p-3 border rounded-lg" disabled="@isSubmitting" />
-                    <ValidationMessage For="@(() => formModel.Email)" class="text-red-600 text-sm" />
-                </div>
-
-                <div class="mb-6">
-                    <label class="block text-gray-700 mb-2">Subject</label>
-                    <InputText @bind-Value="formModel.Subject" class="w-full p-3 border rounded-lg" disabled="@isSubmitting" />
-                    <ValidationMessage For="@(() => formModel.Subject)" class="text-red-600 text-sm" />
-                </div>
-
-                <div class="mb-6">
-                    <label class="block text-gray-700 mb-2">Message</label>
-                    <InputTextArea @bind-Value="formModel.Message" class="w-full p-3 border rounded-lg h-32" disabled="@isSubmitting" />
-                    <ValidationMessage For="@(() => formModel.Message)" class="text-red-600 text-sm" />
-                </div>
-
-                @if (!string.IsNullOrEmpty(errorMessage))
+        <!-- Form Card -->
+        <div class="relative">
+            <!-- Decorative Elements -->
+            <div class="absolute -top-4 -left-4 w-24 h-24 bg-indigo-200 rounded-full opacity-20 blur-2xl"></div>
+            <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-200 rounded-full opacity-20 blur-2xl"></div>
+            
+            <div class="relative bg-white rounded-2xl shadow-xl shadow-indigo-100/50 border border-gray-100 overflow-hidden">
+                
+                @if (!submitted)
                 {
-                    <div class="mb-6 p-4 bg-red-100 text-red-700 rounded-lg">
-                        <i class="bi bi-exclamation-triangle-fill mr-2"></i>
-                        @errorMessage
+                    <!-- Form Content -->
+                    <div class="p-8 md:p-12">
+                        <EditForm Model="@formModel" OnValidSubmit="HandleValidSubmit">
+                            <DataAnnotationsValidator />
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Name Field -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700">
+                                        <i class="bi bi-person mr-2 text-indigo-500"></i>Your Name
+                                    </label>
+                                    <InputText @bind-Value="formModel.Name" 
+                                               placeholder="John Doe"
+                                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                               disabled="@isSubmitting" />
+                                    <ValidationMessage For="@(() => formModel.Name)" class="text-red-500 text-xs mt-1" />
+                                </div>
+
+                                <!-- Email Field -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-semibold text-gray-700">
+                                        <i class="bi bi-envelope mr-2 text-indigo-500"></i>Email Address
+                                    </label>
+                                    <InputText @bind-Value="formModel.Email" 
+                                               type="email" 
+                                               placeholder="john@example.com"
+                                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                               disabled="@isSubmitting" />
+                                    <ValidationMessage For="@(() => formModel.Email)" class="text-red-500 text-xs mt-1" />
+                                </div>
+                            </div>
+
+                            <!-- Subject Field -->
+                            <div class="space-y-2 mt-6">
+                                <label class="block text-sm font-semibold text-gray-700">
+                                    <i class="bi bi-chat-left-text mr-2 text-indigo-500"></i>Subject
+                                </label>
+                                <InputText @bind-Value="formModel.Subject" 
+                                           placeholder="How can I help you?"
+                                           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                           disabled="@isSubmitting" />
+                                <ValidationMessage For="@(() => formModel.Subject)" class="text-red-500 text-xs mt-1" />
+                            </div>
+
+                            <!-- Message Field -->
+                            <div class="space-y-2 mt-6">
+                                <label class="block text-sm font-semibold text-gray-700">
+                                    <i class="bi bi-pencil-square mr-2 text-indigo-500"></i>Your Message
+                                </label>
+                                <InputTextArea @bind-Value="formModel.Message" 
+                                               placeholder="Tell me about your project, goals, and timeline..."
+                                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 h-36 resize-none disabled:opacity-50 disabled:cursor-not-allowed" 
+                                               disabled="@isSubmitting" />
+                                <div class="flex justify-between items-center">
+                                    <ValidationMessage For="@(() => formModel.Message)" class="text-red-500 text-xs" />
+                                    <span class="text-xs text-gray-400">@(formModel.Message?.Length ?? 0)/500</span>
+                                </div>
+                            </div>
+
+                            <!-- Error Message -->
+                            @if (!string.IsNullOrEmpty(errorMessage))
+                            {
+                                <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                                    <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                                        <i class="bi bi-exclamation-triangle text-red-600"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-red-800">Unable to send message</p>
+                                        <p class="text-sm text-red-600 mt-1">@errorMessage</p>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Submit Button -->
+                            <div class="mt-8">
+                                <button type="submit" 
+                                        class="w-full group relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-300"
+                                        disabled="@isSubmitting">
+                                    @if (isSubmitting)
+                                    {
+                                        <span class="flex items-center justify-center">
+                                            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                            Sending your message...
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="flex items-center justify-center">
+                                            <i class="bi bi-send mr-2 transition-transform group-hover:translate-x-1"></i>
+                                            Send Message
+                                        </span>
+                                    }
+                                </button>
+                            </div>
+                        </EditForm>
+
+                        <!-- Trust Indicators -->
+                        <div class="mt-8 pt-8 border-t border-gray-100">
+                            <div class="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500">
+                                <div class="flex items-center gap-2">
+                                    <i class="bi bi-shield-check text-green-500"></i>
+                                    <span>Secure & Encrypted</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="bi bi-clock text-indigo-500"></i>
+                                    <span>Response within 24h</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="bi bi-chat-heart text-pink-500"></i>
+                                    <span>No spam, ever</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 }
+                else
+                {
+                    <!-- Success State -->
+                    <div class="p-12 md:p-16 text-center">
+                        <!-- Animated Success Icon -->
+                        <div class="relative inline-block mb-8">
+                            <div class="absolute inset-0 bg-green-200 rounded-full animate-ping opacity-25"></div>
+                            <div class="relative w-20 h-20 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg shadow-green-200">
+                                <i class="bi bi-check-lg text-white text-4xl"></i>
+                            </div>
+                        </div>
 
-                <button type="submit" 
-                        class="w-full px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                        disabled="@isSubmitting">
-                    @if (isSubmitting)
-                    {
-                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        <span>Sending...</span>
-                    }
-                    else
-                    {
-                        <span>Submit Request</span>
-                    }
-                </button>
-            </EditForm>
-        }
-        else
-        {
-            <div class="text-center py-8">
-                <div class="text-6xl mb-4">✅</div>
-                <h3 class="text-2xl font-semibold text-gray-800 mb-2">Thank You!</h3>
-                <p class="text-gray-600 mb-6">
-                    We've received your request and will contact you shortly.
-                </p>
-                <button @onclick="ResetForm" 
-                        class="px-6 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition">
-                    Send Another Message
-                </button>
+                        <h3 class="text-3xl font-bold text-gray-900 mb-3">Message Sent!</h3>
+                        <p class="text-lg text-gray-600 mb-8 max-w-md mx-auto">
+                            Thank you for reaching out! I've received your message and will get back to you within 24 hours.
+                        </p>
+
+                        <!-- What's Next Section -->
+                        <div class="bg-gray-50 rounded-xl p-6 mb-8 max-w-md mx-auto">
+                            <h4 class="font-semibold text-gray-800 mb-3">What happens next?</h4>
+                            <ul class="text-left text-sm text-gray-600 space-y-2">
+                                <li class="flex items-center gap-2">
+                                    <i class="bi bi-1-circle-fill text-indigo-500"></i>
+                                    <span>I'll review your message</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i class="bi bi-2-circle-fill text-indigo-500"></i>
+                                    <span>Prepare a personalized response</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <i class="bi bi-3-circle-fill text-indigo-500"></i>
+                                    <span>Reach out to schedule a call if needed</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <button @onclick="ResetForm" 
+                                class="inline-flex items-center px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200">
+                            <i class="bi bi-arrow-repeat mr-2"></i>
+                            Send Another Message
+                        </button>
+                    </div>
+                }
             </div>
-        }
+        </div>
+
+        <!-- Alternative Contact Options -->
+        <div class="mt-12 text-center">
+            <p class="text-gray-500 mb-4">Or reach out directly</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="mailto:cloudzen.inc@gmail.com" 
+                   class="inline-flex items-center px-5 py-2.5 bg-white border border-gray-200 rounded-full text-gray-700 hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200 shadow-sm hover:shadow">
+                    <i class="bi bi-envelope mr-2"></i>
+                    cloudzen.inc@gmail.com
+                </a>
+                <a href="https://www.linkedin.com/in/dariemcarlos/"
+                   target="_blank"
+                   class="inline-flex items-center px-5 py-2.5 bg-white border border-gray-200 rounded-full text-gray-700 hover:border-blue-300 hover:text-blue-600 transition-all duration-200 shadow-sm hover:shadow">
+                    <i class="bi bi-linkedin mr-2"></i>
+                    LinkedIn
+                </a>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -130,18 +263,20 @@
 
     public class ContactFormModel
     {
-        [Required(ErrorMessage = "Name is required")]
+        [Required(ErrorMessage = "Please enter your name")]
+        [StringLength(100, ErrorMessage = "Name is too long (max 100 characters)")]
         public string? Name { get; set; }
 
-        [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Invalid email address")]
+        [Required(ErrorMessage = "Please enter your email address")]
+        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
         public string? Email { get; set; }
 
-        [Required(ErrorMessage = "Subject is required")]
+        [Required(ErrorMessage = "Please enter a subject")]
+        [StringLength(200, ErrorMessage = "Subject is too long (max 200 characters)")]
         public string? Subject { get; set; }
 
-        [Required(ErrorMessage = "Message is required")]
-        [StringLength(500, ErrorMessage = "Message too long (max 500 chars)")]
+        [Required(ErrorMessage = "Please enter your message")]
+        [StringLength(500, ErrorMessage = "Message is too long (max 500 characters)")]
         public string? Message { get; set; }
     }
 }
