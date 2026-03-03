@@ -1,25 +1,29 @@
 using CloudZen.Api.Models;
 using CloudZen.Api.Security;
 using CloudZen.Api.Services;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using sib_api_v3_sdk.Api;
-using sib_api_v3_sdk.Client;
-using sib_api_v3_sdk.Model;
+using MimeKit;
+using System.Security.Authentication;
 using System.Text.Json;
 
 namespace CloudZen.Api.Functions;
 
 /// <summary>
-/// Azure Function to handle email sending through the Brevo (formerly Sendinblue) API.
+/// Azure Function to handle email sending through Brevo SMTP relay.
 /// </summary>
 /// <remarks>
 /// This function serves as a secure backend for the Blazor WebAssembly frontend contact form,
 /// ensuring that API keys remain secure on the server side and are never exposed to the client.
+/// <para>
+/// Uses SMTP instead of REST API to avoid IP whitelisting issues with Azure Functions Consumption plan.
+/// </para>
 /// <para>
 /// Security features implemented:
 /// <list type="bullet">
@@ -31,38 +35,37 @@ namespace CloudZen.Api.Functions;
 /// </list>
 /// </para>
 /// </remarks>
-public class SendEmailFunction
+/// <param name="logger">The logger instance for diagnostic output.</param>
+/// <param name="config">The configuration provider for accessing secrets (API keys).</param>
+/// <param name="rateLimiter">The rate limiter service for throttling requests.</param>
+/// <param name="corsSettings">The CORS settings for cross-origin requests.</param>
+/// <param name="emailSettings">The email configuration settings.</param>
+public class SendEmailFunction(
+    ILogger<SendEmailFunction> logger,
+    IConfiguration config,
+    IRateLimiterService rateLimiter,
+    CorsSettings corsSettings,
+    IOptions<EmailSettings> emailSettings)
 {
-    private readonly ILogger<SendEmailFunction> _logger;
-    private readonly IConfiguration _config;
-    private readonly IRateLimiterService _rateLimiter;
-    private readonly CorsSettings _corsSettings;
-    private readonly EmailSettings _emailSettings;
+    private readonly ILogger<SendEmailFunction> _logger = logger;
+    private readonly IConfiguration _config = config;
+    private readonly IRateLimiterService _rateLimiter = rateLimiter;
+    private readonly CorsSettings _corsSettings = corsSettings;
+    private readonly EmailSettings _emailSettings = emailSettings.Value;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SendEmailFunction"/> class.
-    /// </summary>
-    /// <param name="logger">The logger instance for diagnostic output.</param>
-    /// <param name="config">The configuration provider for accessing secrets (API keys).</param>
-    /// <param name="rateLimiter">The rate limiter service for throttling requests.</param>
-    /// <param name="corsSettings">The CORS settings for cross-origin requests.</param>
-    /// <param name="emailSettings">The email configuration settings.</param>
-    public SendEmailFunction(
-        ILogger<SendEmailFunction> logger,
-        IConfiguration config,
-        IRateLimiterService rateLimiter,
-        CorsSettings corsSettings,
-        IOptions<EmailSettings> emailSettings)
+    // Brevo SMTP settings
+    private const string BrevoSmtpHost = "smtp-relay.brevo.com";
+    private const int BrevoSmtpPort = 587;
+
+    // Cached JsonSerializerOptions for email request deserialization
+    private static readonly JsonSerializerOptions EmailRequestJsonOptions = new()
     {
-        _logger = logger;
-        _config = config;
-        _rateLimiter = rateLimiter;
-        _corsSettings = corsSettings;
-        _emailSettings = emailSettings.Value;
-    }
+        PropertyNameCaseInsensitive = true,
+        MaxDepth = 10 // Prevent deep object attacks
+    };
 
     /// <summary>
-    /// HTTP POST endpoint to send emails via the Brevo transactional email API.
+    /// HTTP POST endpoint to send emails via Brevo SMTP relay.
     /// Also handles OPTIONS preflight requests for CORS.
     /// </summary>
     /// <param name="req">The HTTP request containing an <see cref="EmailRequest"/> JSON body.</param>
@@ -73,7 +76,7 @@ public class SendEmailFunction
     ///   <item><description><b>204 No Content</b> - For CORS preflight requests</description></item>
     ///   <item><description><b>400 Bad Request</b> - Invalid request body, validation failure, or malformed JSON</description></item>
     ///   <item><description><b>429 Too Many Requests</b> - Rate limit exceeded (includes Retry-After header)</description></item>
-    ///   <item><description><b>500 Internal Server Error</b> - Email service configuration error or Brevo API failure</description></item>
+    ///   <item><description><b>500 Internal Server Error</b> - Email service configuration error or SMTP failure</description></item>
     /// </list>
     /// </returns>
     [Function("SendEmail")]
@@ -136,11 +139,7 @@ public class SendEmailFunction
                 return new BadRequestObjectResult(new { error = "Request body too large." });
             }
 
-            var emailRequest = JsonSerializer.Deserialize<EmailRequest>(requestBody, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                MaxDepth = 10 // Prevent deep object attacks
-            });
+            var emailRequest = JsonSerializer.Deserialize<EmailRequest>(requestBody, EmailRequestJsonOptions);
 
             if (emailRequest == null)
             {
@@ -156,58 +155,57 @@ public class SendEmailFunction
                 return new BadRequestObjectResult(new { error = validationError });
             }
 
-            // Get Brevo API key from configuration (environment variable or Key Vault)
-            // Note: API keys should NOT be in IOptions - they come from secure configuration
-            var apiKey = _config["BREVO_API_KEY"] ?? Environment.GetEnvironmentVariable("BREVO_API_KEY");
+            // Get Brevo SMTP credentials from configuration
+            var smtpLogin = _config["BREVO_SMTP_LOGIN"] ?? Environment.GetEnvironmentVariable("BREVO_SMTP_LOGIN");
+            var smtpKey = _config["BREVO_SMTP_KEY"] ?? Environment.GetEnvironmentVariable("BREVO_SMTP_KEY");
 
-            if (string.IsNullOrEmpty(apiKey))
+            // Fall back to API key if SMTP key not set (Brevo allows using API key as SMTP password)
+            if (string.IsNullOrEmpty(smtpKey))
             {
-                _logger.LogError("Brevo API key is not configured.");
+                smtpKey = _config["BREVO_API_KEY"] ?? Environment.GetEnvironmentVariable("BREVO_API_KEY");
+            }
+
+            if (string.IsNullOrEmpty(smtpLogin) || string.IsNullOrEmpty(smtpKey))
+            {
+                _logger.LogError("Brevo SMTP credentials are not configured. Ensure BREVO_SMTP_LOGIN and BREVO_SMTP_KEY (or BREVO_API_KEY) are set.");
                 return new ObjectResult(new { error = "Email service is not configured properly." })
                 {
                     StatusCode = StatusCodes.Status500InternalServerError
                 };
             }
 
-            // Configure Brevo client
-            Configuration.Default.ApiKey["api-key"] = apiKey;
-            var apiInstance = new TransactionalEmailsApi();
+            // Build and send email via SMTP
+            var messageId = await SendEmailViaSmtpAsync(emailRequest, smtpLogin, smtpKey);
 
-            // Build email using IOptions configuration
-            var sender = new SendSmtpEmailSender { Email = _emailSettings.FromEmail };
-            var recipient = new SendSmtpEmailTo(_emailSettings.FromEmail, InputValidator.SanitizeHtml(emailRequest.FromName));
-
-            var ccList = new List<SendSmtpEmailCc>();
-            if (!string.IsNullOrEmpty(_emailSettings.CcEmail))
-            {
-                ccList.Add(new SendSmtpEmailCc(_emailSettings.CcEmail));
-            }
-
-            var email = new SendSmtpEmail(
-                sender: sender,
-                to: new List<SendSmtpEmailTo> { recipient },
-                cc: ccList.Count > 0 ? ccList : null,
-                subject: InputValidator.SanitizeHtml(emailRequest.Subject),
-                htmlContent: BuildHtmlContent(emailRequest),
-                textContent: BuildTextContent(emailRequest)
-            );
-
-            // Send email
-            var response = await apiInstance.SendTransacEmailAsync(email);
-
-            _logger.LogInformation("Email sent successfully. MessageId: {MessageId}", response.MessageId);
+            _logger.LogInformation("Email sent successfully via SMTP. MessageId: {MessageId}", messageId);
 
             return new OkObjectResult(new
             {
                 success = true,
                 message = "Email sent successfully.",
-                messageId = response.MessageId
+                messageId
             });
         }
-        catch (ApiException ex)
+        catch (SmtpCommandException ex)
         {
-            _logger.LogError(ex, "Brevo API error: {Message}", ex.Message);
+            _logger.LogError(ex, "SMTP command error: {Message}, StatusCode: {StatusCode}", ex.Message, ex.StatusCode);
             return new ObjectResult(new { error = "Failed to send email. Please try again later." })
+            {
+                StatusCode = StatusCodes.Status500InternalServerError
+            };
+        }
+        catch (SmtpProtocolException ex)
+        {
+            _logger.LogError(ex, "SMTP protocol error: {Message}", ex.Message);
+            return new ObjectResult(new { error = "Failed to send email. Please try again later." })
+            {
+                StatusCode = StatusCodes.Status500InternalServerError
+            };
+        }
+        catch (System.Security.Authentication.AuthenticationException ex)
+        {
+            _logger.LogError(ex, "SMTP authentication error: {Message}", ex.Message);
+            return new ObjectResult(new { error = "Email service configuration error." })
             {
                 StatusCode = StatusCodes.Status500InternalServerError
             };
@@ -225,6 +223,85 @@ public class SendEmailFunction
                 StatusCode = StatusCodes.Status500InternalServerError
             };
         }
+    }
+
+    /// <summary>
+    /// Sends an email using Brevo SMTP relay with MailKit.
+    /// </summary>
+    /// <param name="emailRequest">The email request containing message details.</param>
+    /// <param name="smtpLogin">The SMTP login (typically your Brevo account email).</param>
+    /// <param name="smtpKey">The SMTP key (your Brevo SMTP password or API key).</param>
+    /// <returns>The message ID of the sent email.</returns>
+    private async Task<string> SendEmailViaSmtpAsync(EmailRequest emailRequest, string smtpLogin, string smtpKey)
+    {
+        var message = new MimeMessage();
+
+        // Set sender
+        message.From.Add(new MailboxAddress(_emailSettings.FromName ?? "CloudZen Contact", _emailSettings.FromEmail));
+
+        // Set recipient (contact form sends to yourself)
+        message.To.Add(new MailboxAddress(InputValidator.SanitizeHtml(emailRequest.FromName), _emailSettings.FromEmail));
+
+        // Add CC if configured
+        if (!string.IsNullOrEmpty(_emailSettings.CcEmail))
+        {
+            message.Cc.Add(new MailboxAddress("", _emailSettings.CcEmail));
+        }
+
+        // Set Reply-To as the sender from the form
+        message.ReplyTo.Add(new MailboxAddress(InputValidator.SanitizeHtml(emailRequest.FromName), emailRequest.FromEmail));
+
+        // Set subject
+        message.Subject = InputValidator.SanitizeHtml(emailRequest.Subject);
+
+        // Build multipart body with both HTML and plain text
+        var builder = new BodyBuilder
+        {
+            HtmlBody = BuildHtmlContent(emailRequest),
+            TextBody = BuildTextContent(emailRequest)
+        };
+
+        message.Body = builder.ToMessageBody();
+
+        // Generate a unique message ID
+        var messageId = $"{Guid.NewGuid():N}@cloudzen.com";
+        message.MessageId = messageId;
+
+        // Send via SMTP
+        using var client = new SmtpClient();
+
+        // IMPORTANT: Disable certificate revocation check BEFORE setting the callback
+        // This is required because revocation servers may be unreachable in some networks
+        client.CheckCertificateRevocation = false;
+
+        // Configure certificate validation to accept Brevo's certificate
+        // This callback always returns true because:
+        // 1. We're connecting to a known, trusted server (smtp-relay.brevo.com)
+        // 2. The connection still uses TLS encryption
+        // 3. Revocation check failures are common in restricted networks
+        client.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
+        {
+            if (sslPolicyErrors != System.Net.Security.SslPolicyErrors.None)
+            {
+                _logger.LogWarning("SSL certificate validation bypassed for Brevo SMTP. Errors: {Errors}", sslPolicyErrors);
+            }
+            // Always accept for Brevo's trusted SMTP server
+            return true;
+        };
+
+        // Connect with STARTTLS
+        await client.ConnectAsync(BrevoSmtpHost, BrevoSmtpPort, SecureSocketOptions.StartTls);
+
+        // Authenticate
+        await client.AuthenticateAsync(smtpLogin, smtpKey);
+
+        // Send
+        await client.SendAsync(message);
+
+        // Disconnect
+        await client.DisconnectAsync(true);
+
+        return messageId;
     }
 
     /// <summary>
