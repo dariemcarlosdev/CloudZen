@@ -239,6 +239,85 @@ This approach is acceptable because:
 
 ---
 
+## Configuration Architecture
+
+### Understanding Where Configuration Lives
+
+This project has a **two-tier architecture**: a Blazor WebAssembly frontend and an Azure Functions backend. Each tier has different configuration requirements.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    BLAZOR APP (Frontend)                        │
+│   Configuration: wwwroot/appsettings.*.json                     │
+│                                                                 │
+│   Files:                                                        │
+│   ├── wwwroot/appsettings.json           (base settings)       │
+│   ├── wwwroot/appsettings.Development.json (local dev)         │
+│   └── wwwroot/appsettings.Production.json  (production)        │
+│                                                                 │
+│   ✅ NO Azure Portal config needed                              │
+│   These files are static assets bundled with the app            │
+│   and automatically loaded based on environment.                │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              │ HTTP POST to ApiBaseUrl
+                              ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                 AZURE FUNCTION (Backend)                        │
+│   Configuration: Azure Portal + local.settings.json             │
+│                                                                 │
+│   Local Development:                                            │
+│   └── Api/local.settings.json                                   │
+│                                                                 │
+│   Production (Azure Portal):                                    │
+│   └── Function App → Configuration → Application settings       │
+│                                                                 │
+│   ✅ REQUIRES Azure Portal configuration for:                   │
+│      - BREVO_SMTP_LOGIN                                         │
+│      - BREVO_SMTP_KEY                                           │
+│      - EmailSettings:FromEmail                                  │
+│      - EmailSettings:CcEmail                                    │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Blazor App Configuration (No Azure Config Needed)
+
+The Blazor WebAssembly app uses static JSON files in `wwwroot/`:
+
+| File | Environment | Loaded When |
+|------|-------------|-------------|
+| `appsettings.json` | All | Always (base configuration) |
+| `appsettings.Development.json` | Development | Running locally with `dotnet run` |
+| `appsettings.Production.json` | Production | Deployed to Azure/production host |
+
+**Key Setting**: `EmailService.ApiBaseUrl`
+- **Development**: `http://localhost:7257/api` (local Azure Function)
+- **Production**: `https://your-function-app.azurewebsites.net/api`
+
+**Why no Azure config?** These files are:
+- Bundled into the app during build
+- Served as static files from `wwwroot/`
+- Downloaded by the browser when the app loads
+- Automatically selected based on environment
+
+### Azure Function Configuration (Azure Portal Required)
+
+The Azure Function backend requires secrets that **must** be configured in Azure Portal:
+
+| Setting | Where to Configure | Why |
+|---------|-------------------|-----|
+| `BREVO_SMTP_LOGIN` | Azure Portal → Configuration | Secret credential |
+| `BREVO_SMTP_KEY` | Azure Portal → Configuration | Secret credential |
+| `EmailSettings:FromEmail` | Azure Portal → Configuration | Runtime config |
+| `EmailSettings:CcEmail` | Azure Portal → Configuration | Runtime config |
+
+**Why Azure Portal config?** 
+- Secrets should never be in source code
+- Azure Function runs server-side with access to secure configuration
+- `local.settings.json` is only for local development (gitignored)
+
+---
+
 ## File Changes Summary
 
 ### Modified Files
@@ -248,6 +327,7 @@ This approach is acceptable because:
 | `Api/CloudZen.Api.csproj` | Added `MailKit` package reference |
 | `Api/Functions/SendEmailFunction.cs` | Replaced REST API with SMTP implementation |
 | `Api/local.settings.json` | Added `BREVO_SMTP_LOGIN` and `BREVO_SMTP_KEY` |
+| `wwwroot/appsettings.Production.json` | Added with Azure Function URL |
 
 ### New Dependencies
 
@@ -300,26 +380,46 @@ dotnet remove package sib_api_v3_sdk
 
 ## Production Deployment (Azure)
 
-### Required Configuration
-
-Add these Application Settings to your Azure Function App:
-
-1. Go to **Azure Portal** → **Your Function App**
-2. Navigate to **Configuration** → **Application settings**
-3. Add:
-   - `BREVO_SMTP_LOGIN` = `<your-brevo-smtp-login>`
-   - `BREVO_SMTP_KEY` = `<your-brevo-smtp-key>`
-4. **Save** and **Restart** the function app
-
-> 💡 **Tip**: Store sensitive credentials in Azure Key Vault and reference them using Key Vault references for enhanced security.
-
-### Deployment Steps
+### Step 1: Deploy Azure Function
 
 ```bash
-# Deploy to Azure
 cd Api
 func azure functionapp publish <your-function-app-name>
 ```
+
+### Step 2: Configure Azure Function Settings
+
+Add these Application Settings in **Azure Portal → Function App → Configuration**:
+
+| Setting | Value | Required |
+|---------|-------|----------|
+| `BREVO_SMTP_LOGIN` | `<your-smtp-login>@smtp-brevo.com` | ✅ Yes |
+| `BREVO_SMTP_KEY` | `xsmtpsib-<your-key>` | ✅ Yes |
+| `EmailSettings:FromEmail` | `your-email@example.com` | ✅ Yes |
+| `EmailSettings:CcEmail` | `cc-email@example.com` | Optional |
+
+Then click **Save** and **Restart** the function app.
+
+### Step 3: Deploy Blazor App
+
+The `wwwroot/appsettings.Production.json` is automatically included. Just deploy:
+
+```bash
+git add .
+git commit -m "Add SMTP migration and production config"
+git push origin master
+```
+
+GitHub Actions will automatically deploy to Azure Static Web Apps.
+
+### Step 4: Verify Deployment
+
+1. Open your production Blazor app URL
+2. Navigate to the Contact form
+3. Submit a test message
+4. Check if the email is received
+
+> 💡 **Tip**: Store sensitive credentials in Azure Key Vault and reference them using Key Vault references for enhanced security.
 
 ---
 
@@ -329,10 +429,11 @@ func azure functionapp publish <your-function-app-name>
 
 | Error | Cause | Solution |
 |-------|-------|----------|
-| `AuthenticationException` | Invalid SMTP credentials | Verify `BREVO_SMTP_LOGIN` and `BREVO_SMTP_KEY` |
+| `AuthenticationException` | Invalid SMTP credentials | Verify `BREVO_SMTP_LOGIN` and `BREVO_SMTP_KEY` in Azure Portal |
 | `SmtpCommandException` | SMTP server rejected command | Check email addresses are valid |
 | `SslHandshakeException` | SSL/TLS connection failed | Ensure `CheckCertificateRevocation = false` and callback returns `true` |
 | `SocketException` | Network connectivity | Check firewall allows port 587 outbound |
+| `MethodNotAllowed` | Wrong API URL in Blazor app | Verify `appsettings.Production.json` has correct Azure Function URL |
 
 ### Logging
 
@@ -353,6 +454,7 @@ The function logs detailed information for debugging:
 - [Brevo SMTP Documentation](https://developers.brevo.com/docs/send-a-transactional-email#smtp-api)
 - [Azure Functions Outbound IPs](https://docs.microsoft.com/en-us/azure/azure-functions/ip-addresses)
 - [Azure Key Vault References](https://docs.microsoft.com/en-us/azure/app-service/app-service-key-vault-references)
+- [Blazor WebAssembly Configuration](https://docs.microsoft.com/en-us/aspnet/core/blazor/fundamentals/configuration)
 
 ---
 
@@ -362,3 +464,4 @@ The function logs detailed information for debugging:
 |------|---------|---------|
 | 2026-03-03 | 1.0 | Initial SMTP migration from REST API |
 | 2026-03-03 | 1.1 | Fixed SSL certificate revocation check issue |
+| 2026-03-03 | 1.2 | Added production configuration and deployment guide |
