@@ -11,6 +11,25 @@ builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 // =============================================================================
+// LOCAL DEVELOPMENT: API URL OVERRIDE
+// =============================================================================
+// In production (Azure Static Web Apps), "/api" routes are proxied to the linked
+// Azure Functions app automatically. In local development, the Blazor app and the
+// Functions API run on separate ports, so API calls must use the absolute URL.
+//
+// NOTE: appsettings.Development.json can silently fail to load in Blazor WASM
+// (the client fetches it via HTTP and skips it on any error). This programmatic
+// override is more reliable for local development.
+// =============================================================================
+
+if (builder.HostEnvironment.IsDevelopment())
+{
+    const string functionsLocalUrl = "http://localhost:7257/api";
+    builder.Configuration["ChatbotService:ApiBaseUrl"] = functionsLocalUrl;
+    builder.Configuration["EmailService:ApiBaseUrl"] = functionsLocalUrl;
+}
+
+// =============================================================================
 // CONFIGURATION WITH IOPTIONS PATTERN
 // =============================================================================
 // The IOptions pattern provides:
@@ -31,6 +50,11 @@ builder.Services.AddOptions<EmailServiceOptions>()
 // Section: "BlobStorage"
 builder.Services.AddOptions<BlobStorageOptions>()
     .BindConfiguration(BlobStorageOptions.SectionName);
+
+// Configure Chatbot Service options from appsettings.json
+// Section: "ChatbotService"
+builder.Services.AddOptions<ChatbotOptions>()
+    .BindConfiguration(ChatbotOptions.SectionName);
 
 // =============================================================================
 // HTTP CLIENT REGISTRATION
@@ -77,6 +101,11 @@ builder.Services.AddScoped(sp => new ResumeService(
 // Uses IOptions<EmailServiceOptions> for configuration
 // This sends emails through the Azure Functions API backend (secure for WebAssembly)
 builder.Services.AddScoped<IEmailService, ApiEmailService>();
+
+// Register ChatbotService as the implementation for IChatbotService
+// Uses IOptions<ChatbotOptions> for configuration
+// This sends chat messages through the Azure Functions API backend (API key stays server-side)
+builder.Services.AddScoped<IChatbotService, ChatbotService>();
 
 // Register ProjectService for managing portfolio projects
 builder.Services.AddScoped<ProjectService>();
