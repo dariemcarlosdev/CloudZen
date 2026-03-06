@@ -35,19 +35,23 @@ dotnet new func -n CloudZen.Api
 cd CloudZen.Api
 dotnet add package Azure.Identity
 dotnet add package Azure.Extensions.AspNetCore.Configuration.Secrets
-dotnet add package sib_api_v3_sdk
+dotnet add package MailKit
+dotnet add package Polly
 ```
 - [ ] Create `SendEmailFunction.cs` (see `deployment_guide.md` section 5)
+- [ ] Create `ChatFunction.cs` (AI chatbot proxy to Anthropic Claude)
 - [ ] Deploy to Azure Function App (Consumption plan)
 - [ ] Enable Managed Identity
 - [ ] Link to Static Web App (in Azure Portal: Static Web App > APIs)
+- [ ] Set `ANTHROPIC_API_KEY` in Azure Function App settings
 
 ### 4️⃣ Azure Key Vault Setup
 ```bash
 # For storing secrets securely
 ```
 - [ ] Create Key Vault (e.g., `cloudzen-keyvault`)
-- [ ] Add secret: `BREVO-API-KEY` (new rotated key)
+- [ ] Add secret: `BREVO-SMTP-KEY` (Brevo SMTP relay key)
+- [ ] Add secret: `ANTHROPIC-API-KEY` (Anthropic Claude API key)
 - [ ] Add secret: `BLOB-STORAGE-CONNECTION-STRING`
 - [ ] Grant Function App's Managed Identity access (role: Key Vault Secrets User)
 
@@ -139,17 +143,19 @@ git push origin master        # Triggers GitHub Actions
                    ▼
 ┌────────────────────────────────────────────────────────┐
 │  Azure Static Web Apps                                 │
-│  ├── Hosts Blazor WASM                                │
+│  ├── Hosts Blazor WASM (incl. AI Chatbot widget)     │
 │  └── Linked API (Azure Functions)                     │
+│      ├── SendEmailFunction (email proxy)              │
+│      └── ChatFunction (AI chatbot proxy)              │
 └──────────────────┬─────────────────────────────────────┘
                    │
-        ┌──────────┴──────────┐
-        ▼                     ▼
-┌───────────────┐     ┌──────────────────┐
-│  Azure Key    │     │  Azure Blob      │
-│  Vault        │     │  Storage         │
-│  (Secrets)    │     │  (Resume, Files) │
-└───────────────┘     └──────────────────┘
+        ┌──────────┼──────────────────┐
+        ▼                     ▼              ▼
+┌───────────────┐     ┌──────────────────┐  ┌──────────────┐
+│  Azure Key    │     │  Azure Blob      │  │  Anthropic    │
+│  Vault        │     │  Storage         │  │  Claude API   │
+│  (Secrets)    │     │  (Resume, Files) │  │  (AI Chat)    │
+└───────────────┘     └──────────────────┘  └──────────────┘
 ```
 
 ## 🎯 Success Criteria
@@ -157,9 +163,10 @@ git push origin master        # Triggers GitHub Actions
 Your deployment is successful when:
 - ✔️ Blazor app loads at your Static Web App URL
 - ✔️ Contact form sends emails via Azure Function (not client-side)
+- ✔️ AI chatbot widget responds to questions via ChatFunction
 - ✔️ Resume downloads from Blob Storage with SAS token
 - ✔️ No secrets in `wwwroot/appsettings.json`
-- ✔️ All API keys rotated and stored in Key Vault
+- ✔️ All API keys (Brevo, Anthropic) stored in Key Vault or env vars
 - ✔️ HTTPS enabled with auto-provisioned certificate
 - ✔️ GitHub Actions workflow completes successfully
 - ✔️ No console errors in browser DevTools

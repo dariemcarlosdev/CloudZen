@@ -38,6 +38,7 @@ The CloudZen API implements multiple layers of security to protect against commo
 ### Location
 - `Api/Services/RateLimiterService.cs`
 - `Api/Functions/SendEmailFunction.cs`
+- `Api/Functions/ChatFunction.cs`
 
 ### Implementation
 
@@ -422,7 +423,9 @@ _logger.LogInformation("SendEmail function triggered from {ClientIp}",
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `KEY_VAULT_ENDPOINT` | Optional | Azure Key Vault URI |
-| `BREVO_API_KEY` | Required | Email service API key |
+| `BREVO_SMTP_KEY` | Required | Brevo SMTP relay key (email delivery) |
+| `BREVO_SMTP_LOGIN` | Required | Brevo SMTP login (email delivery) |
+| `ANTHROPIC_API_KEY` | Required | Anthropic Claude API key (AI chatbot) |
 | `ProductionOrigin` | Optional | Production CORS origin |
 | `AllowedOrigins` | Optional | Additional CORS origins |
 
@@ -430,11 +433,13 @@ _logger.LogInformation("SendEmail function triggered from {ClientIp}",
 
 | File | Purpose |
 |------|---------|
-| `Api/Program.cs` | Main configuration with security settings |
-| `Api/host.json` | Host-level security configuration |
-| `Api/Security/InputValidator.cs` | Validation and sanitization utilities |
-| `Api/Services/RateLimiterService.cs` | Rate limiting implementation |
-| `Api/Functions/SendEmailFunction.cs` | Secured email function |
+| `Api/Program.cs` | Main configuration with security settings, CORS, Key Vault, service registrations |
+| `Api/host.json` | Host-level security configuration (HSTS, throttling, health monitor, custom headers) |
+| `Api/Security/InputValidator.cs` | Validation, sanitization, security headers, and CORS utilities |
+| `Api/Services/RateLimiterService.cs` | Polly-based per-client rate limiting with circuit breaker support |
+| `Api/Functions/SendEmailFunction.cs` | Secured email function (rate limiting, input validation, CORS, security headers) |
+| `Api/Functions/ChatFunction.cs` | Secured AI chatbot function (rate limiting, input validation, token controls, response truncation) |
+| `Shared/Chatbot/CloudZenChatbot.razor` | Client-side chatbot widget with 5-message conversation cap |
 
 ---
 
@@ -442,20 +447,79 @@ _logger.LogInformation("SendEmail function triggered from {ClientIp}",
 
 ### ? Implemented
 
-- [x] Rate limiting per client IP
-- [x] XSS protection (input validation)
-- [x] SQL injection protection (pattern detection)
-- [x] HTML sanitization for output
-- [x] Security headers on all responses
-- [x] CORS with strict origin validation
-- [x] HSTS enabled
-- [x] Azure Key Vault integration
-- [x] Secure logging (PII masking)
-- [x] Request throttling
-- [x] Request body size limits
-- [x] JSON deserialization depth limits
-- [x] Correlation ID tracking
-- [x] Health monitoring
+- [x] **Rate limiting per client IP**
+  - `Api/Services/RateLimiterService.cs` → `PollyRateLimiterService` class — per-client fixed window via Polly `FixedWindowRateLimiter`
+  - `Api/Functions/SendEmailFunction.cs:113` → `_rateLimiter.TryAcquireAsync(clientIp, "send-email")`
+  - `Api/Functions/ChatFunction.cs` → `_rateLimiter.TryAcquireAsync(clientIp, "chat")`
+  - `Api/Models/Options/RateLimitOptions.cs` → configurable `PermitLimit`, `WindowSeconds`, `QueueLimit`
+
+- [x] **XSS protection (input validation)**
+  - `Api/Security/InputValidator.cs` → `DangerousPatterns` HashSet (`<script`, `javascript:`, `onerror=`, `eval(`, etc.)
+  - `Api/Security/InputValidator.cs` → `ContainsDangerousContent()` checked by `ValidateTextInput()` and `ValidateEmail()`
+  - `Api/Functions/ChatFunction.cs` → message role and content validation in `Run()` foreach loop
+
+- [x] **SQL injection protection (pattern detection)**
+  - `Api/Security/InputValidator.cs` → `SqlInjectionPatterns` HashSet (`'; DROP`, `UNION SELECT`, `1=1`, `DELETE FROM`, etc.)
+  - `Api/Security/InputValidator.cs` → `ContainsSqlInjection()` checked by `ValidateTextInput()`
+
+- [x] **HTML sanitization for output**
+  - `Api/Security/InputValidator.cs` → `SanitizeHtml()` using `WebUtility.HtmlEncode()` before rendering user content in emails
+
+- [x] **Security headers on all responses**
+  - `Api/Security/InputValidator.cs` → `SecurityHeadersExtensions.AddSecurityHeaders()` extension method (X-Frame-Options, X-Content-Type-Options, CSP, Cache-Control, etc.)
+  - `Api/Functions/SendEmailFunction.cs:96` → `req.HttpContext.Response.AddSecurityHeaders()`
+  - `Api/Functions/ChatFunction.cs` → `req.HttpContext.Response.AddSecurityHeaders()`
+  - `Api/host.json:43-49` → `customHeaders` block (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy)
+
+- [x] **CORS with strict origin validation**
+  - `Api/Security/InputValidator.cs` → `CorsSettings` record with `IsOriginAllowed()` method
+  - `Api/Security/InputValidator.cs` → `AddCorsHeaders()` extension method (validates request origin against allowed list)
+  - `Api/Program.cs:78-110` → `CorsSettings` built from config with dev defaults and production origin
+  - `Api/host.json:26-36` → `cors.allowedOrigins` array
+  - `Api/Functions/SendEmailFunction.cs:87` → `req.HttpContext.Response.AddCorsHeaders(req, _corsSettings)`
+  - `Api/Functions/ChatFunction.cs` → `req.HttpContext.Response.AddCorsHeaders(req, _corsSettings)`
+
+- [x] **HSTS enabled**
+  - `Api/host.json:37-42` → `hsts` block (`isEnabled: true`, `maxAge: 365 days`, `includeSubDomains: true`, `preload: true`)
+
+- [x] **Azure Key Vault integration**
+  - `Api/Program.cs:28-45` → `AddAzureKeyVault()` with `DefaultAzureCredential` (Managed Identity, Azure CLI, environment credentials enabled; Visual Studio, VS Code, Interactive Browser excluded)
+
+- [x] **Secure logging (PII masking)**
+  - `Api/Security/InputValidator.cs` → `SanitizeForLogging()` (masks emails → `[email]`, tokens → `[token]`, truncates at 200 chars)
+  - `Api/Functions/SendEmailFunction.cs:100-108` → correlation ID scope with `SanitizeForLogging(clientIp)`
+  - `Api/Functions/ChatFunction.cs` → correlation ID scope with `InputValidator.SanitizeForLogging(clientIp)`
+
+- [x] **Request throttling**
+  - `Api/host.json:22-24` → `maxConcurrentRequests: 100`, `maxOutstandingRequests: 200`, `dynamicThrottlesEnabled: true`
+
+- [x] **Request body size limits**
+  - `Api/Functions/SendEmailFunction.cs:136` → `requestBody.Length > 10000` (10 KB limit for email requests)
+  - `Api/Functions/ChatFunction.cs` → `requestBody.Length > MaxRequestBodySize` where `MaxRequestBodySize = 15000` (15 KB limit for chat)
+  - `Api/Functions/ChatFunction.cs` → `MaxMessageContentLength = 500` (per user message character cap)
+  - `Api/Functions/ChatFunction.cs` → `MaxMessages = 10` (max messages per request)
+
+- [x] **JSON deserialization depth limits**
+  - `Api/Functions/SendEmailFunction.cs:64` → `EmailRequestJsonOptions` with `MaxDepth = 10`
+  - `Api/Functions/ChatFunction.cs` → `ChatJsonOptions` with `MaxDepth = 10`
+
+- [x] **Correlation ID tracking**
+  - `Api/Functions/SendEmailFunction.cs:100-106` → reads `X-Correlation-Id` header or generates `Guid.NewGuid()`, used in `ILogger.BeginScope()`
+  - `Api/Functions/ChatFunction.cs` → same pattern with `correlationId` in logger scope dictionary
+
+- [x] **Health monitoring**
+  - `Api/host.json:53-59` → `healthMonitor` block (`enabled: true`, `healthCheckInterval: 10s`, `healthCheckWindow: 2min`, `counterThreshold: 0.80`)
+
+- [x] **AI chatbot abuse prevention (multi-layer)**
+  - `Api/Functions/ChatFunction.cs` → `MaxTokens = 200` (Anthropic token budget), `MaxReplyLength = 500` (server-side response truncation at sentence boundary)
+  - `Api/Functions/ChatFunction.cs` → conversation history trimming `MaxConversationHistoryMessages = 6` (only sends recent context to Anthropic)
+  - `Api/Functions/ChatFunction.cs` → system prompt hardening (off-topic rejection, no roleplay, character limit instruction, consultation redirect)
+  - `Shared/Chatbot/CloudZenChatbot.razor` → client-side `MaxUserMessages = 5` cap with CTA replacement after limit
+
+- [x] **Anthropic API error classification**
+  - `Api/Functions/ChatFunction.cs` → billing error detection → `503 Service Unavailable`
+  - `Api/Functions/ChatFunction.cs` → rate limit detection → `429 Too Many Requests`
+  - `Api/Functions/ChatFunction.cs` → timeout detection, generic HTTP error, JSON parse error — each with specific status codes and user messages
 
 ### ?? Recommended Additional Measures
 
@@ -473,7 +537,8 @@ _logger.LogInformation("SendEmail function triggered from {ClientIp}",
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0.0 | 2024 | Initial security implementation |
+| 1.0.0 | 2024 | Initial security implementation (rate limiting, input validation, CORS, Key Vault, security headers) |
+| 1.1.0 | March 2026 | Added ChatFunction security (AI chatbot abuse prevention, token controls, response truncation, Anthropic error classification) |
 
 ---
 

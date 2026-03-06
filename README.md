@@ -13,6 +13,7 @@ A modern Blazor WebAssembly portfolio and consulting showcase built with .NET 8,
 
 ### Business Features
 - [x] **Contact Form** - Validated contact form with email integration via Brevo/SendGrid/SMTP providers
+- [x] **AI Chatbot** - Embedded conversational assistant powered by Anthropic Claude, with knowledge base, lead conversion, and abuse protection (see [AI_CHATBOT_DOCUMENTATION.md](AI_CHATBOT_DOCUMENTATION.md))
 - [x] **Resume Download** - Secure resume delivery from Azure Blob Storage with SAS token authentication
 - [x] **Service Offerings Display** - Dynamic service cards showcasing consulting capabilities
 - [ ] **Testimonials Section** - Client feedback display (currently disabled, ready for activation)
@@ -21,7 +22,7 @@ A modern Blazor WebAssembly portfolio and consulting showcase built with .NET 8,
 ### Technical Features
 - [x] **Progressive Web App (PWA)** - Service worker enabled for offline capability and fast loading
 - [x] **Component-Based Architecture** - Reusable Blazor components with clear separation of concerns
-- [x] **Secure API Backend** - Email operations routed through Azure Functions API with rate limiting and input validation
+- [x] **Secure API Backend** - Email and AI chatbot operations routed through Azure Functions API with rate limiting, input validation, and token controls
 - [x] **Centralized Data Management** - Service layer pattern with ProjectService and PersonalService
 - [x] **Type-Safe Event Handling** - EventCallback pattern for parent-child component communication
 - [x] **Google Calendar Integration** - URL service for scheduling consultation bookings
@@ -47,9 +48,12 @@ A modern Blazor WebAssembly portfolio and consulting showcase built with .NET 8,
 - [x] **Azure Static Web Apps** - Serverless hosting with global CDN distribution
 - [x] **Azure Blob Storage** - Scalable object storage for resumes and file assets
 - [x] **Azure Key Vault** - Centralized secrets management accessed via Functions with `DefaultAzureCredential`
-- [x] **Azure Functions (Isolated Worker, .NET 8)** - Serverless backend for secure email API operations
+- [x] **Azure Functions (Isolated Worker, .NET 8)** - Serverless backend for secure email API and AI chatbot proxy
 - [ ] **Azure Table Storage** - NoSQL storage for ticket/incident data
 - [x] **Azure Application Insights** - Real-time monitoring and telemetry with adaptive sampling
+
+### External APIs
+- [x] **Anthropic Claude API** (`claude-sonnet-4-20250514`) - AI chatbot backend with server-side knowledge base and system prompt
 
 ### Backend Services & APIs
 - [x] **Brevo SMTP Relay** - Transactional email delivery via MailKit/MimeKit through Azure Functions API
@@ -252,6 +256,8 @@ npx tailwindcss -i ./wwwroot/css/app.css -o ./wwwroot/css/output.css --minify
 
 This project includes comprehensive documentation to help you understand the architecture, deploy to Azure, and maintain security:
 
+- **[AI Chatbot Documentation](AI_CHATBOT_DOCUMENTATION.md)** - Complete technical documentation for the AI chatbot including architecture, security layers, token controls, lead conversion strategy, and testing guide.
+
 - **[Component Architecture](COMPONENT_ARCHITECTURE.md)** - Detailed breakdown of the component-based design, including the WhoIAm page refactoring that reduced code by 90%.
 
 - **[Tailwind Custom Colors](TAILWIND_CUSTOM_COLORS.md)** - Reference guide for CloudZen's custom Tailwind CSS utilities, brand colors, and custom fonts.
@@ -307,7 +313,8 @@ Blazor WASM (Client)  ──→  Azure Functions API (Backend)  ──→  Brevo
    (CloudZen)                 (CloudZen.Api)                     (Email Delivery)
         │                          │
         │                          ├──→ Azure Key Vault (Secrets)
-        │                          └──→ Application Insights (Telemetry)
+        │                          ├──→ Application Insights (Telemetry)
+        │                          └──→ Anthropic Claude API (AI Chatbot)
         │
         └──→  Azure Blob Storage (Resume/Files)
 ```
@@ -319,8 +326,10 @@ See [COMPONENT_ARCHITECTURE.md](COMPONENT_ARCHITECTURE.md) for detailed componen
 ```
 CloudZen/
 ├── Api/                             # Azure Functions API backend (CloudZen.Api)
-│   ├── Functions/                  # Azure Function endpoints (SendEmailFunction)
-│   ├── Models/                     # API models (EmailRequest, EmailSettings, RateLimitOptions)
+│   ├── Functions/                  # Azure Function endpoints
+│   │   ├── SendEmailFunction.cs    # Email proxy to Brevo SMTP
+│   │   └── ChatFunction.cs         # AI chatbot proxy to Anthropic Claude
+│   ├── Models/                     # API models (EmailRequest, ChatRequest, ChatResponse, RateLimitOptions)
 │   ├── Security/                   # Input validation and sanitization (InputValidator)
 │   ├── Services/                   # API services (PollyRateLimiterService)
 │   └── Program.cs                  # Functions host entry point
@@ -331,6 +340,7 @@ CloudZen/
 ├── Services/                        # Business logic (ProjectService, ApiEmailService, ResumeService)
 │   └── Abstractions/               # Service interfaces (IEmailService, ITicketService)
 ├── Shared/                          # Reusable Blazor components
+│   ├── Chatbot/                    # AI chatbot widget (CloudZenChatbot)
 │   ├── Common/                     # Shared UI (AnimatedCounterCircle, ScrollToTopButton, Tickets)
 │   ├── Landing/                    # Landing page sections (Hero, Services, CaseStudies, ContactForm, CTA)
 │   ├── Profile/                    # Profile components (ProfileHeader, ProfileApproach, SDLCProcess, WhoIAm)
@@ -408,7 +418,8 @@ GitHub Actions workflows automatically deploy:
 
 ### Business Value Delivered
 - [x] **Professional portfolio** showcasing 8+ real-world projects with measurable results
-- [x] **Lead generation** via strategic CTAs and validated contact form
+- [x] **Lead generation** via strategic CTAs, validated contact form, and AI chatbot with 5-question conversation cap
+- [x] **AI-powered chatbot** converting website visitors to consultation leads with knowledge-base-driven responses
 - [x] **Automated email delivery** with Brevo SMTP relay via secure Azure Functions API backend
 - [x] **Resume distribution** with download tracking and blob analytics
 - [x] **Client onboarding** streamlined with Google Calendar integration
@@ -428,6 +439,8 @@ GitHub Actions workflows automatically deploy:
 - [x] **Gradient color interpolation** - Mathematical color transitions for animated counters using RGB calculations
 - [x] **Event-driven architecture** - Loose coupling between UI and business logic via EventCallback pattern
 - [x] **Secure email pipeline** - Client → Azure Functions API → Brevo SMTP relay with rate limiting and input validation
+- [x] **AI chatbot pipeline** - Blazor WASM → Azure Functions → Anthropic Claude API with token controls, history trimming, and response truncation
+- [x] **Multi-layer abuse prevention** - Client-side conversation cap + API rate limiting + input validation + system prompt hardening
 - [x] **SPA with SEO optimization** - Static Web Apps routing and fallback for search engine visibility (`staticwebapp.config.json`)
 - [ ] **Retry mechanisms** - Implemented in side projects (RabbitMQ connection resiliency, SSIS retry logic)
 - [x] **Circuit breaker patterns** - Polly-based circuit breaker in Azure Functions rate limiter service
