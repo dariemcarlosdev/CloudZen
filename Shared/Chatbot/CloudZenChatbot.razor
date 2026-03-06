@@ -25,7 +25,7 @@
         <div class="chat-container">
             @* Header *@
             <div class="chat-header">
-                <div class="logo-mark">☁</div>
+                <div class="logo-mark"><img src="images/cloudzen-logo.png" alt="CloudZen" /></div>
                 <div class="header-text">
                     <h2>CloudZen Assistant</h2>
                     <p>Empowering businesses with smart technology</p>
@@ -39,10 +39,24 @@
                 {
                     <div class="message-row @(msg.Role == "user" ? "user" : "")">
                         <div class="avatar @(msg.Role == "user" ? "user-av" : "bot")">
-                            @(msg.Role == "user" ? "👤" : "☁️")
+                            @if (msg.Role == "user")
+                            {
+                                <span>👤</span>
+                            }
+                            else
+                            {
+                                <img src="images/cloudzen-logo.png" alt="CloudZen" />
+                            }
                         </div>
                         <div class="bubble @(msg.Role == "user" ? "user" : "bot")">
-                            @msg.Content
+                            @if (msg.Role == "user")
+                            {
+                                @msg.Content
+                            }
+                            else
+                            {
+                                @((MarkupString)HighlightContactInfo(msg.Content))
+                            }
                         </div>
                     </div>
                 }
@@ -50,7 +64,7 @@
                 @if (isLoading)
                 {
                     <div class="message-row">
-                        <div class="avatar bot">☁️</div>
+                        <div class="avatar bot"><img src="images/cloudzen-logo.png" alt="CloudZen" /></div>
                         <div class="bubble bot">
                             <div class="typing-indicator">
                                 <div class="typing-dot"></div>
@@ -78,26 +92,41 @@
 
             @* Input area *@
             <div class="input-area">
-                <div class="input-row">
-                    <textarea @bind="inputText"
-                              @bind:event="oninput"
-                              @onkeydown="HandleKeyDown"
-                              placeholder="Ask about CloudZen's services, projects, or process..."
-                              rows="1"
-                              disabled="@isLoading"></textarea>
-                    <button class="send-btn" @onclick="() => SendMessage(null)" disabled="@(string.IsNullOrWhiteSpace(inputText) || isLoading)">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                            <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </button>
-                </div>
-                <p class="footer-hint">cloudzen.inc@gmail.com · Replies within 24h</p>
+                @if (UserMessageCount >= MaxUserMessages)
+                {
+                    <div class="conversation-limit-cta">
+                        <p>Thanks for your interest! For personalized answers, let's talk directly.</p>
+                        <a href="mailto:cloudzen.inc@gmail.com?subject=Free%20Consultation%20Request" class="cta-button">
+                            📧 Book a Free Consultation
+                        </a>
+                        <p class="cta-subtext">cloudzen.inc@gmail.com · Replies within 24h</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="input-row">
+                        <textarea @bind="inputText"
+                                  @bind:event="oninput"
+                                  @onkeydown="HandleKeyDown"
+                                  placeholder="Ask about CloudZen's services, projects, or process..."
+                                  rows="1"
+                                  disabled="@isLoading"></textarea>
+                        <button class="send-btn" @onclick="() => SendMessage(null)" disabled="@(string.IsNullOrWhiteSpace(inputText) || isLoading)">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                                <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="footer-hint">cloudzen.inc@gmail.com · Replies within 24h · @(MaxUserMessages - UserMessageCount) questions remaining</p>
+                }
             </div>
         </div>
     }
 </div>
 
 @code {
+    private const int MaxUserMessages = 5;
+
     private List<ChatMessage> messages = new()
     {
         ChatMessage.Assistant("Hi! I'm the CloudZen assistant 👋 I can answer questions about our services, past projects, and how we help small businesses grow with technology. What can I help you with today?")
@@ -111,14 +140,14 @@
     private ElementReference messagesAreaRef;
     private ElementReference messagesEndRef;
 
+    private int UserMessageCount => messages.Count(m => m.Role == "user");
+
     private readonly string[] suggestedQuestions =
     [
         "What does CloudZen do?",
-        "How much do your services cost?",
         "Can you help modernize my old system?",
-        "What's your process like?",
-        "Tell me about your past projects",
-        "How do I get started?"
+        "How do I get started?",
+        "Tell me about your past projects"
     ];
 
     private void ToggleChat()
@@ -138,6 +167,7 @@
     {
         var text = suggestedText ?? inputText?.Trim();
         if (string.IsNullOrWhiteSpace(text) || isLoading) return;
+        if (UserMessageCount >= MaxUserMessages) return;
 
         inputText = string.Empty;
         showSuggestions = false;
@@ -154,6 +184,13 @@
         if (result.Success && !string.IsNullOrEmpty(result.Reply))
         {
             messages.Add(ChatMessage.Assistant(result.Reply));
+
+            // After reaching the limit, add a final CTA message
+            if (UserMessageCount >= MaxUserMessages)
+            {
+                messages.Add(ChatMessage.Assistant(
+                    "I hope that was helpful! Every business is unique, so I'd love for you to connect directly with CloudZen for a personalized conversation. You can book a free consultation by emailing cloudzen.inc@gmail.com — replies within 24 hours! 🚀"));
+            }
         }
         else
         {
