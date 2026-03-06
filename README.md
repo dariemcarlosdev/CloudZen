@@ -21,7 +21,7 @@ A modern Blazor WebAssembly portfolio and consulting showcase built with .NET 8,
 ### Technical Features
 - [x] **Progressive Web App (PWA)** - Service worker enabled for offline capability and fast loading
 - [x] **Component-Based Architecture** - Reusable Blazor components with clear separation of concerns
-- [x] **Factory Pattern** - Email service factory supporting multiple providers (Brevo, SendGrid, SMTP)
+- [x] **Secure API Backend** - Email operations routed through Azure Functions API with rate limiting and input validation
 - [x] **Centralized Data Management** - Service layer pattern with ProjectService and PersonalService
 - [x] **Type-Safe Event Handling** - EventCallback pattern for parent-child component communication
 - [x] **Google Calendar Integration** - URL service for scheduling consultation bookings
@@ -30,8 +30,8 @@ A modern Blazor WebAssembly portfolio and consulting showcase built with .NET 8,
 ### Cloud & DevOps
 - [x] **Azure Static Web Apps** - Automated deployment with GitHub Actions workflow
 - [x] **Azure Blob Storage** - Cloud file storage with CORS configuration for cross-origin access
-- [ ] **Azure Key Vault Integration** - Secrets management architecture (via Azure Functions backend)
-- [x] **CI/CD Pipeline** - Automated build, test, and deployment on push to master branch
+- [x] **Azure Key Vault Integration** - Secrets management via Azure Functions backend with `DefaultAzureCredential`
+- [x] **CI/CD Pipeline** - Automated build, test, and deployment on push to master (Static Web Apps + Azure Functions)
 - [x] **Service Worker** - Automatic caching and offline support for enhanced performance
 
 ## 🛠️ Tech Stack
@@ -46,14 +46,15 @@ A modern Blazor WebAssembly portfolio and consulting showcase built with .NET 8,
 ### Cloud Infrastructure (Azure)
 - [x] **Azure Static Web Apps** - Serverless hosting with global CDN distribution
 - [x] **Azure Blob Storage** - Scalable object storage for resumes and file assets
-- [ ] **Azure Key Vault** - Centralized secrets management (accessed via Functions)
-- [ ] **Azure Functions** - Serverless backend for secure API operations (recommended architecture)
+- [x] **Azure Key Vault** - Centralized secrets management accessed via Functions with `DefaultAzureCredential`
+- [x] **Azure Functions (Isolated Worker, .NET 8)** - Serverless backend for secure email API operations
 - [ ] **Azure Table Storage** - NoSQL storage for ticket/incident data
-- [ ] **Azure Application Insights** - Real-time monitoring and telemetry
+- [x] **Azure Application Insights** - Real-time monitoring and telemetry with adaptive sampling
 
 ### Backend Services & APIs
-- [x] **Brevo Email API (sib_api_v3_sdk)** - Transactional email delivery service
-- [x] **SendGrid** - Alternative email provider with robust delivery infrastructure
+- [x] **Brevo SMTP Relay** - Transactional email delivery via MailKit/MimeKit through Azure Functions API
+- [x] **MailKit / MimeKit** (v4.15.0) - Cross-platform .NET SMTP client for secure email delivery
+- [x] **Polly** (v8.6.5) - Resilience and transient fault handling (rate limiting, circuit breaker)
 - [x] **Azure Storage SDK** - Client libraries for Blob, Queue, File Share, and Table operations
   - [x] `Azure.Storage.Blobs` (v12.24.0)
   - [x] `Azure.Storage.Queues` (v12.22.0)
@@ -61,11 +62,13 @@ A modern Blazor WebAssembly portfolio and consulting showcase built with .NET 8,
   - [x] `Azure.Data.Tables` (v12.10.0)
 
 ### Authentication & Security
-- [x] **Azure Identity** (v1.13.2) - Managed Identity and credential management
-- [ ] **Azure Key Vault Configuration** - Secure runtime configuration loading
+- [x] **Azure Identity** - Managed Identity and credential management (v1.13.2 client, v1.18.0 API)
+- [x] **Azure Key Vault Configuration** - Secure runtime configuration loading via `AddAzureKeyVault()` in Functions API
 - [ ] **SAS Tokens** - Secure, time-limited access to blob storage resources
-- [ ] **CORS Configuration** - Cross-origin resource sharing for API security
-- [ ] **Content Security Policy** - HTTP headers for XSS protection
+- [x] **CORS Configuration** - Cross-origin resource sharing with configurable allowed origins in Azure Functions
+- [x] **Content Security Policy** - HTTP headers for XSS protection configured in `staticwebapp.config.json`
+- [x] **Input Validation & Sanitization** - `InputValidator` with XSS pattern detection in Azure Functions API
+- [x] **Rate Limiting** - Per-client fixed window rate limiting with Polly in Azure Functions API
 
 ### Development & Build Tools
 - [x] **.NET 8 SDK** - Latest LTS version with performance improvements
@@ -184,49 +187,50 @@ npx tailwindcss -i ./wwwroot/css/app.css -o ./wwwroot/css/output.css --minify
   - [x] Components have single, well-defined purposes (`ProfileHeader`, `ProjectCard`)
   - [x] Models represent single entities (`ProjectInfo`, `ServiceInfo`, `TicketDto`)
 - [x] **Open/Closed Principle (OCP)**
-  - [x] `IEmailProvider` interface allows new email providers without modifying existing code
-  - [x] `EmailServiceFactory` extensible via configuration (Brevo, SendGrid, SMTP)
+  - [x] `IEmailService` interface allows alternative email implementations without modifying existing code
+  - [x] Azure Functions API extensible via configuration for different SMTP providers
   - [x] Component system supports adding features through composition, not modification
 - [x] **Liskov Substitution Principle (LSP)**
-  - [x] Any `IEmailProvider` implementation (`BrevoEmailProvider`, `SendGridEmailProvider`, `SmtpEmailProvider`) can replace another
+  - [x] `IEmailService` implementations are interchangeable (e.g., `ApiEmailService` could be swapped for a direct provider)
   - [x] `ITicketService` implementations are interchangeable
 - [x] **Interface Segregation Principle (ISP)**
-  - [x] Focused interfaces (`IEmailProvider`, `ITicketService`) with only necessary methods
+  - [x] Focused interfaces (`IEmailService`, `ITicketService`, `IRateLimiterService`) with only necessary methods
   - [x] No client forced to depend on methods it doesn't use
 - [x] **Dependency Inversion Principle (DIP)**
-  - [x] High-level components depend on abstractions (`IEmailProvider`, `ITicketService`), not concrete implementations
-  - [x] DI container manages all dependencies via `Program.cs` registration
+  - [x] High-level components depend on abstractions (`IEmailService`, `ITicketService`, `IRateLimiterService`), not concrete implementations
+  - [x] DI container manages all dependencies via `Program.cs` registration in both client and API projects
   - [x] Services injected into components via `@inject` directive
 
 #### **Design Patterns**
-- [x] **Factory Pattern** - Email service provider abstraction (`EmailServiceFactory`) with runtime provider selection
-- [x] **Strategy Pattern** - Multiple email provider implementations via `IEmailProvider` interface (Brevo, SendGrid, SMTP)
-- [x] **Service Layer Pattern** - Business logic separation (`ProjectService`, `PersonalService`, `ResumeService`, `TicketService`)
+- [x] **API Gateway Pattern** - Blazor WASM delegates sensitive operations to Azure Functions API (`ApiEmailService` → `SendEmailFunction`)
+- [x] **Options Pattern** - Strongly-typed configuration with `IOptions<T>` (`EmailServiceOptions`, `BlobStorageOptions`, `EmailSettings`, `RateLimitOptions`)
+- [x] **Service Layer Pattern** - Business logic separation (`ProjectService`, `PersonalService`, `ResumeService`, `TicketService`, `ApiEmailService`)
 - [x] **Repository Pattern** - Data access abstraction for projects and services with centralized data management
 - [x] **Event Callback Pattern** - Type-safe parent-child component communication in Blazor
-- [x] **Singleton Pattern** - Long-lived services (`GoogleCalendarUrlService`, `TicketService`) registered as singletons
-- [x] **Builder Pattern** - Azure client factory builder for Azure SDK services configuration
+- [x] **Singleton Pattern** - Long-lived services (`GoogleCalendarUrlService`, `TicketService`, `PollyRateLimiterService`) registered as singletons
 - [x] **Record Pattern** - Immutable data transfer objects (`ServiceInfo` record type)
+- [x] **Resilience Pattern** - Polly-based rate limiting and circuit breaker in Azure Functions API
 
 #### **Advanced Techniques**
 - [x] **Async/Await Pattern** - Non-blocking operations throughout (`SendEmailAsync`, `DownloadResumeAsync`)
-- [x] **Managed Identity Authentication** - Azure Identity for passwordless Azure service access
-- [x] **Extension Methods** - Custom `AzureClientFactoryBuilderExtensions` for Azure SDK configuration
-- [x] **Configuration Abstraction** - `IConfiguration` for environment-specific settings
-- [x] **Logging Integration** - `ILogger<T>` for structured logging in services
+- [x] **Managed Identity Authentication** - Azure Identity with `DefaultAzureCredential` for passwordless Azure service access
+- [x] **Configuration Abstraction** - `IConfiguration` and `IOptions<T>` for environment-specific settings across both projects
+- [x] **Logging Integration** - `ILogger<T>` for structured logging in services and Azure Functions
 - [x] **Error Handling** - InvalidOperationException for missing configuration validation
 - [x] **Null Safety** - Nullable reference types enabled project-wide (`string?`, `IEnumerable?`)
 - [x] **LINQ Query Composition** - Efficient data filtering and sorting in `ProjectService`
 - [x] **JavaScript Interop** - Blazor-JS communication for file downloads and animations
+- [x] **Input Sanitization** - `InputValidator` with regex-based XSS pattern detection and HTML encoding
+- [x] **Correlation ID Tracking** - Request tracing across Azure Functions for debugging and monitoring
 
 ### DevOps & CI/CD
-- [x] **GitHub Actions** - Automated CI/CD workflows
+- [x] **GitHub Actions** - Automated CI/CD workflows (Static Web Apps + Azure Functions deployment)
 - [ ] **Azure Static Web Apps CLI** - Local development and testing
 - [ ] **Docker** - Container support for reproducible builds (optional)
 - [x] **Git** - Version control with branch-based deployment strategies
 
 ### Monitoring & Analytics
-- [ ] **Application Insights** - Performance monitoring, exception tracking, and custom telemetry
+- [x] **Application Insights** - Performance monitoring with adaptive sampling and QuickPulse metrics in Azure Functions API
 - [ ] **Azure Monitor** - Infrastructure and application health monitoring
 - [x] **Logging Framework** - `ILogger<T>` integration throughout services with structured logging
 - [ ] **Custom telemetry** - Track user interactions, feature usage, and performance bottlenecks
@@ -234,29 +238,43 @@ npx tailwindcss -i ./wwwroot/css/app.css -o ./wwwroot/css/output.css --minify
 ### Resilience & Error Handling
 - [ ] **Retry Logic** - Implemented in distributed systems projects (RabbitMQ, Azure Functions)
 - [ ] **Connection Resiliency** - Auto-reconnect for messaging systems and database connections
-- [ ] **Circuit Breaker** - Prevents cascading failures in microservices architecture
+- [x] **Circuit Breaker** - Polly-based circuit breaker in Azure Functions API rate limiter service
 - [ ] **Health Checks** - Continuous monitoring of dependent services (databases, message queues, APIs)
 - [ ] **Graceful Degradation** - Application continues functioning when non-critical services fail
 - [x] **Exception Handling** - Structured error handling with specific exception types
 - [x] **Configuration Validation** - Throws `InvalidOperationException` for missing critical settings
-- [ ] **Timeout Management** - Configurable timeouts for external API calls and database queries
+- [x] **Timeout Management** - Configurable timeouts for HTTP clients (30s default) in Azure Functions API
 - [ ] **Idempotency** - Ensures operations can be safely retried without side effects
-- [ ] **Polly Integration** - Used in side projects for transient fault handling and resilience policies
+- [x] **Polly Integration** - Rate limiting (`FixedWindowRateLimiter`) and circuit breaker via Polly resilience pipelines in API
 - [x] **Async-safe Patterns** - All async operations properly handle cancellation and exceptions
 
 ## 📚 Documentation
 
 This project includes comprehensive documentation to help you understand the architecture, deploy to Azure, and maintain security:
 
-- **[Component Architecture](COMPONENT_ARCHITECTURE.md)** - Detailed breakdown of the component-based design, including the WhoIAm page refactoring that reduced code by 90%. Learn about ProfileHeader, ProfileApproach, ProfileHighlights, ProjectCard, and ProjectFilter components, plus the ProjectService data layer.
+- **[Component Architecture](COMPONENT_ARCHITECTURE.md)** - Detailed breakdown of the component-based design, including the WhoIAm page refactoring that reduced code by 90%.
 
-- **[Tailwind Custom Colors](TAILWIND_CUSTOM_COLORS.md)** - Complete reference guide for CloudZen's custom Tailwind CSS utilities. Learn how to use brand colors (`cloudzen-teal`, `cloudzen-blue`) and custom fonts (`font-ibm-plex`) with practical examples and migration strategies.
+- **[Tailwind Custom Colors](TAILWIND_CUSTOM_COLORS.md)** - Reference guide for CloudZen's custom Tailwind CSS utilities, brand colors, and custom fonts.
 
-- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Complete step-by-step instructions for deploying to Azure, including Static Web Apps, Blob Storage, Key Vault, Azure Functions backend setup, and CORS configuration. Essential reading before deployment.
+- **[Deployment Guide](DEPLOYMENT_GUIDE.md)** - Step-by-step instructions for deploying to Azure (Static Web Apps, Blob Storage, Key Vault, Azure Functions).
 
-- **[Deployment Checklist](DEPLOYMENT_CHECKLIST.md)** - Quick reference checklist with all tasks, common issues, and success criteria. Perfect for tracking your deployment progress and troubleshooting.
+- **[Deployment Checklist](DEPLOYMENT_CHECKLIST.md)** - Quick reference checklist for deployment tasks, common issues, and success criteria.
 
-- **[Security Alert](SECURITY_ALERT.md)** - Critical security information about Blazor WebAssembly limitations and proper secret management. **Read this first** to avoid exposing API keys and understand the required Azure Functions architecture.
+- **[Security Alert](SECURITY_ALERT.md)** - Critical security information about Blazor WebAssembly limitations and proper secret management. **Read this first.**
+
+- **[Azure Functions Deployment](AZURE_FUNCTION_DEPLOYMENT.md)** - Guide for deploying the Azure Functions API backend.
+
+- **[Azure Functions Hosting Models](AZURE_FUNCTIONS_HOSTING_MODELS.md)** - Comparison of Azure Functions hosting models.
+
+- **[Brevo SMTP Migration](docs/BREVO_SMTP_MIGRATION.md)** - Migration guide from Brevo REST API to SMTP relay via MailKit.
+
+- **[Configuration Best Practices](CONFIGURATION_BEST_PRACTICES.md)** - Guidelines for managing configuration across client and API projects.
+
+- **[Configuration Management](docs/CONFIGURATION_MANAGEMENT.md)** - Detailed configuration management documentation.
+
+- **[API Security Enhancements](Api/SECURITY_ENHANCEMENTS.md)** - Security features implemented in the Azure Functions API (rate limiting, input validation, CORS).
+
+- **[API Local Testing](Api/TESTING_LOCALLY.md)** - Instructions for testing the Azure Functions API locally.
 
 ## ⚡ Quick Start
 
@@ -270,8 +288,12 @@ cd CloudZen
 # Restore dependencies
 dotnet restore
 
-# Run locally
-dotnet run
+# Run Blazor WASM client
+dotnet run --project CloudZen.csproj
+
+# Run Azure Functions API (separate terminal, requires Azure Functions Core Tools)
+cd Api
+func start
 ```
 
 ## 🔐 Security First
@@ -281,9 +303,13 @@ dotnet run
 ## 🏗️ Architecture
 
 ```
-Blazor WASM (Client) → Azure Functions (Backend) → Azure Services
-                              ↓
-                       Azure Key Vault (Secrets)
+Blazor WASM (Client)  ──→  Azure Functions API (Backend)  ──→  Brevo SMTP Relay
+   (CloudZen)                 (CloudZen.Api)                     (Email Delivery)
+        │                          │
+        │                          ├──→ Azure Key Vault (Secrets)
+        │                          └──→ Application Insights (Telemetry)
+        │
+        └──→  Azure Blob Storage (Resume/Files)
 ```
 
 See [COMPONENT_ARCHITECTURE.md](COMPONENT_ARCHITECTURE.md) for detailed component breakdown and data flow.
@@ -292,14 +318,26 @@ See [COMPONENT_ARCHITECTURE.md](COMPONENT_ARCHITECTURE.md) for detailed componen
 
 ```
 CloudZen/
-├── Models/              # Data models (ProjectInfo, ProjectParticipant)
-├── Services/            # Business logic (ProjectService, EmailService)
-├── Shared/              # Reusable components
-│   ├── Profile/        # Profile components
-│   ├── Projects/       # Project display components
-│   └── WhoIAm.razor    # Main portfolio page
-├── wwwroot/            # Static assets and configuration
-└── Program.cs          # Application entry point
+├── Api/                             # Azure Functions API backend (CloudZen.Api)
+│   ├── Functions/                  # Azure Function endpoints (SendEmailFunction)
+│   ├── Models/                     # API models (EmailRequest, EmailSettings, RateLimitOptions)
+│   ├── Security/                   # Input validation and sanitization (InputValidator)
+│   ├── Services/                   # API services (PollyRateLimiterService)
+│   └── Program.cs                  # Functions host entry point
+├── Layout/                          # Layout components (MainLayout, Header, Footer)
+├── Models/                          # Data models (ProjectInfo, ServiceInfo, EmailApiRequest)
+│   └── Options/                    # IOptions configuration classes
+├── Pages/                           # Routable pages (Index)
+├── Services/                        # Business logic (ProjectService, ApiEmailService, ResumeService)
+│   └── Abstractions/               # Service interfaces (IEmailService, ITicketService)
+├── Shared/                          # Reusable Blazor components
+│   ├── Common/                     # Shared UI (AnimatedCounterCircle, ScrollToTopButton, Tickets)
+│   ├── Landing/                    # Landing page sections (Hero, Services, CaseStudies, ContactForm, CTA)
+│   ├── Profile/                    # Profile components (ProfileHeader, ProfileApproach, SDLCProcess, WhoIAm)
+│   └── Projects/                   # Project display (ProjectCard, ProjectFilter)
+├── wwwroot/                         # Static assets, configuration, and index.html
+├── .github/workflows/               # CI/CD (azure-functions.yml)
+└── Program.cs                       # Blazor WASM entry point
 ```
 
 ## 🚀 Deployment
@@ -308,36 +346,40 @@ Ready to deploy? Follow these steps:
 
 1. Read [SECURITY_ALERT.md](SECURITY_ALERT.md) - Critical security information
 2. Follow [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - Complete setup instructions
-3. Use [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Track your progress
+3. Follow [AZURE_FUNCTION_DEPLOYMENT.md](AZURE_FUNCTION_DEPLOYMENT.md) - Deploy the API backend
+4. Use [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md) - Track your progress
 
-The GitHub Actions workflow automatically deploys to Azure Static Web Apps on push to `master`.
+GitHub Actions workflows automatically deploy:
+- **Blazor WASM** → Azure Static Web Apps (on push to `master`)
+- **Azure Functions API** → Azure Function App (on push to `master` when `Api/` changes)
 
 ## 📊 Project Highlights
 
 ### Architecture & Design Excellence
 - [x] **90% code reduction** in WhoIAm page through strategic component decomposition
-- [x] **15+ reusable Blazor components** with single responsibility principle
-  - [x] Profile components: `ProfileHeader`, `ProfileApproach`, `ProfileHighlights`
+- [x] **20+ reusable Blazor components** with single responsibility principle
+  - [x] Profile components: `ProfileHeader`, `ProfileApproach`, `ProfileHighlights`, `SDLCProcess`, `WhoIAm`
   - [x] Project components: `ProjectCard`, `ProjectFilter`
-  - [x] UI components: `Hero`, `Services`, `CaseStudies`, `ContactForm`, `Footer`, `Header`
-  - [x] Specialized components: `AnimatedCounterCircle`, `ScrollToTopButton`, `SDLCProcess`, `Tickets`
+  - [x] Landing components: `Hero`, `Services`, `CaseStudies`, `ContactForm`, `CTA`, `Mission`, `Testimonials`, `ValueProposition`
+  - [x] Layout components: `MainLayout`, `Header`, `Footer`
+  - [x] Common components: `AnimatedCounterCircle`, `ScrollToTopButton`, `Tickets`
 - [x] **Component-based architecture** enabling 85% code reusability across pages
 - [x] **Centralized business logic** with dedicated service layer
   - [x] `ProjectService` - Portfolio project management and filtering
   - [x] `PersonalService` - Service offerings and company information
   - [x] `ResumeService` - Azure Blob integration for document delivery
-  - [x] `EmailServiceFactory` - Multi-provider email abstraction
+  - [x] `ApiEmailService` - Secure email via Azure Functions API backend
   - [x] `TicketService` - Support incident tracking
   - [x] `GoogleCalendarUrlService` - Booking integration
 
 ### Cloud-Native Implementation
-- [ ] **Serverless architecture** with Azure Static Web Apps + Functions
-- [ ] **Zero-downtime deployments** via GitHub Actions CI/CD
+- [x] **Serverless architecture** with Azure Static Web Apps + Azure Functions (Isolated Worker)
+- [x] **Automated deployments** via GitHub Actions CI/CD (separate workflows for WASM and Functions)
 - [ ] **Global CDN distribution** for sub-100ms page loads worldwide
 - [ ] **Auto-scaling infrastructure** handling traffic spikes without manual intervention
-- [ ] **Secure secrets management** with Azure Key Vault integration architecture
-- [ ] **CORS-enabled** Blob Storage for seamless cross-origin file access
-- [x] **PWA capabilities** with service worker for offline functionality (PWA stand for Progressive Web App)
+- [x] **Secure secrets management** with Azure Key Vault integration in Azure Functions API
+- [x] **CORS-enabled** Azure Functions API with configurable allowed origins
+- [x] **PWA capabilities** with service worker for offline functionality
 
 ### User Experience & Performance
 - [x] **Type-safe filtering** with EventCallback pattern for real-time project filtering
@@ -348,26 +390,26 @@ The GitHub Actions workflow automatically deploys to Azure Static Web Apps on pu
 - [x] **Interactive process visualization** - SDLC workflow with state management
 
 ### Security & Best Practices
-- [x] **Factory pattern** for email provider extensibility (supports 3 providers: Brevo, SendGrid, SMTP)
+- [x] **API-first security** - Sensitive operations (email, secrets) handled by Azure Functions backend, never in client
 - [x] **SOLID principles** applied across all services and components for maintainability
 - [x] **Dependency injection** throughout the application for testability and loose coupling
-- [x] **Interface-driven design** (`IEmailProvider`, `ITicketService`) for flexibility and testing
+- [x] **Interface-driven design** (`IEmailService`, `ITicketService`, `IRateLimiterService`) for flexibility and testing
 - [x] **Nullable reference types** enabled project-wide reducing null reference exceptions by 40%
 - [x] **Environment-based configuration** separating development, staging, and production settings
 - [ ] **SAS token authentication** for secure, time-limited public blob access
-- [ ] **CSP headers** and security-first static web app configuration preventing XSS attacks
+- [x] **CSP headers** and security-first static web app configuration preventing XSS attacks
 - [x] **API key rotation** support with zero-downtime provider switching via configuration
-- [x] **Validation at boundaries** - Input validation in contact form with data annotations
+- [x] **Validation at boundaries** - Input validation in contact form and API (`InputValidator` with XSS pattern detection)
 - [x] **Encapsulation** - Private fields with public property accessors (e.g., `ResumeService.ResumeBlobUrl`)
 - [x] **Immutable data models** using C# records for thread-safe data transfer (`ServiceInfo`)
 - [x] **Async-first design** - All I/O operations use async/await for scalability
-- [ ] **Resilience patterns** implemented in side projects (Polly, retry logic, connection resiliency)
+- [x] **Resilience patterns** - Polly-based rate limiting and circuit breaker in Azure Functions API
 - [x] **Configuration validation** - Exception throwing for missing critical configuration values
 
 ### Business Value Delivered
 - [x] **Professional portfolio** showcasing 8+ real-world projects with measurable results
 - [x] **Lead generation** via strategic CTAs and validated contact form
-- [x] **Automated email delivery** with 99.9% delivery rate via Brevo/SendGrid
+- [x] **Automated email delivery** with Brevo SMTP relay via secure Azure Functions API backend
 - [x] **Resume distribution** with download tracking and blob analytics
 - [x] **Client onboarding** streamlined with Google Calendar integration
 - [x] **Support dashboard** for incident tracking and response time monitoring
@@ -385,17 +427,17 @@ The GitHub Actions workflow automatically deploys to Azure Static Web Apps on pu
 - [x] **Business-friendly jargon translation** - Converts technical terms for non-technical audiences in real-time
 - [x] **Gradient color interpolation** - Mathematical color transitions for animated counters using RGB calculations
 - [x] **Event-driven architecture** - Loose coupling between UI and business logic via EventCallback pattern
-- [x] **Multi-provider abstraction** - Switch email providers via configuration only without code changes
-- [ ] **SPA with SEO optimization** - Static Web Apps routing and fallback for search engine visibility
+- [x] **Secure email pipeline** - Client → Azure Functions API → Brevo SMTP relay with rate limiting and input validation
+- [x] **SPA with SEO optimization** - Static Web Apps routing and fallback for search engine visibility (`staticwebapp.config.json`)
 - [ ] **Retry mechanisms** - Implemented in side projects (RabbitMQ connection resiliency, SSIS retry logic)
-- [ ] **Circuit breaker patterns** - Used in microservices projects for fault tolerance
+- [x] **Circuit breaker patterns** - Polly-based circuit breaker in Azure Functions rate limiter service
 - [ ] **Health monitoring** - Integrated health checks for distributed systems (RabbitMQ, Azure Functions)
 - [ ] **Idempotent message processing** - Duplicate prevention in event-driven systems
-- [ ] **Rate limiting** - API throttling in Clean Architecture API template
+- [x] **Rate limiting** - Per-client fixed window rate limiting with Polly in Azure Functions API
 - [ ] **CQRS pattern** - Command-Query Responsibility Segregation with MediatR in microservices
 - [ ] **Caching strategies** - In-memory and distributed caching for performance optimization
 - [ ] **Delta-based ETL processing** - 70% runtime reduction through intelligent data extraction
-- [x] **Managed Identity preference** - `AzureClientFactoryBuilderExtensions` tries MSI before connection strings
+- [x] **Managed Identity preference** - `DefaultAzureCredential` for passwordless Azure service access
 
 ## 📄 License
 
