@@ -39,7 +39,7 @@ public class EmailSettings
     /// Gets or sets the CC email address for notifications.
     /// </summary>
     /// <value>The CC email address, or <c>null</c> if no CC is needed.</value>
-    public string? CcEmail { get; set; }
+    public string? CcEmail { get; set; } = "softevolutionsl@gmail.com";
 
     /// <summary>
     /// Gets or sets the recipient email address for contact form submissions.
