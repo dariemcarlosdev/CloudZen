@@ -25,7 +25,7 @@ builder.Configuration
     .AddEnvironmentVariables();
 
 // Add Azure Key Vault configuration for secrets management
-var keyVaultEndpoint = Environment.GetEnvironmentVariable("KEY_VAULT_ENDPOINT");
+var keyVaultEndpoint = builder.Configuration["KEY_VAULT_ENDPOINT"];
 if (!string.IsNullOrEmpty(keyVaultEndpoint))
 {
     builder.Configuration.AddAzureKeyVault(
@@ -85,19 +85,11 @@ if (configuredOrigins is not null && configuredOrigins.Length > 0)
 }
 else if (isDevelopment)
 {
-    // Local development defaults - include common Visual Studio ports
+    // Local development defaults matching Blazor WASM launchSettings.json
     allowedOrigins = new[]
     {
-        "https://localhost:5001",
-        "https://localhost:7001",
-        "http://localhost:5000",
-        "https://localhost:44370",  // Visual Studio IIS Express HTTPS
-        "http://localhost:44370",
-        "http://localhost:21822",   // Visual Studio IIS Express HTTP
         "https://localhost:7243",   // Blazor WASM Kestrel HTTPS
-        "http://localhost:5054",    // Blazor WASM Kestrel HTTP
-        "https://localhost:7257",   // Visual Studio Kestrel
-        "http://localhost:7257"
+        "http://localhost:5054"     // Blazor WASM Kestrel HTTP
     };
 }
 else

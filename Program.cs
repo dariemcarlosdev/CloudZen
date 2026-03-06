@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using CloudZen.Services;
 using CloudZen.Services.Abstractions;
-using Microsoft.Extensions.Options;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -24,7 +23,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 if (builder.HostEnvironment.IsDevelopment())
 {
-    const string functionsLocalUrl = "http://localhost:7257/api";
+    const string functionsLocalUrl = "http://localhost:7257/api"; // update with your local Functions URL and port
     builder.Configuration["ChatbotService:ApiBaseUrl"] = functionsLocalUrl;
     builder.Configuration["EmailService:ApiBaseUrl"] = functionsLocalUrl;
 }
@@ -76,26 +75,18 @@ builder.Services.AddScoped(sp => new HttpClient
 // - Use Azure Functions backend for sensitive operations (email, storage writes)
 // =============================================================================
 
-// Legacy blob storage endpoint (consider migrating to BlobStorageOptions)
-var blobServiceEndpoint = builder.Configuration["CloudZenBlobStorageConnection:blobServiceUri"];
-
 // =============================================================================
 // SERVICE REGISTRATIONS
 // =============================================================================
 
-// Register GoogleCalendarUrlService as a singleton
-builder.Services.AddSingleton<GoogleCalendarUrlService>();
+// Register GoogleCalendarUrlService
+builder.Services.AddScoped<GoogleCalendarUrlService>();
 
 // Register TicketService as the implementation for ITicketService
-builder.Services.AddSingleton<ITicketService, TicketService>();
+builder.Services.AddScoped<ITicketService, TicketService>();
 
-// Register ResumeService after HttpClient
-// TODO: Refactor to use IOptions<BlobStorageOptions> pattern
-builder.Services.AddScoped(sp => new ResumeService(
-    sp.GetRequiredService<HttpClient>(),
-    blobServiceEndpoint,
-    sp.GetRequiredService<ILogger<ResumeService>>()
-));
+// Register ResumeService (uses IOptions<BlobStorageOptions> for configuration)
+builder.Services.AddScoped<ResumeService>();
 
 // Register ApiEmailService as the implementation for IEmailService
 // Uses IOptions<EmailServiceOptions> for configuration
