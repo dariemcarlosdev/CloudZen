@@ -79,6 +79,7 @@ Then create a template `appsettings.json` with no secrets:
 ┌─────────────────────────────┐
 │  ⚡ Azure Functions API      │ (Server-side, secure)
 │     • 📧 SendEmail endpoint │
+│     • 🤖 Chat endpoint      │ (AI chatbot via Anthropic)
 │     • 🔑 Reads secrets from │
 │          Key Vault          │
 └─────────────────────────────┘
@@ -86,7 +87,8 @@ Then create a template `appsettings.json` with no secrets:
             ▼
 ┌─────────────────────────────┐
 │  🔐 Azure Key Vault          │
-│     • 🔑 BREVO_API_KEY      │
+│     • 🔑 BREVO_SMTP_KEY     │
+│     • 🔑 ANTHROPIC_API_KEY  │
 │     • 🗝️  Other secrets      │
 └─────────────────────────────┘
 ```

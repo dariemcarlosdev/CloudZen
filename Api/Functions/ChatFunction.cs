@@ -47,9 +47,12 @@ public class ChatFunction(
     private const string AnthropicApiUrl = "https://api.anthropic.com/v1/messages";
     private const string AnthropicVersion = "2023-06-01";
     private const string DefaultModel = "claude-sonnet-4-20250514";
-    private const int MaxTokens = 1000;
-    private const int MaxRequestBodySize = 50000;
-    private const int MaxMessages = 50;
+    private const int MaxTokens = 200;
+    private const int MaxRequestBodySize = 15000;
+    private const int MaxMessages = 10;
+    private const int MaxConversationHistoryMessages = 6;
+    private const int MaxMessageContentLength = 500;
+    private const int MaxReplyLength = 500;
 
     private static readonly JsonSerializerOptions ChatJsonOptions = new()
     {
@@ -60,7 +63,7 @@ public class ChatFunction(
     #region Knowledge Base & System Prompt
 
     private const string KnowledgeBase = """
-        You are the CloudZen AI Assistant. You represent CloudZen, a solo freelance tech consultancy run by one expert consultant who helps small businesses modernize, automate, and grow using technology — with zero jargon.
+        You are the CloudZen AI Assistant. You represent CloudZen, a technology consultancy that helps small businesses modernize, automate, and grow using technology — with zero jargon.
 
         ---
 
@@ -69,13 +72,13 @@ public class ChatFunction(
         - **Name**: CloudZen
         - **Tagline**: "You don't need to speak tech. You just need results."
         - **Sub-tagline**: "Technology That Works - So You Can Focus on Growing"
-        - **Type**: Solo freelance tech consultancy (one person + trusted specialist network)
+        - **Type**: Technology consultancy with a trusted specialist network
         - **Target audience**: Small business owners who are non-technical and frustrated with slow, outdated systems
         - **Email**: cloudzen.inc@gmail.com
         - **Founded**: Active as of 2026
         - **Copyright**: © 2026 CloudZen. All Rights Reserved.
         - **Socials**: LinkedIn, GitHub
-        - **Positioning**: Personal attention of a solo consultant + depth of a handpicked specialist team
+        - **Positioning**: Personalized attention and direct communication + depth of a handpicked specialist team
 
         ---
 
@@ -87,14 +90,14 @@ public class ChatFunction(
           - Honesty and clear communication
           - Practical, measurable results
           - No cookie-cutter approaches — every solution is tailored
-          - Direct relationship (no middlemen, no phone trees)
+          - Direct communication (no middlemen, no phone trees)
           - Bring in trusted experts only when genuinely needed
 
         ---
 
         ## KEY DIFFERENTIATORS
 
-        1. **One Point of Contact**: Clients talk directly to the person doing the work — no phone trees, no account managers, straight answers.
+        1. **One Point of Contact**: Clients get a dedicated point of contact — no phone trees, no account managers, straight answers.
         2. **Trusted Specialist Network**: When a project needs extra skills, trusted handpicked experts are brought in — clients get full-team depth without the overhead.
         3. **Real-World Results**: Proven track record — helped businesses ditch slow systems, save hours every week, and win more customers.
         4. **Tailored Solutions**: No templates or generic approaches. Every solution is built around specific business goals, processes, and customers.
@@ -205,7 +208,7 @@ public class ChatFunction(
         - Frustrated with slow, outdated systems
         - Drowning in manual, repetitive tasks
         - Want clear communication and real results
-        - Don't want to hire a big agency or manage a large team
+        - Don't want to deal with big agencies or manage large teams
         - Need technology that actually moves the needle for their business
 
         ---
@@ -265,9 +268,16 @@ public class ChatFunction(
         3. Guide interested visitors toward booking a free consultation
         4. Be warm, clear, and jargon-free at all times
 
-        Keep responses concise (2-4 sentences max unless more detail is genuinely needed).
-        Always end with a helpful next step or offer to connect them with CloudZen directly.
-        If asked something outside your knowledge, say so honestly and suggest they email cloudzen.inc@gmail.com.
+        IMPORTANT GUIDELINES:
+        - HARD LIMIT: Every response MUST be under 500 characters total. This is non-negotiable. Count carefully.
+        - Keep responses to 1-2 sentences max. Be brief and direct.
+        - After answering a question, ALWAYS suggest a next step — either booking a free consultation or emailing cloudzen.inc@gmail.com.
+        - If the visitor asks more than 2-3 questions, proactively suggest: "I can share the basics, but every business is unique — would you like to book a free consultation to discuss your specific situation?"
+        - Do NOT provide detailed technical advice, implementation specifics, or lengthy explanations. Keep it high-level and redirect to a real conversation.
+        - If asked about pricing, timelines, or project-specific details, say that those depend on the specific situation and encourage them to book a free consultation.
+        - If asked something outside your knowledge, say so honestly and suggest they email cloudzen.inc@gmail.com.
+        - Do NOT engage with off-topic conversations, jokes, roleplay, or anything unrelated to CloudZen's services. Politely redirect.
+        - You are NOT a general-purpose AI assistant. Only answer questions relevant to CloudZen.
         """;
 
     #endregion
@@ -373,9 +383,11 @@ public class ChatFunction(
                     return new BadRequestObjectResult(new ChatResponse { Success = false, Error = "Message role must be 'user' or 'assistant'." });
                 }
 
-                if (msg.Content.Length > 5000)
+                // Only enforce content length on user messages — assistant messages are
+                // generated by the API itself and may exceed the user input limit.
+                if (msg.Role == "user" && msg.Content.Length > MaxMessageContentLength)
                 {
-                    return new BadRequestObjectResult(new ChatResponse { Success = false, Error = "Message content is too long." });
+                    return new BadRequestObjectResult(new ChatResponse { Success = false, Error = $"Message content is too long. Maximum {MaxMessageContentLength} characters." });
                 }
             }
 
@@ -401,6 +413,22 @@ public class ChatFunction(
                 Success = true,
                 Reply = reply
             });
+        }
+        catch (HttpRequestException ex) when (ex.Message.Contains("billing error", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogError(ex, "Anthropic API billing/quota issue: {Message}", ex.Message);
+            return new ObjectResult(new ChatResponse { Success = false, Error = "The AI service is temporarily unavailable due to a configuration issue. Please contact the administrator." })
+            {
+                StatusCode = StatusCodes.Status503ServiceUnavailable
+            };
+        }
+        catch (HttpRequestException ex) when (ex.Message.Contains("rate limit", StringComparison.OrdinalIgnoreCase))
+        {
+            _logger.LogError(ex, "Anthropic API rate limited: {Message}", ex.Message);
+            return new ObjectResult(new ChatResponse { Success = false, Error = "The AI service is currently busy. Please try again in a moment." })
+            {
+                StatusCode = StatusCodes.Status429TooManyRequests
+            };
         }
         catch (HttpRequestException ex)
         {
@@ -440,12 +468,25 @@ public class ChatFunction(
     {
         var httpClient = _httpClientFactory.CreateClient("SecureClient");
 
+        // Only send the most recent messages to Anthropic to limit token consumption.
+        // This prevents long conversations from sending excessive context.
+        var recentMessages = chatRequest.Messages
+            .TakeLast(MaxConversationHistoryMessages)
+            .Select(m => new { role = m.Role, content = m.Content })
+            .ToArray();
+
+        // Ensure the first message is always from the user (Anthropic requirement)
+        if (recentMessages.Length > 0 && recentMessages[0].role != "user")
+        {
+            recentMessages = recentMessages.Skip(1).ToArray();
+        }
+
         var anthropicRequest = new
         {
             model = DefaultModel,
             max_tokens = MaxTokens,
             system = SystemPrompt,
-            messages = chatRequest.Messages.Select(m => new { role = m.Role, content = m.Content }).ToArray()
+            messages = recentMessages
         };
 
         var json = JsonSerializer.Serialize(anthropicRequest);
@@ -463,6 +504,36 @@ public class ChatFunction(
         if (!response.IsSuccessStatusCode)
         {
             _logger.LogError("Anthropic API returned {StatusCode}: {Body}", response.StatusCode, responseBody);
+
+            // Parse error type from Anthropic response for specific handling
+            var errorType = string.Empty;
+            try
+            {
+                using var errorDoc = JsonDocument.Parse(responseBody);
+                if (errorDoc.RootElement.TryGetProperty("error", out var errorElement) &&
+                    errorElement.TryGetProperty("type", out var typeElement))
+                {
+                    errorType = typeElement.GetString() ?? string.Empty;
+                }
+            }
+            catch (JsonException)
+            {
+                // Ignore parse failures on error body
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest &&
+                (responseBody.Contains("credit balance is too low", StringComparison.OrdinalIgnoreCase) ||
+                 errorType == "invalid_request_error" && responseBody.Contains("credit", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new HttpRequestException("Anthropic API billing error: insufficient credits. Please check your Anthropic plan and billing.");
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests ||
+                errorType == "rate_limit_error")
+            {
+                throw new HttpRequestException("Anthropic API rate limit exceeded. Please try again later.");
+            }
+
             throw new HttpRequestException($"Anthropic API returned {response.StatusCode}");
         }
 
@@ -485,6 +556,15 @@ public class ChatFunction(
         {
             _logger.LogWarning("Anthropic API returned empty content.");
             return "Sorry, I couldn't generate a response. Please try again.";
+        }
+
+        // Truncate reply if it exceeds the max length, cutting at the last sentence boundary
+        if (reply.Length > MaxReplyLength)
+        {
+            _logger.LogWarning("Anthropic reply exceeded {MaxLength} chars ({ActualLength}). Truncating.", MaxReplyLength, reply.Length);
+            var truncated = reply[..MaxReplyLength];
+            var lastSentenceEnd = truncated.LastIndexOfAny(['.', '!', '?']);
+            reply = lastSentenceEnd > 0 ? truncated[..(lastSentenceEnd + 1)] : truncated + "…";
         }
 
         return reply;

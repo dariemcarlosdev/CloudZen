@@ -31,9 +31,16 @@ CloudZen/
 │   ├── ProjectService.cs               # Project data management service
 │   ├── ResumeService.cs                # Resume download service
 │   ├── PersonalService.cs              # Personal info service
+│   ├── ChatbotService.cs              # AI chatbot HTTP client service
+│   ├── Abstractions/
+│   │   └── IChatbotService.cs         # Chatbot service interface
 │   └── ... (other services)
 │
 ├── Shared/
+│   ├── Chatbot/
+│   │   ├── CloudZenChatbot.razor       # AI chatbot widget (FAB + chat panel)
+│   │   └── CloudZenChatbot.razor.css   # Scoped dark theme styles
+│   │
 │   ├── Profile/
 │   │   ├── ProfileHeader.razor         # Profile avatar, name, social links
 │   │   ├── ProfileApproach.razor       # Professional approach section
@@ -556,6 +563,10 @@ CloudZen Application
 │       └── Injects: ResumeService
 │
 ├── Components/
+│   ├── Shared/Chatbot/
+│   │   ├── CloudZenChatbot.razor       # AI chatbot widget
+│   │   └── CloudZenChatbot.razor.css   # Scoped dark theme
+│   │
 │   ├── Shared/Profile/
 │   │   ├── ProfileHeader.razor (81 lines)
 │   │   ├── ProfileApproach.razor (35 lines)
@@ -570,6 +581,9 @@ CloudZen Application
 │   │   ├── GetProjectsByStatus()
 │   │   ├── GetProjectsByType()
 │   │   └── GetFeaturedProjects()
+│   │
+│   ├── ChatbotService.cs
+│   │   └── SendMessageAsync() → POST /api/chat
 │   │
 │   └── ResumeService.cs
 │
@@ -719,7 +733,15 @@ new ProjectInfo
 
 ## 📝 Change Log
 
-### **Version 1.1** (Current - December 8, 2025)
+### **Version 1.2** (Current - March 2026)
+- ✅ Added AI Chatbot component (`CloudZenChatbot.razor`)
+- ✅ Added chatbot client service (`ChatbotService.cs`, `IChatbotService.cs`)
+- ✅ Added chatbot configuration model (`ChatbotOptions.cs`)
+- ✅ Added AI chatbot backend (`ChatFunction.cs`, `ChatRequest.cs`, `ChatResponse.cs`)
+- ✅ Integrated chatbot widget into main layout
+- ✅ See [AI_CHATBOT_DOCUMENTATION.md](AI_CHATBOT_DOCUMENTATION.md) for full chatbot architecture
+
+### **Version 1.1** (December 2025)
 - ✅ Extracted ProjectCard component
 - ✅ Created Profile components (Header, Approach, Highlights)
 - ✅ Moved data models to Models folder
@@ -753,6 +775,6 @@ This architecture is part of the CloudZen Inc. portfolio application.
 
 ---
 
-**Last Updated**: December 2025  
-**Document Version**: 1.2  
+**Last Updated**: March 2026  
+**Document Version**: 1.3  
 **Maintained By**: CloudZen Development Team
