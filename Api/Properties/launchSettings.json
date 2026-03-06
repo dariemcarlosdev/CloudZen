@@ -4,6 +4,16 @@
       "commandName": "Project",
       "commandLineArgs": "--port 7257",
       "launchBrowser": false
+    },
+    "CloudZen.Api (HTTPS)": {
+      "commandName": "Executable",
+      "executablePath": "func",
+      "commandLineArgs": "start --port 7257 --useHttps --cert certificate.pfx --password CloudZenDev123!",
+      "workingDirectory": "bin\\Debug\\net8.0",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "AZURE_FUNCTIONS_ENVIRONMENT": "Development"
+      }
     }
   }
 }

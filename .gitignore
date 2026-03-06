@@ -365,3 +365,4 @@ MigrationBackup/
 /wwwroot/appsettings.json
 /Api/local.settings.json
 /Api/local.settings.json
+/cloudzen-chatbot.jsx

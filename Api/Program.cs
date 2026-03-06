@@ -93,6 +93,9 @@ else if (isDevelopment)
         "http://localhost:5000",
         "https://localhost:44370",  // Visual Studio IIS Express HTTPS
         "http://localhost:44370",
+        "http://localhost:21822",   // Visual Studio IIS Express HTTP
+        "https://localhost:7243",   // Blazor WASM Kestrel HTTPS
+        "http://localhost:5054",    // Blazor WASM Kestrel HTTP
         "https://localhost:7257",   // Visual Studio Kestrel
         "http://localhost:7257"
     };
