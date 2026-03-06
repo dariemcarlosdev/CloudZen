@@ -24,4 +24,9 @@
     <PackageReference Include="sib_api_v3_sdk" Version="4.0.2" />
   </ItemGroup>
 
+  <!-- Copy HTTPS certificate to output for local development -->
+  <ItemGroup>
+    <None Include="certificate.pfx" CopyToOutputDirectory="PreserveNewest" Condition="Exists('certificate.pfx')" />
+  </ItemGroup>
+
 </Project>

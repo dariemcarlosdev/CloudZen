@@ -4,6 +4,9 @@
 # Azure Functions localsettings file
 local.settings.json
 
+# HTTPS development certificate (generated locally, never commit)
+certificate.pfx
+
 # User-specific files
 *.suo
 *.user
