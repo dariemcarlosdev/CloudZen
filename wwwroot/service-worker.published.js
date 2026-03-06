@@ -9,8 +9,12 @@ self.addEventListener('fetch', event => event.respondWith(onFetch(event)));
 const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
 const offlineAssetsInclude = [ /\.dll$/, /\.pdb$/, /\.wasm/, /\.html/, /\.js$/, /\.json$/, /\.css$/, /\.woff$/, /\.png$/, /\.jpe?g$/, /\.gif$/, /\.ico$/, /\.blat$/, /\.dat$/ ];
-const offlineAssetsExclude = [/^service-worker\.js$/,
-    /^staticwebapp\.config\.json$/]; // Exclude the service worker itself and the staticwebapp.config.json from offline caching. The former is necessary to ensure that updates to the service worker are properly detected and applied, while the latter is necessary to ensure that changes to routing rules are properly detected and applied.
+const offlineAssetsExclude = [
+    // Exclude the service worker itself and the staticwebapp.config.json from offline caching.
+    // The former is necessary to ensure that updates to the service worker are properly detected and applied.
+    // The latter is necessary to ensure that changes to routing rules are properly detected and applied.
+    /^service-worker\.js$/,
+    /^staticwebapp\.config\.json$/];
 
 // Replace with your base path if you are hosting on a subfolder. Ensure there is a trailing '/'.
 const base = "/";
