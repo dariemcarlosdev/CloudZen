@@ -1,4 +1,4 @@
-﻿# CloudZen
+﻿#  CloudZen
 
 A modern Blazor WebAssembly portfolio and consulting showcase built with .NET 8, demonstrating expertise in building scalable, secure cloud applications with Azure integration.
 
