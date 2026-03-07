@@ -1,3 +1,13 @@
+# Azure CloudZen Static Web Apps CI/CD
+#
+# Build & Deploy Pipeline:
+#   1. "dotnet publish" compiles the Blazor WASM app and outputs to "publish_output/wwwroot".
+#   2. "skip_app_build: true" tells Azure Static Web Apps to skip its built-in Oryx build
+#      engine and just upload the pre-built files. This means the portal's Build Details
+#      settings (App location, Api location, Artifact location) are ignored entirely.
+#   3. "app_location: publish_output/wwwroot" tells the SWA deploy action where to find
+#      the pre-built files to upload.
+
 name: Azure CloudZen Static Web Apps CI/CD
 
 on:
