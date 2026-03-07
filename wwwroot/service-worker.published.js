@@ -4,7 +4,16 @@
 self.importScripts('./service-worker-assets.js');
 self.addEventListener('install', event => event.waitUntil(onInstall(event)));
 self.addEventListener('activate', event => event.waitUntil(onActivate(event)));
-self.addEventListener('fetch', event => event.respondWith(onFetch(event)));
+self.addEventListener('fetch', event => {
+    // Only intercept same-origin requests. Cross-origin requests (CDN resources like
+    // Tailwind CSS, Bootstrap Icons, Google Fonts) are left to the browser's default
+    // fetch behavior, which is NOT subject to the service worker's connect-src CSP.
+    // Calling event.respondWith() would route the fetch through the SW context where
+    // connect-src is enforced, blocking CDN fetches on first load.
+    if (event.request.url.startsWith(self.origin)) {
+        event.respondWith(onFetch(event));
+    }
+});
 
 const cacheNamePrefix = 'offline-cache-';
 const cacheName = `${cacheNamePrefix}${self.assetsManifest.version}`;
@@ -43,12 +52,6 @@ async function onActivate(event) {
 }
 
 async function onFetch(event) {
-    // Skip cross-origin requests — let the browser handle CDN fetches directly
-    // so they are not subject to the service worker's CSP connect-src restrictions.
-    if (!event.request.url.startsWith(self.origin)) {
-        return fetch(event.request);
-    }
-
     let cachedResponse = null;
     if (event.request.method === 'GET') {
         // For all navigation requests, try to serve index.html from cache,
