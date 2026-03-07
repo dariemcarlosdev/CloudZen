@@ -43,6 +43,12 @@ async function onActivate(event) {
 }
 
 async function onFetch(event) {
+    // Skip cross-origin requests — let the browser handle CDN fetches directly
+    // so they are not subject to the service worker's CSP connect-src restrictions.
+    if (!event.request.url.startsWith(self.origin)) {
+        return fetch(event.request);
+    }
+
     let cachedResponse = null;
     if (event.request.method === 'GET') {
         // For all navigation requests, try to serve index.html from cache,
