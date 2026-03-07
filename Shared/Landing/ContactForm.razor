@@ -1,4 +1,5 @@
 ﻿@using System.ComponentModel.DataAnnotations
+@using CloudZen.Models
 @using CloudZen.Services.Abstractions
 @inject IEmailService EmailService
 
@@ -22,7 +23,7 @@
         </div>
 
         <!-- Form Card -->
-        <div class="relative">
+        <div class="relative overflow-hidden">
             <!-- Decorative Elements -->
             <div class="absolute -top-4 -left-4 w-24 h-24 bg-indigo-200 rounded-full opacity-20 blur-2xl"></div>
             <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-200 rounded-full opacity-20 blur-2xl"></div>
@@ -259,24 +260,5 @@
         formModel = new ContactFormModel();
         submitted = false;
         errorMessage = null;
-    }
-
-    public class ContactFormModel
-    {
-        [Required(ErrorMessage = "Please enter your name")]
-        [StringLength(100, ErrorMessage = "Name is too long (max 100 characters)")]
-        public string? Name { get; set; }
-
-        [Required(ErrorMessage = "Please enter your email address")]
-        [EmailAddress(ErrorMessage = "Please enter a valid email address")]
-        public string? Email { get; set; }
-
-        [Required(ErrorMessage = "Please enter a subject")]
-        [StringLength(200, ErrorMessage = "Subject is too long (max 200 characters)")]
-        public string? Subject { get; set; }
-
-        [Required(ErrorMessage = "Please enter your message")]
-        [StringLength(500, ErrorMessage = "Message is too long (max 500 characters)")]
-        public string? Message { get; set; }
     }
 }

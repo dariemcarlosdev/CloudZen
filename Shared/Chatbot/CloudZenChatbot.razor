@@ -1,4 +1,4 @@
-@using CloudZen.Models
+﻿@using CloudZen.Models
 @using CloudZen.Services.Abstractions
 @inject IChatbotService ChatbotService
 
@@ -189,7 +189,7 @@
             if (UserMessageCount >= MaxUserMessages)
             {
                 messages.Add(ChatMessage.Assistant(
-                    "I hope that was helpful! Every business is unique, so I'd love for you to connect directly with CloudZen for a personalized conversation. You can book a free consultation by emailing cloudzen.inc@gmail.com — replies within 24 hours! 🚀"));
+                    "I hope that was helpful! Every business is unique, so I'd love for you to connect directly with CloudZen for a personalized conversation. You can book a free consultation by emailing cloudzen.inc@gmail.com - replies within 24 hours! 🚀"));
             }
         }
         else

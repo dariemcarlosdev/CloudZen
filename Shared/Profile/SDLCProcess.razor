@@ -1,3 +1,4 @@
+@using CloudZen.Models
 @* SDLCProcess.razor - Selected Button Has Full Background Color *@
 <section id="sdlc-process" class="bg-gray-50 py-5">
     <div class="max-w-5xl mx-auto px-6">
@@ -66,12 +67,5 @@
     private void SelectStage(SDLCStage stage)
     {
         SelectedStage = stage;
-    }
-
-    private enum SDLCStage
-    {
-        Strategy,
-        Delivery,
-        Deployment
     }
 }

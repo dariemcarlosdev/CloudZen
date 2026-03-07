@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace CloudZen.Shared.Chatbot;
 
@@ -16,9 +16,9 @@ public partial class CloudZenChatbot
     /// <remarks>
     /// Named capture groups:
     /// <list type="bullet">
-    ///   <item><description><c>url</c> – matches <c>http://</c> and <c>https://</c> URLs.</description></item>
-    ///   <item><description><c>email</c> – matches standard email address formats.</description></item>
-    ///   <item><description><c>phone</c> – matches North-American-style phone numbers with optional country code.</description></item>
+    ///   <item><description><c>url</c> - matches <c>http://</c> and <c>https://</c> URLs.</description></item>
+    ///   <item><description><c>email</c> - matches standard email address formats.</description></item>
+    ///   <item><description><c>phone</c> - matches North-American-style phone numbers with optional country code.</description></item>
     /// </list>
     /// </remarks>
     private static readonly Regex ContactPattern = new(
