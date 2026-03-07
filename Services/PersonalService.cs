@@ -30,31 +30,31 @@ public class PersonalService
         return
         [
             new ServiceInfo("💻", "Custom Solutions Built for Your Business",
-                "Get a system that actually fits how you work — designed around your goals, your processes, and your customers. No generic templates, just solutions that grow with you."),
+                "Get a system that actually fits how you work - designed around your goals, your processes, and your customers. No generic templates, just solutions that grow with you."),
 
             new ServiceInfo("☁️", "Smarter Hosting & Infrastructure",
-                "Move your business online with confidence. Cut costs, gain flexibility, and support your growth — without the tech overwhelm or hidden surprises."),
+                "Move your business online with confidence. Cut costs, gain flexibility, and support your growth - without the tech overwhelm or hidden surprises."),
 
             new ServiceInfo("🚀", "Modernize Without the Disruption",
                 "Tired of outdated systems holding you back? I'll help you transition smoothly to modern solutions that keep your business running while setting you up for the future."),
 
             new ServiceInfo("🚚", "Faster Delivery, Happier Customers",
-                "Speed up how you deliver updates and new services. Reduce delays, streamline your operations, and give your customers better experiences—every time."),
+                "Speed up how you deliver updates and new services. Reduce delays, streamline your operations, and give your customers better experiences - every time."),
 
             new ServiceInfo("📊", "Clear Insights from Your Data",
                 "Stop guessing. Get visual dashboards that turn your raw data into decisions you can act on - see what matters, when it matters."),
 
             new ServiceInfo("🤖", "Let AI Handle the Repetitive Stuff",
-                "Free up your time to focus on what matters. I help you automate tasks, catch issues early, and deliver smarter experiences — all powered by practical AI."),
+                "Free up your time to focus on what matters. I help you automate tasks, catch issues early, and deliver smarter experiences - all powered by practical AI."),
 
             new ServiceInfo("🤝", "Extended Expertise When You Need It",
-                "Need expertise beyond one person? I bring in trusted specialists to fill gaps and deliver complete solutions—so you get results without the hiring headache."),
+                "Need expertise beyond one person? I bring in trusted specialists to fill gaps and deliver complete solutions - so you get results without the hiring headache."),
 
             new ServiceInfo("🧪", "Launch with Confidence",
-                "No crossed fingers at launch. I test everything thoroughly so your solution works reliably from day one — giving you and your customers peace of mind."),
+                "No crossed fingers at launch. I test everything thoroughly so your solution works reliably from day one - giving you and your customers peace of mind."),
 
             new ServiceInfo("🔁", "We Build Together, Step by Step",
-                "Your input shapes every stage. I work in focused cycles so you see progress quickly, give feedback, and get exactly what your business needs—no surprises.")
+                "Your input shapes every stage. I work in focused cycles so you see progress quickly, give feedback, and get exactly what your business needs - no surprises.")
         ];
     }
 }

@@ -2,6 +2,7 @@
 
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
 }
 
 h1:focus {
@@ -125,17 +126,19 @@ code {
 }
 
 /* Scroll to Top Button Styles */
+/* Positioned above the chatbot FAB (56px tall at bottom: 24px) */
+/* right: 24px matches chatbot-widget right so both buttons are vertically aligned */
 .scroll-to-top {
     position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 1000;
+    bottom: 6rem;
+    right: 24px;
+    z-index: 9998;
     opacity: 0;
     visibility: hidden;
     transform: translateY(20px) scale(0.8);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
+/* Visible state with smooth fade and slide-up effect */
 .scroll-to-top.visible {
     opacity: 1;
     visibility: visible;
@@ -143,10 +146,12 @@ code {
 }
 
 /* Responsive positioning for mobile devices */
-@media (max-width: 768px) {
+/* Chatbot FAB is 56px at bottom:16px on mobile, top edge at 72px */
+/* right: 16px matches chatbot-widget mobile right */
+@media (max-width: 480px) {
     .scroll-to-top {
-        bottom: 1.5rem;
-        right: 1.5rem;
+        bottom: 5.5rem;
+        right: 16px;
     }
 }
 

@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <None Include=".github\workflows\azure-functions.yml" />
+    <None Include=".github\workflows\azure-static-web-apps.yml" />
   </ItemGroup>
 
   <ItemGroup>
