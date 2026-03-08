@@ -23,6 +23,7 @@ on:
       - master
     paths-ignore:
       - 'Api/**'  # Don't trigger for Api changes (handled by azure-functions.yml)
+      - '.github/workflows/azure-functions.yml'
       - '*.md'    # Don't trigger for markdown changes
   pull_request:
     types: [opened, synchronize, reopened, closed]
@@ -30,6 +31,7 @@ on:
       - master
     paths-ignore:
       - 'Api/**'
+      - '.github/workflows/azure-functions.yml'
       - '*.md'
   workflow_dispatch:  # Allow manual trigger
 
