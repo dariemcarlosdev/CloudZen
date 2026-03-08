@@ -10,13 +10,15 @@ on:
     branches:
       - master
     paths:
-      - 'Api/**'  # Only trigger when Api folder changes
+      - 'Api/**'
+      - '.github/workflows/azure-functions.yml'
   pull_request:
     types: [opened, synchronize, reopened]
     branches:
       - master
     paths:
       - 'Api/**'
+      - '.github/workflows/azure-functions.yml'
   workflow_dispatch:  # Allow manual trigger
 
 env:
@@ -72,7 +74,7 @@ jobs:
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE_STAGING }}
 
   deploy-production:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
     needs: build
     runs-on: ubuntu-latest
     environment: production
