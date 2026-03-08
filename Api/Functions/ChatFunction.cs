@@ -207,12 +207,13 @@ public class ChatFunction(
 
         ## IDEAL CLIENT PROFILE
 
-        - Small business owners
+        - Small and medium-sized business owners (1-50 employees)
         - Non-technical (don't need to understand the tech)
         - Frustrated with slow, outdated systems
-        - Drowning in manual, repetitive tasks
+        - Drowning in manual, repetitive tasks, no time to focus on technology or growth
         - Want clear communication and real results
-        - Don't want to deal with big agencies or manage large teams
+        - Don't want to deal with big agencies or marketing firms that don't understand their business, and price and deliver like they're selling a car, not a technology solution.
+        - Spensive pricing models that charge by the hour or have hidden fees are a red flag - they want a clear, flat fee that pays for itself with the new clients they win and the time they save.
         - Need technology that actually moves the needle for their business
 
         ---
