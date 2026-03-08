@@ -464,12 +464,14 @@ public record CorsSettings(string[] AllowedOrigins)
 {
     /// <summary>
     /// Checks if the specified origin is allowed by CORS policy.
+    /// Supports wildcard "*" to allow any origin (intended for staging environments only).
     /// </summary>
     /// <param name="origin">The origin to check.</param>
     /// <returns>True if the origin is allowed, false otherwise.</returns>
     public bool IsOriginAllowed(string? origin)
     {
         if (string.IsNullOrEmpty(origin)) return false;
+        if (AllowedOrigins.Contains("*")) return true; // only for staging/testing, not recommended for production
         return AllowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
     }
 }

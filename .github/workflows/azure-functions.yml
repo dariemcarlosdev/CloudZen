@@ -1,20 +1,32 @@
 name: Deploy Azure Function
 
+# Blue/Green Deployment Strategy:
+#   - PRODUCTION: Push to 'master' deploys to the live Function App.
+#   - STAGING: Pull requests to 'master' deploy to a separate staging Function App
+#     for testing alongside the SWA preview environment.
+
 on:
   push:
     branches:
       - master
     paths:
       - 'Api/**'  # Only trigger when Api folder changes
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - master
+    paths:
+      - 'Api/**'
   workflow_dispatch:  # Allow manual trigger
 
 env:
-  AZURE_FUNCTIONAPP_NAME: 'cloudzen-api-func-e4gehdaef9ftdhbn'  # Your Azure Function App name from Azure Portal
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'Api'  # Path to your function app project
+  AZURE_FUNCTIONAPP_NAME: 'cloudzen-api-func-e4gehdaef9ftdhbn' # Update if your production Function App hostname differs
+  AZURE_FUNCTIONAPP_NAME_STAGING: 'cloudzen-api-func-staging' # Update if your staging Function App hostname differs
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'Api' # Path to your Azure Function project
   DOTNET_VERSION: '8.0.x'
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -34,7 +46,44 @@ jobs:
       - name: Publish
         run: dotnet publish ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }} --configuration Release --no-build --output ./output
 
-      - name: Deploy to Azure Functions
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-app
+          path: ./output
+
+  deploy-staging:
+    if: github.event_name == 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: function-app
+          path: ./output
+
+      - name: Deploy to Staging Function App
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME_STAGING }}
+          package: './output'
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE_STAGING }}
+
+  deploy-production:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: function-app
+          path: ./output
+
+      - name: Deploy to Production Function App
         uses: Azure/functions-action@v1
         with:
           app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
