@@ -187,8 +187,9 @@ Add these application settings:
 | `KEY_VAULT_ENDPOINT` | `https://cloudzenvault.vault.azure.net/` | *(Optional)* Azure Key Vault URI for secrets management |
 | `EmailSettings:FromEmail` | `cloudzen.inc@gmail.com` | Sender email address |
 | `EmailSettings:CcEmail` | `softevolutionsl@gmail.com` | CC email address |
-| `ProductionOrigin` | `https://your-app.azurestaticapps.net` | Your Static Web App URL (added to CORS allowed origins) |
-| `AllowedOrigins:0` | `https://your-app.azurestaticapps.net` | *(Optional)* Explicit CORS origin list (overrides defaults) |
+| `ProductionOrigin` | `https://www.cloud-zen.net` | Your Static Web App URL (added to CORS allowed origins) |
+| `AllowedOrigins:0` | `https://www.cloud-zen.net` | *(Optional)* Explicit CORS origin list (overrides defaults) |
+| `AllowedOrigins:1` | `https://lively-flower-02783cd0f.3.azurestaticapps.net` | *(Optional)* Azure-assigned SWA origin |
 | `RateLimiting:PermitLimit` | `10` | Max requests per window |
 | `RateLimiting:WindowSeconds` | `60` | Rate limit window in seconds |
 | `RateLimiting:QueueLimit` | `0` | Queue limit for excess requests |
@@ -215,57 +216,19 @@ To set up:
 
 ## CORS Configuration
 
-CORS is configured at two levels. Both must be aligned.
+CORS is configured at two levels:
 
-### Level 1: `host.json` (Azure Functions Host)
+### Level 1: Application Code (`Api/Program.cs`)
 
-The `Api/host.json` file configures the HTTP extension with CORS origins, HSTS, and security headers:
+CORS origins are resolved at runtime in `Program.cs` with the following priority:
 
-```json
-{
-  "extensions": {
-    "http": {
-      "routePrefix": "api",
-      "cors": {
-        "allowedOrigins": [
-          "https://localhost:5001",
-          "https://localhost:7001",
-          "http://localhost:5000",
-          "https://localhost:44370",
-          "http://localhost:44370",
-          "https://localhost:7257",
-          "http://localhost:7257"
-        ],
-        "supportCredentials": false
-      },
-      "hsts": {
-        "isEnabled": true,
-        "maxAge": "365.00:00:00",
-        "includeSubDomains": true,
-        "preload": true
-      },
-      "customHeaders": {
-        "X-Content-Type-Options": "nosniff",
-        "X-Frame-Options": "DENY",
-        "X-XSS-Protection": "1; mode=block",
-        "Referrer-Policy": "strict-origin-when-cross-origin",
-        "Permissions-Policy": "geolocation=(), microphone=(), camera=()"
-      }
-    }
-  }
-}
-```
-
-### Level 2: Application Code (`Api/Program.cs`)
-
-CORS origins are also resolved at runtime in `Program.cs` with the following priority:
-
-1. **`AllowedOrigins` configuration section** -- If set, these are used as-is.
-2. **Development defaults** -- If no `AllowedOrigins` are configured and `AZURE_FUNCTIONS_ENVIRONMENT=Development`, falls back to:
+1. **`AllowedOrigins` configuration section** -- If set (via Azure Environment Variables), these are used as-is.
+2. **`ProductionOrigin`** -- If `AllowedOrigins` is not set, falls back to this single origin.
+3. **Development defaults** -- If neither is set and `AZURE_FUNCTIONS_ENVIRONMENT=Development`, falls back to:
    - `https://localhost:7243` (Blazor WASM Kestrel HTTPS)
    - `http://localhost:5054` (Blazor WASM Kestrel HTTP)
-3. **Production enforcement** -- If neither `AllowedOrigins` nor development mode is detected, the app throws at startup.
-4. **`ProductionOrigin`** -- Always appended if set and not already present.
+4. **Production enforcement** -- If none of the above are configured, the app throws at startup.
+5. **`ProductionOrigin` append** -- Always appended if set and not already present in the resolved list.
 
 Origins are registered via a `CorsSettings` singleton and applied per-request by each Function using extension methods:
 
@@ -274,18 +237,19 @@ Origins are registered via a `CorsSettings` singleton and applied per-request by
 req.HttpContext.Response.AddCorsHeaders(req, _corsSettings);
 ```
 
-### Level 3: Azure Portal (Recommended for Production)
+### Level 2: Azure Portal (Recommended for Production)
 
 1. Go to **Function App** > **API** > **CORS**
 2. Add allowed origins:
 
 ```
-https://your-static-web-app.azurestaticapps.net
+https://www.cloud-zen.net
+https://lively-flower-02783cd0f.3.azurestaticapps.net
 ```
 
 3. Click **Save**
 
-> **Note:** When deploying to production, ensure the production Static Web App URL is configured in at least one of these levels.
+> **Note:** The `host.json` CORS section has been intentionally removed. When Azure Portal CORS is configured, it overrides `host.json` CORS anyway. Having both can cause conflicts. CORS is managed exclusively via Azure Portal settings and the `Program.cs` runtime logic (which reads `AllowedOrigins` / `ProductionOrigin` from Azure Environment Variables).
 
 ---
 
@@ -345,7 +309,7 @@ The Blazor WASM client uses environment-specific configuration files:
 The `Content-Security-Policy` and `connect-src` directives must include the Function App URL to allow API calls from the deployed Blazor app:
 
 ```
-connect-src 'self' https://cloudzen-api-func-e4gehdaef9ftdhbn.westus2-01.azurewebsites.net;
+connect-src 'self' https://cloudzen-api-func-e4gehdaef9ftdhbn.westus2-01.azurewebsites.net https://www.cloud-zen.net;
 ```
 
 ---
@@ -437,10 +401,9 @@ curl -X POST https://cloudzen-api-func-e4gehdaef9ftdhbn.westus2-01.azurewebsites
 **Cause:** Origin not allowed at one or more CORS levels.
 
 **Solution:**
-1. Verify `host.json` includes the origin
-2. Set `ProductionOrigin` or `AllowedOrigins` environment variables in Azure Portal
-3. Add origin in Azure Portal > **API** > **CORS**
-4. Ensure `staticwebapp.config.json` `connect-src` includes the Function App URL
+1. Set `ProductionOrigin` or `AllowedOrigins` environment variables in Azure Portal
+2. Add origin in Azure Portal > **API** > **CORS**
+3. Ensure `staticwebapp.config.json` `connect-src` includes the Function App URL
 
 #### 4. Function Not Found (404)
 
@@ -621,7 +584,7 @@ CloudZen/
 - [x] Deployment successful
 - [ ] Add Environment Variables in Azure Portal
 - [ ] Configure `KEY_VAULT_ENDPOINT` and Managed Identity (optional)
-- [ ] Configure CORS with Static Web App URL (Portal + `ProductionOrigin`)
+- [ ] Configure CORS with Static Web App URL (Portal + `ProductionOrigin` = `https://www.cloud-zen.net`)
 - [ ] Update `appsettings.Production.json` with Function URL
 - [ ] Update `staticwebapp.config.json` CSP `connect-src` with Function URL
 - [ ] Test contact form end-to-end
