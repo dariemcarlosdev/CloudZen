@@ -7,6 +7,7 @@ using Polly.CircuitBreaker;
 using Polly.RateLimiting;
 using System.Collections.Concurrent;
 using System.Threading.RateLimiting;
+using CloudZen.Api.Security;
 
 namespace CloudZen.Api.Services;
 
@@ -153,7 +154,7 @@ public class PollyRateLimiterService : IRateLimiterService, IDisposable
     /// <returns>A new <see cref="ClientRateLimiter"/> instance with configured strategies.</returns>
     private ClientRateLimiter CreateClientLimiter(string key)
     {
-        _logger.LogDebug("Creating new rate limiter for key: {Key}", key);
+        _logger.LogDebug("Creating new rate limiter for key: {Key}", InputValidator.SanitizeForLogging(key));
 
         var rateLimiter = new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions
         {
