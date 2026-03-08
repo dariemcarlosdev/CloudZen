@@ -22,15 +22,6 @@
             "maxConcurrentRequests": 100,
             "maxOutstandingRequests": 200,
             "dynamicThrottlesEnabled": true,
-            //"cors": {
-            //    "allowedOrigins": [
-            //        "https://www.cloud-zen.net",
-            //        "https://lively-flower-02783cd0f.3.azurestaticapps.net",
-            //        "https://localhost:7243",
-            //        "http://localhost:5054"
-            //    ],
-            //    "supportCredentials": false
-            //},
             "hsts": {
                 "isEnabled": true,
                 "maxAge": "365.00:00:00",
