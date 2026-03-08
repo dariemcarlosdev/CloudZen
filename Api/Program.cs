@@ -83,6 +83,11 @@ if (configuredOrigins is not null && configuredOrigins.Length > 0)
 {
     allowedOrigins = configuredOrigins;
 }
+else if (!string.IsNullOrEmpty(productionOrigin))
+{
+    // Fallback: use ProductionOrigin as the sole allowed origin
+    allowedOrigins = [productionOrigin];
+}
 else if (isDevelopment)
 {
     // Local development defaults matching Blazor WASM launchSettings.json
@@ -96,11 +101,12 @@ else
 {
     // Production: require explicit configuration
     throw new InvalidOperationException(
-        "CORS 'AllowedOrigins' must be configured in production. " +
-        "Set the 'AllowedOrigins' configuration section with allowed domains.");
+        "CORS 'AllowedOrigins' or 'ProductionOrigin' must be configured in production. " +
+        "Set the 'AllowedOrigins' configuration section with allowed domains, " +
+        "or set 'ProductionOrigin' with the primary allowed origin.");
 }
 
-// Add production origin if specified
+// Add production origin if specified and not already included
 if (!string.IsNullOrEmpty(productionOrigin) && !allowedOrigins.Contains(productionOrigin))
 {
     allowedOrigins = [.. allowedOrigins, productionOrigin];
