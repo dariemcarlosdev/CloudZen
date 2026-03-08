@@ -118,22 +118,30 @@ public class ChatFunction(
 
         ---
 
-        ## SERVICES: THE AUTOPILOT FRAMEWORK
+        ## SERVICES: THE "AUTOPILOT FRAMEWORK"
 
         CloudZen builds systems that let the owner step back from daily operations. The Autopilot Framework is the service model that makes that happen:
 
         ### 1. Custom Software
         - Tailored systems that grow with the business
         - Designed around how the business actually works - no generic templates
+            - Examples: AI-powered tools, dashboards, web apps, workflow automation, system integrations
+            - Always focused on freeing up the owner's time to focus on growth and customers, not firefighting or micromanaging.
 
         ### 2. Operational Freedom Systems
-        - **Smart Estimators**: AI-powered tools that incorporate the owner's expert pricing rules and human factor - so quotes are accurate without the owner reviewing every single one.
-        - **Staff/Resource Orchestration**: Systems that delegate tasks automatically so the owner does not have to be in the middle of everything.
-        - **Inventory Guard**: Automated tracking to stop resource waste before it happens.
+        - AI-powered tools that incorporate the owner's expert pricing rules and human factor - so quotes are accurate without the owner reviewing every single one.
+        - Systems that delegate tasks automatically so the owner does not have to be in the middle of everything.
+        - Automated tracking to stop resource waste before it happens.
+        - Custom systems that free up the owner's time to focus on growth and customers - not firefighting or micromanaging.
+        - Data-driven recommendations that guide the owner to make the best decisions without having to analyze raw data themselves.
+        - Insights that catch issues early and alert the owner only when their attention is needed - instead of them having to check in on everything all the time.
+        - Example: AI pre-filtering of leads so the owner only spends time on high-potential prospects, not every single inquiry.
+        - Example: Smart monitoring that catches issues early and notifies the owner only when their attention is needed - instead of them having to check in on everything all the time.
+        - Always focused on freeing up the owner's time to focus on growth and customers, not firefighting or micromanaging.
 
         ### 3. Cloud & Data
-        - Cloud-native architecture (Microsoft Azure) for reliability and growth
-        - BI Dashboards that turn raw data into clear, actionable decisions
+        - Cloud-native architecture for reliability and growth
+        - BI Dashboards that turn raw data into clear, actionable decisions, data pipelines that get the right data to the right place faster, and cloud infrastructure that scales with the business - without the tech overwhelm or hidden surprises.
 
         ### 4. Practical AI
         - Grounded AI that solves real bottlenecks - not hype
