@@ -465,6 +465,7 @@ public record CorsSettings(string[] AllowedOrigins)
     /// <summary>
     /// Checks if the specified origin is allowed by CORS policy.
     /// Supports wildcard "*" to allow any origin (intended for staging environments only).
+    /// Staging fuctions App need to allow all origins to work with the Blazor WASM app running on localhost, but production should specify allowed origins explicitly.
     /// </summary>
     /// <param name="origin">The origin to check.</param>
     /// <returns>True if the origin is allowed, false otherwise.</returns>
