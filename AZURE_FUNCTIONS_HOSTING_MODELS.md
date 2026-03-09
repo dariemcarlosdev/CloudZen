@@ -665,6 +665,8 @@ dotnet build CloudZen.sln
 
 ### CloudZen Documentation
 - [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - Complete Azure deployment instructions
+- [BLUE_GREEN_DEPLOYMENT.md](BLUE_GREEN_DEPLOYMENT.md) - Staging/production blue/green deployment setup
+- [AZURE_FUNCTION_DEPLOYMENT.md](AZURE_FUNCTION_DEPLOYMENT.md) - Function App deployment details
 - [SECURITY_ALERT.md](SECURITY_ALERT.md) - Security best practices for Blazor + Azure Functions
 - [COMPONENT_ARCHITECTURE.md](COMPONENT_ARCHITECTURE.md) - Frontend component design
 

@@ -2,6 +2,8 @@
 
 This guide will walk you through configuring your Azure services (Static Web App, Key Vault, Blob Storage) and your application to work with them.
 
+> **See also:** [BLUE_GREEN_DEPLOYMENT.md](BLUE_GREEN_DEPLOYMENT.md) for staging/production (blue/green) deployment setup · [AZURE_FUNCTION_DEPLOYMENT.md](AZURE_FUNCTION_DEPLOYMENT.md) · [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)
+
 ## Important: Blazor WebAssembly Limitations
 
 **Your application is Blazor WebAssembly**, which runs entirely in the browser. This means:

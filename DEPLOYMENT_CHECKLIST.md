@@ -171,8 +171,25 @@ Your deployment is successful when:
 - ✔️ GitHub Actions workflow completes successfully
 - ✔️ No console errors in browser DevTools
 
+### 9️⃣ Blue/Green Deployment (Staging/Production)
+> Full guide: [BLUE_GREEN_DEPLOYMENT.md](BLUE_GREEN_DEPLOYMENT.md)
+
+- [ ] Create staging Function App (`cloudzen-api-func-staging-*`)
+- [ ] Set staging `AllowedOrigins__0 = *` and `FUNCTIONS_WORKER_RUNTIME = dotnet-isolated`
+- [ ] Set production `FUNCTIONS_WORKER_RUNTIME = dotnet-isolated`
+- [ ] Create `wwwroot/appsettings.Staging.json` with staging Function App URL
+- [ ] Add `AZURE_FUNCTIONAPP_PUBLISH_PROFILE_STAGING` to GitHub Secrets
+- [ ] Create `production` and `staging` GitHub Environments (Settings → Environments)
+- [ ] Update `azure-functions.yml` with `deploy-staging` and `deploy-production` jobs
+- [ ] Update `azure-static-web-apps.yml` with staging config swap step
+- [ ] Verify trigger matrix (SWA ignores Api/*, Functions targets Api/*)
+- [ ] Test: create PR → verify preview URL uses staging backend
+- [ ] Test: merge PR → verify production deploys, preview env destroyed
+
 ---
 
-**Need detailed instructions?** See `deployment_guide.md`
+**Need detailed instructions?** See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+
+**Blue/green deployment?** See [BLUE_GREEN_DEPLOYMENT.md](BLUE_GREEN_DEPLOYMENT.md)
 
 **Security concerns?** See `SECURITY_ALERT.md`
