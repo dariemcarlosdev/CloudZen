@@ -6,17 +6,37 @@ This document provides comprehensive documentation of all security enhancements 
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Rate Limiting](#1-rate-limiting)
-3. [Input Validation & Sanitization](#2-input-validation--sanitization)
-4. [Security Headers](#3-security-headers)
-5. [CORS Configuration](#4-cors-configuration)
-6. [Azure Key Vault Integration](#5-azure-key-vault-integration)
-7. [HTTP Security](#6-http-security)
-8. [Logging Security](#7-logging-security)
-9. [Request Throttling](#8-request-throttling)
-10. [Configuration Summary](#configuration-summary)
-11. [Security Checklist](#security-checklist)
+1. [OWASP Top 10 Compliance](#owasp-top-10-compliance)
+2. [Overview](#overview)
+3. [Rate Limiting](#1-rate-limiting)
+4. [Input Validation & Sanitization](#2-input-validation--sanitization)
+5. [Security Headers](#3-security-headers)
+6. [CORS Configuration](#4-cors-configuration)
+7. [Azure Key Vault Integration](#5-azure-key-vault-integration)
+8. [HTTP Security](#6-http-security)
+9. [Logging Security](#7-logging-security)
+10. [Request Throttling](#8-request-throttling)
+11. [Configuration Summary](#configuration-summary)
+12. [Security Checklist](#security-checklist)
+
+---
+
+## OWASP Top 10 Compliance
+
+The table below maps each OWASP Top 10 (2021) category to the controls implemented in this application.
+
+| # | OWASP Category | Status | Controls |
+|---|---------------|--------|----------|
+| A01 | **Broken Access Control** | ✅ Mitigated | Rate limiting per client IP; path traversal detection (`InputValidator.ContainsPathTraversal`); CORS strict origin validation; functions accept only expected HTTP methods |
+| A02 | **Cryptographic Failures** | ✅ Mitigated | HSTS enforced via `host.json` and `Strict-Transport-Security` response header; secrets stored in Azure Key Vault; TLS (STARTTLS) for SMTP; SSL certificate validation restricted to revocation-only bypasses |
+| A03 | **Injection** | ✅ Mitigated | XSS pattern detection covering 35+ attack vectors (script tags, event handlers, data URIs, dangerous HTML elements, SSTI); SQL injection pattern detection; HTML output encoded with `WebUtility.HtmlEncode` |
+| A04 | **Insecure Design** | ✅ Mitigated | Defense-in-depth: rate limiting + input validation + security headers + CORS; request body size limits; JSON deserialization depth limits; AI response token budget and truncation |
+| A05 | **Security Misconfiguration** | ✅ Mitigated | Security headers on all responses (X-Frame-Options, CSP, HSTS, Referrer-Policy, Permissions-Policy, X-Content-Type-Options); CORS requires explicit origin configuration in production; Key Vault credentials limited to required types only |
+| A06 | **Vulnerable and Outdated Components** | ⚠️ Recommended | Enable Dependabot or GitHub Advanced Security for automated dependency vulnerability scanning; review NuGet package versions regularly |
+| A07 | **Identification and Authentication Failures** | ✅ Mitigated | Per-client rate limiting with circuit breaker prevents brute-force and credential stuffing; correlation ID tracking for anomaly detection |
+| A08 | **Software and Data Integrity Failures** | ✅ Mitigated | JSON deserialization depth limits (`MaxDepth = 10`); request body size enforcement; content validated before processing |
+| A09 | **Security Logging and Monitoring Failures** | ✅ Mitigated | Structured logging with correlation IDs; PII masking (emails → `[email]`, tokens → `[token]`); Application Insights with adaptive sampling; health monitoring in `host.json` |
+| A10 | **Server-Side Request Forgery (SSRF)** | ✅ Mitigated | Outbound HTTP calls use only hardcoded, trusted URLs (Anthropic API); `InputValidator.ValidateUrl` enforces HTTPS-only scheme and blocks private/loopback IP ranges; `IHttpClientFactory` used for all HTTP clients |
 
 ---
 
@@ -454,7 +474,7 @@ _logger.LogInformation("SendEmail function triggered from {ClientIp}",
   - `Api/Models/Options/RateLimitOptions.cs` → configurable `PermitLimit`, `WindowSeconds`, `QueueLimit`
 
 - [x] **XSS protection (input validation)**
-  - `Api/Security/InputValidator.cs` → `DangerousPatterns` HashSet (`<script`, `javascript:`, `onerror=`, `eval(`, etc.)
+  - `Api/Security/InputValidator.cs` → `DangerousPatterns` HashSet — 35+ patterns covering script tags (`<script`, `</script`), protocol handlers (`javascript:`, `vbscript:`), data URIs (`data:text/html`, `data:application/javascript`), dangerous HTML elements (`<iframe`, `<frame`, `<object`, `<embed`), event handlers (`onerror=`, `onclick=`, `onload=`, `onmouseover=`, `onfocus=`, `onblur=`, `onchange=`, `onsubmit=`, `onkeydown=` and more), code execution (`eval(`, `expression(`), SSTI patterns (`${`, `#{`, `<%=`).
   - `Api/Security/InputValidator.cs` → `ContainsDangerousContent()` checked by `ValidateTextInput()` and `ValidateEmail()`
   - `Api/Functions/ChatFunction.cs` → message role and content validation in `Run()` foreach loop
 
@@ -466,7 +486,7 @@ _logger.LogInformation("SendEmail function triggered from {ClientIp}",
   - `Api/Security/InputValidator.cs` → `SanitizeHtml()` using `WebUtility.HtmlEncode()` before rendering user content in emails
 
 - [x] **Security headers on all responses**
-  - `Api/Security/InputValidator.cs` → `SecurityHeadersExtensions.AddSecurityHeaders()` extension method (X-Frame-Options, X-Content-Type-Options, CSP, Cache-Control, etc.)
+  - `Api/Security/InputValidator.cs` → `SecurityHeadersExtensions.AddSecurityHeaders()` extension method (X-Frame-Options, X-Content-Type-Options, X-XSS-Protection, Referrer-Policy, CSP, Permissions-Policy, **Strict-Transport-Security**, Cache-Control)
   - `Api/Functions/SendEmailFunction.cs:96` → `req.HttpContext.Response.AddSecurityHeaders()`
   - `Api/Functions/ChatFunction.cs` → `req.HttpContext.Response.AddSecurityHeaders()`
   - `Api/host.json:43-49` → `customHeaders` block (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy)
@@ -481,6 +501,7 @@ _logger.LogInformation("SendEmail function triggered from {ClientIp}",
 
 - [x] **HSTS enabled**
   - `Api/host.json:37-42` → `hsts` block (`isEnabled: true`, `maxAge: 365 days`, `includeSubDomains: true`, `preload: true`)
+  - `Api/Security/InputValidator.cs` → `AddSecurityHeaders()` → `Strict-Transport-Security: max-age=31536000; includeSubDomains; preload` response header on all function responses
 
 - [x] **Azure Key Vault integration**
   - `Api/Program.cs:28-45` → `AddAzureKeyVault()` with `DefaultAzureCredential` (Managed Identity, Azure CLI, environment credentials enabled; Visual Studio, VS Code, Interactive Browser excluded)
@@ -507,6 +528,17 @@ _logger.LogInformation("SendEmail function triggered from {ClientIp}",
   - `Api/Functions/SendEmailFunction.cs:100-106` → reads `X-Correlation-Id` header or generates `Guid.NewGuid()`, used in `ILogger.BeginScope()`
   - `Api/Functions/ChatFunction.cs` → same pattern with `correlationId` in logger scope dictionary
 
+- [x] **Path traversal protection (OWASP A01: Broken Access Control)**
+  - `Api/Security/InputValidator.cs` → `ContainsPathTraversal()` — detects `../`, `..\`, `/../`, `\..`, URL-encoded variants (`%2e%2e`, `%2e%2e%2f`)
+  - `Api/Security/InputValidator.cs` → `ValidateTextInput()` — calls `ContainsPathTraversal()` on all text inputs
+
+- [x] **SSRF protection (OWASP A10: Server-Side Request Forgery)**
+  - `Api/Security/InputValidator.cs` → `ValidateUrl()` — enforces HTTPS-only scheme, checks against a host allowlist, and blocks private/loopback IP address ranges (10.x, 172.16-31.x, 192.168.x, 169.254.x, loopback, IPv6 ULA/link-local)
+  - `Api/Functions/ChatFunction.cs` → outbound Anthropic API URL is a hardcoded constant (`AnthropicApiUrl`), never constructed from user input
+
+- [x] **SSL/TLS certificate validation (OWASP A02: Cryptographic Failures)**
+  - `Api/Functions/SendEmailFunction.cs` → `ServerCertificateValidationCallback` now rejects all SSL errors except revocation-related chain errors (since `CheckCertificateRevocation = false`), preventing MITM attacks
+
 - [x] **Health monitoring**
   - `Api/host.json:53-59` → `healthMonitor` block (`enabled: true`, `healthCheckInterval: 10s`, `healthCheckWindow: 2min`, `counterThreshold: 0.80`)
 
@@ -521,7 +553,7 @@ _logger.LogInformation("SendEmail function triggered from {ClientIp}",
   - `Api/Functions/ChatFunction.cs` → rate limit detection → `429 Too Many Requests`
   - `Api/Functions/ChatFunction.cs` → timeout detection, generic HTTP error, JSON parse error — each with specific status codes and user messages
 
-### ?? Recommended Additional Measures
+### ⚠️ Recommended Additional Measures
 
 - [ ] API key authentication for sensitive endpoints
 - [ ] Azure AD/Entra ID integration for user auth
@@ -529,7 +561,7 @@ _logger.LogInformation("SendEmail function triggered from {ClientIp}",
 - [ ] IP allowlisting for admin functions
 - [ ] Penetration testing
 - [ ] Security audit logging to Azure Sentinel
-- [ ] Automated vulnerability scanning in CI/CD
+- [ ] Automated vulnerability scanning in CI/CD (A06: Vulnerable and Outdated Components)
 
 ---
 
@@ -539,6 +571,7 @@ _logger.LogInformation("SendEmail function triggered from {ClientIp}",
 |---------|------|---------|
 | 1.0.0 | 2024 | Initial security implementation (rate limiting, input validation, CORS, Key Vault, security headers) |
 | 1.1.0 | March 2026 | Added ChatFunction security (AI chatbot abuse prevention, token controls, response truncation, Anthropic error classification) |
+| 1.2.0 | March 2026 | OWASP Top 10 compliance review: expanded XSS patterns (35+ vectors), path traversal detection (A01), SSRF prevention with private IP blocking (A10), SSL certificate validation hardened (A02), HSTS header added to all function responses (A02/A05) |
 
 ---
 
