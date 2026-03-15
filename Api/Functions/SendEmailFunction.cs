@@ -274,19 +274,27 @@ public class SendEmailFunction(
         // This is required because revocation servers may be unreachable in some networks
         client.CheckCertificateRevocation = false;
 
-        // Configure certificate validation to accept Brevo's certificate
-        // This callback always returns true because:
-        // 1. We're connecting to a known, trusted server (smtp-relay.brevo.com)
-        // 2. The connection still uses TLS encryption
-        // 3. Revocation check failures are common in restricted networks
+        // Configure certificate validation for Brevo's SMTP server.
+        // CheckCertificateRevocation is already disabled above, so revocation-related chain
+        // errors are expected and acceptable. All other errors (name mismatch, untrusted root,
+        // etc.) are rejected to prevent MITM attacks (OWASP A02: Cryptographic Failures).
         client.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
         {
-            if (sslPolicyErrors != System.Net.Security.SslPolicyErrors.None)
+            if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
+                return true;
+
+            // Allow chain errors caused only by revocation check being disabled
+            if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors &&
+                chain != null &&
+                chain.ChainStatus.All(status =>
+                    status.Status == System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.RevocationStatusUnknown ||
+                    status.Status == System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.OfflineRevocation))
             {
-                _logger.LogWarning("SSL certificate validation bypassed for Brevo SMTP. Errors: {Errors}", sslPolicyErrors);
+                return true;
             }
-            // Always accept for Brevo's trusted SMTP server
-            return true;
+
+            _logger.LogError("SSL certificate validation failed for Brevo SMTP. Errors: {Errors}", sslPolicyErrors);
+            return false;
         };
 
         // Connect with STARTTLS
