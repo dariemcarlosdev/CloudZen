@@ -16,18 +16,60 @@ public static partial class InputValidator
 {
     /// <summary>
     /// Collection of dangerous patterns commonly used in XSS and injection attacks.
+    /// Covers OWASP A03:2021 – Injection threat vectors including script injection,
+    /// JavaScript protocol handlers, HTML event handlers, and dangerous HTML elements.
     /// </summary>
     private static readonly HashSet<string> DangerousPatterns = new(StringComparer.OrdinalIgnoreCase)
     {
+        // Script injection
         "<script",
+        "</script",
+        // JavaScript and VBScript protocol handlers
         "javascript:",
+        "vbscript:",
+        // Data URI injection
+        "data:text/html",
+        "data:application/javascript",
+        // Dangerous HTML elements that can execute scripts or load remote content
+        "<iframe",
+        "<frame",
+        "<object",
+        "<embed",
+        // Mouse/pointer event handlers
         "onerror=",
         "onclick=",
         "onload=",
+        "onmouseover=",
+        "onmouseout=",
+        "onmousedown=",
+        "onmouseup=",
+        "onmousemove=",
+        "ondblclick=",
+        "oncontextmenu=",
+        // Focus/keyboard event handlers
+        "onfocus=",
+        "onblur=",
+        "onkeydown=",
+        "onkeypress=",
+        "onkeyup=",
+        // Form event handlers
+        "onchange=",
+        "onsubmit=",
+        "onreset=",
+        "onselect=",
+        "oninput=",
+        "oninvalid=",
+        // Document/window event handlers
+        "onabort=",
+        "onunload=",
+        "onbeforeunload=",
+        // Code execution
         "eval(",
         "expression(",
-        "vbscript:",
-        "data:text/html"
+        // Server-Side Template Injection (SSTI) patterns
+        "${",
+        "#{",
+        "<%=",
     };
 
     /// <summary>
@@ -131,6 +173,10 @@ public static partial class InputValidator
         if (ContainsSqlInjectionPatterns(input))
             return ValidationResult.Invalid($"{fieldName} contains invalid content.");
 
+        // Check for path traversal patterns (A01: Broken Access Control)
+        if (ContainsPathTraversal(input))
+            return ValidationResult.Invalid($"{fieldName} contains invalid content.");
+
         return ValidationResult.Valid();
     }
 
@@ -194,6 +240,148 @@ public static partial class InputValidator
         {
             if (input.Contains(pattern, StringComparison.OrdinalIgnoreCase))
                 return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Checks for path traversal patterns in the input string.
+    /// Prevents OWASP A01:2021 – Broken Access Control via directory traversal.
+    /// </summary>
+    /// <param name="input">The string input to check for path traversal patterns.</param>
+    /// <returns>
+    /// <c>true</c> if the input contains path traversal patterns; otherwise, <c>false</c>.
+    /// </returns>
+    public static bool ContainsPathTraversal(string input)
+    {
+        string[] traversalPatterns =
+        [
+            // Standard path traversal
+            "../", "..\\", "/..", "\\..",
+            // URL-encoded forward slash variants
+            "%2e%2e%2f", "%2e%2e/", "..%2f",
+            // URL-encoded backslash variants
+            "%2e%2e%5c", "%2e%2e\\", "..%5c",
+            // Double URL-encoded variants (bypass double-decode scenarios)
+            "%252e%252e%252f", "%252e%252e%255c",
+        ];
+        foreach (var pattern in traversalPatterns)
+        {
+            if (input.Contains(pattern, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Validates a URL against an allowlist of permitted hosts to prevent
+    /// Server-Side Request Forgery (SSRF) attacks (OWASP A10:2021).
+    /// </summary>
+    /// <param name="url">The URL to validate.</param>
+    /// <param name="allowedHosts">
+    /// A non-empty array of permitted hostnames (e.g., "api.example.com").
+    /// Passing an empty array is a configuration error and will cause all URLs to be rejected.
+    /// </param>
+    /// <returns>
+    /// A <see cref="ValidationResult"/> indicating whether the URL is safe to use.
+    /// </returns>
+    /// <remarks>
+    /// Only HTTPS scheme URLs to known allowed hosts are permitted.
+    /// Private/loopback addresses and non-HTTPS schemes are rejected.
+    /// An empty <paramref name="allowedHosts"/> array is treated as deny-all for security.
+    /// </remarks>
+    public static ValidationResult ValidateUrl(string? url, string[] allowedHosts)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return ValidationResult.Invalid("URL is required.");
+
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
+            return ValidationResult.Invalid("Invalid URL format.");
+
+        // Only allow HTTPS scheme (A02: Cryptographic Failures)
+        if (!uri.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+            return ValidationResult.Invalid("Only HTTPS URLs are allowed.");
+
+        // Block private/loopback IP ranges to prevent SSRF to internal services (A10: SSRF)
+        var host = uri.Host;
+        if (IsPrivateOrLoopbackHost(host))
+            return ValidationResult.Invalid("URL points to a private or internal address.");
+
+        // Validate against the allowlist — an empty allowlist means no host is permitted (deny-all)
+        if (allowedHosts.Length == 0 || !allowedHosts.Contains(host, StringComparer.OrdinalIgnoreCase))
+            return ValidationResult.Invalid("URL host is not permitted.");
+
+        return ValidationResult.Valid();
+    }
+
+    /// <summary>
+    /// Determines whether a hostname or IP address refers to a private, loopback,
+    /// or link-local address that should be blocked to prevent SSRF attacks.
+    /// </summary>
+    /// <param name="host">The hostname or IP address string to check.</param>
+    /// <returns><c>true</c> if the host is private or loopback; otherwise, <c>false</c>.</returns>
+    private static bool IsPrivateOrLoopbackHost(string host)
+    {
+        // Block localhost and loopback hostnames
+        if (host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+            host.Equals("::1", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if (System.Net.IPAddress.TryParse(host, out var ip))
+        {
+            return System.Net.IPAddress.IsLoopback(ip) || IsPrivateIpAddress(ip);
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Checks whether an IP address falls within a private or link-local range.
+    /// </summary>
+    private static bool IsPrivateIpAddress(System.Net.IPAddress ip)
+    {
+        var bytes = ip.GetAddressBytes();
+
+        // IPv4 private ranges
+        if (bytes.Length == 4)
+        {
+            return bytes[0] == 10 ||                                        // 10.0.0.0/8
+                   (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) || // 172.16.0.0/12
+                   (bytes[0] == 192 && bytes[1] == 168) ||                  // 192.168.0.0/16
+                   (bytes[0] == 169 && bytes[1] == 254) ||                  // 169.254.0.0/16 (link-local)
+                   bytes[0] == 127;                                          // 127.0.0.0/8 (loopback)
+        }
+
+        // IPv6 private/link-local/loopback ranges
+        if (bytes.Length == 16)
+        {
+            // ::1 loopback (handled by IsLoopback but checked here for completeness)
+            if (System.Net.IPAddress.IsLoopback(ip)) return true;
+
+            // fc00::/7 — Unique Local Addresses (ULA)
+            if ((bytes[0] & 0xFE) == 0xFC) return true;
+
+            // fe80::/10 — link-local
+            if (bytes[0] == 0xFE && (bytes[1] & 0xC0) == 0x80) return true;
+
+            // fec0::/10 — deprecated site-local (still used in some environments)
+            if (bytes[0] == 0xFE && (bytes[1] & 0xC0) == 0xC0) return true;
+
+            // ::ffff:0:0/96 — IPv4-mapped IPv6 addresses (e.g., ::ffff:10.0.0.1)
+            // Bytes 0-9 are 0, bytes 10-11 are 0xFF
+            bool isIpv4Mapped = bytes[0] == 0 && bytes[1] == 0 && bytes[2] == 0 && bytes[3] == 0 &&
+                                 bytes[4] == 0 && bytes[5] == 0 && bytes[6] == 0 && bytes[7] == 0 &&
+                                 bytes[8] == 0 && bytes[9] == 0 && bytes[10] == 0xFF && bytes[11] == 0xFF;
+            if (isIpv4Mapped)
+            {
+                // Check the embedded IPv4 address (bytes 12-15)
+                return bytes[12] == 10 ||
+                       (bytes[12] == 172 && bytes[13] >= 16 && bytes[13] <= 31) ||
+                       (bytes[12] == 192 && bytes[13] == 168) ||
+                       (bytes[12] == 169 && bytes[13] == 254) ||
+                       bytes[12] == 127;
+            }
         }
 
         return false;
@@ -380,6 +568,9 @@ public static class SecurityHeadersExtensions
 
         // Permissions Policy (previously Feature-Policy)
         headers.TryAdd("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+
+        // HTTP Strict Transport Security — force HTTPS for 1 year (A02: Cryptographic Failures)
+        headers.TryAdd("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
 
         // Cache control for sensitive data
         headers.TryAdd("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
