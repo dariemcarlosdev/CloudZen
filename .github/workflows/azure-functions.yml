@@ -1,10 +1,26 @@
 name: Deploy Azure Function
 
-# Blue/Green Deployment Strategy:
-#   - PRODUCTION: Push to 'master' deploys to the live Function App.
-#   - STAGING: Pull requests to 'master' deploy to a separate staging Function App
-#     for testing alongside the SWA preview environment.
+# ==============================================================================
+# WORKFLOW OVERVIEW
+# ==============================================================================
+# This workflow implements a Blue/Green deployment strategy for an Azure Function App.
+# It is split into 3 jobs that run in sequence:
+#
+#   1. BUILD        – Compiles and packages the Function App (runs on every trigger).
+#   2. DEPLOY-STAGING    – Deploys to a staging Function App (runs ONLY on pull requests).
+#   3. DEPLOY-PRODUCTION – Deploys to the live Function App (runs ONLY on push/manual to master).
+#
+# Flow:  build ──► deploy-staging   (if PR)
+#                 ──► deploy-production (if push to master or manual trigger)
+# ==============================================================================
 
+# ==============================================================================
+# SECTION 1: TRIGGERS
+# Defines the events that cause this workflow to run.
+#   - push: Runs when code is pushed to 'master' (only if Api/ or this file changed).
+#   - pull_request: Runs when a PR targeting 'master' is opened/updated (same path filter).
+#   - workflow_dispatch: Allows running the workflow manually from the GitHub Actions UI.
+# ==============================================================================
 on:
   push:
     branches:
@@ -21,13 +37,25 @@ on:
       - '.github/workflows/azure-functions.yml'
   workflow_dispatch:  # Allow manual trigger
 
+# ==============================================================================
+# SECTION 2: GLOBAL ENVIRONMENT VARIABLES
+# Shared constants available to all jobs. Centralises names and versions so they
+# only need to be updated in one place.
+# ==============================================================================
 env:
-  AZURE_FUNCTIONAPP_NAME: 'cloudzen-api-func-e4gehdaef9ftdhbn' # Update if your production Function App hostname differs
-  AZURE_FUNCTIONAPP_NAME_STAGING: 'cloudzen-api-func-staging' # Update if your staging Function App hostname differs
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'Api' # Path to your Azure Function project
-  DOTNET_VERSION: '8.0.x'
+  AZURE_FUNCTIONAPP_NAME: 'cloudzen-api-func-e4gehdaef9ftdhbn' # Production Function App name
+  AZURE_FUNCTIONAPP_NAME_STAGING: 'cloudzen-api-func-staging'   # Staging Function App name
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: 'Api'                         # Path to the Azure Function project
+  DOTNET_VERSION: '8.0.x'                                       # .NET SDK version to use
 
 jobs:
+  # ============================================================================
+  # JOB 1: BUILD
+  # Runs on EVERY trigger (push, PR, manual).
+  # Restores NuGet packages, compiles the project in Release mode, publishes
+  # the output, and uploads it as a pipeline artifact so downstream deploy
+  # jobs can consume it.
+  # ============================================================================
   build:
     runs-on: ubuntu-latest
     steps:
@@ -39,15 +67,20 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      # Restore NuGet dependencies before building
       - name: Restore dependencies
         run: dotnet restore ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
 
+      # Compile the project in Release configuration
       - name: Build
         run: dotnet build ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }} --configuration Release --no-restore
 
+      # Create the deployment-ready package under ./output
       - name: Publish
         run: dotnet publish ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }} --configuration Release --no-build --output ./output
 
+      # Upload the published output as an artifact named 'function-app'
+      # so the deploy jobs can download and deploy it
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
@@ -55,11 +88,18 @@ jobs:
           path: ./output
           include-hidden-files: true
 
+  # ============================================================================
+  # JOB 2: DEPLOY TO STAGING
+  # Runs ONLY when the trigger is a pull_request.
+  # Downloads the build artifact and deploys it to the STAGING Function App
+  # using a publish profile stored in GitHub Secrets.
+  # This lets reviewers test the API changes alongside the SWA preview environment.
+  # ============================================================================
   deploy-staging:
     if: github.event_name == 'pull_request'
-    needs: build
+    needs: build                    # Waits for the build job to complete
     runs-on: ubuntu-latest
-    environment: staging
+    environment: staging            # Uses the 'staging' GitHub environment (for secrets/protection rules)
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -67,6 +107,7 @@ jobs:
           name: function-app
           path: ./output
 
+      # Deploy the artifact to the staging Azure Function App
       - name: Deploy to Staging Function App
         uses: Azure/functions-action@v1
         with:
@@ -74,11 +115,16 @@ jobs:
           package: './output'
           publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE_STAGING }}
 
+  # ============================================================================
+  # JOB 3: DEPLOY TO PRODUCTION
+  # Runs ONLY when code is pushed to 'master' or the workflow is triggered manually.
+  # Downloads the build artifact and deploys it to the PRODUCTION Function App.
+  # ============================================================================
   deploy-production:
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
-    needs: build
+    needs: build                    # Waits for the build job to complete
     runs-on: ubuntu-latest
-    environment: production
+    environment: production         # Uses the 'production' GitHub environment (for secrets/protection rules)
     steps:
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -86,6 +132,7 @@ jobs:
           name: function-app
           path: ./output
 
+      # Deploy the artifact to the production Azure Function App
       - name: Deploy to Production Function App
         uses: Azure/functions-action@v1
         with:
