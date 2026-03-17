@@ -1,22 +1,37 @@
-# Azure CloudZen Static Web Apps CI/CD
+# ==============================================================================
+# WORKFLOW OVERVIEW
+# ==============================================================================
+# This workflow implements a Blue/Green deployment strategy for the Blazor WASM
+# Static Web App. It is split into 4 jobs:
 #
-# Blue/Green Deployment Strategy:
-#   - PRODUCTION: Push to 'master' deploys to the live Static Web App.
-#   - STAGING: Pull requests to 'master' auto-create a preview environment
-#     with a unique URL, built with staging configuration (staging Function App).
-#   - SWAP (Staging to Production): Merging a PR with a preview environment triggers a swap, making the preview live and the old production environment becomes the new staging environment for the next PR. The old staging environment is then destroyed. This allows for zero-downtime deployments and easy rollbacks by simply reverting the merge.
-#     environment is automatically destroyed on PR close.
+#   1. BUILD             – Compiles and publishes the Blazor WASM app (runs on every trigger).
+#                          For PRs, staging config is applied before publish so the preview
+#                          environment points to the staging Function App.
+#   2. DEPLOY-STAGING    – Deploys to an SWA preview environment (runs ONLY on pull requests).
+#   3. DEPLOY-PRODUCTION – Deploys to the live Static Web App (runs ONLY on push/manual to master).
+#   4. CLOSE-STAGING     – Destroys the preview environment when a PR is closed/merged.
 #
-# Build & Deploy Pipeline:
-#   1. "dotnet publish" compiles the Blazor WASM app and outputs to "publish_output/wwwroot".
-#   2. "skip_app_build: true" tells Azure Static Web Apps to skip its built-in Oryx build
-#      engine and just upload the pre-built files. This means the portal's Build Details
-#      settings (App location, Api location, Artifact location) are ignored entirely.
-#   3. "app_location: publish_output/wwwroot" tells the SWA deploy action where to find
-#      the pre-built files to upload.
+# Flow:  build ──► deploy-staging       (if PR opened/updated)
+#               ──► deploy-production   (if push to master or manual trigger)
+#        close-staging                  (if PR closed — independent, no build needed)
+#
+# Build & Deploy details:
+#   - "dotnet publish" compiles the Blazor WASM app and outputs to "publish_output/wwwroot".
+#   - "skip_app_build: true" tells Azure SWA to skip its built-in Oryx build engine and
+#     just upload the pre-built files. Portal Build Details settings are ignored entirely.
+#   - "app_location: publish_output/wwwroot" tells the SWA deploy action where to find
+#     the pre-built files to upload.
+# ==============================================================================
 
 name: Azure CloudZen Static Web Apps CI/CD
 
+# ==============================================================================
+# SECTION 1: TRIGGERS
+# Defines the events that cause this workflow to run.
+#   - push: Runs when code is pushed to 'master' (ignores Api/ and markdown changes).
+#   - pull_request: Runs when a PR targeting 'master' is opened, updated, or closed.
+#   - workflow_dispatch: Allows running the workflow manually from the GitHub Actions UI.
+# ==============================================================================
 on:
   push:
     branches:
@@ -35,34 +50,48 @@ on:
       - '*.md'
   workflow_dispatch:  # Allow manual trigger
 
+# ==============================================================================
+# SECTION 2: GLOBAL ENVIRONMENT VARIABLES
+# Shared constants available to all jobs. The hostnames are used to swap the
+# API endpoint when building for staging vs production.
+# ==============================================================================
 env:
-  # Update these if your staging Function App hostname differs
-  PRODUCTION_FUNC_HOSTNAME: 'cloudzen-api-func-e4gehdaef9ftdhbn.westus2-01.azurewebsites.net'
-  STAGING_FUNC_HOSTNAME: 'cloudzen-api-func-staging-hch0amaed0gke2dv.westus2-01.azurewebsites.net'
+  PRODUCTION_FUNC_HOSTNAME: 'cloudzen-api-func-e4gehdaef9ftdhbn.westus2-01.azurewebsites.net'  # Production Function App hostname
+  STAGING_FUNC_HOSTNAME: 'cloudzen-api-func-staging-hch0amaed0gke2dv.westus2-01.azurewebsites.net'  # Staging Function App hostname
+  DOTNET_VERSION: '8.0.x'  # .NET SDK version to use
 
 jobs:
-  build-and-deploy:
+  # ============================================================================
+  # JOB 1: BUILD
+  # Runs on EVERY trigger except PR close.
+  # Restores NuGet packages, compiles the Blazor WASM project in Release mode,
+  # applies staging configuration when building for a PR, publishes the output,
+  # and uploads it as a pipeline artifact so downstream deploy jobs can consume it.
+  # ============================================================================
+  build:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed') || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    name: Build and Deploy Job
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: true
 
-      - name: Setup .NET
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      # Restore NuGet dependencies before building
       - name: Restore dependencies
         run: dotnet restore CloudZen.csproj
 
+      # Compile the project in Release configuration
       - name: Build
         run: dotnet build CloudZen.csproj --configuration Release --no-restore
 
       # For PR builds (staging), swap in staging configuration before publish
+      # so the preview environment points to the staging Function App API
       - name: Apply staging configuration
         if: github.event_name == 'pull_request'
         run: |
@@ -70,23 +99,89 @@ jobs:
           cp wwwroot/appsettings.Staging.json wwwroot/appsettings.Production.json
           sed -i "s|${{ env.PRODUCTION_FUNC_HOSTNAME }}|${{ env.STAGING_FUNC_HOSTNAME }}|g" wwwroot/staticwebapp.config.json
 
+      # Publish the Blazor WASM app to publish_output/wwwroot
+      # BlazorEnableCompression=false because SWA handles compression at the edge
       - name: Publish Blazor App
         run: dotnet publish CloudZen.csproj -c Release -o publish_output -p:BlazorEnableCompression=false
 
-      - name: Deploy to Azure Static Web Apps
+      # Upload the published output as an artifact named 'swa-app'
+      # so the deploy jobs can download and deploy it
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: swa-app
+          path: publish_output/wwwroot
+          include-hidden-files: true
+
+  # ============================================================================
+  # JOB 2: DEPLOY TO STAGING
+  # Runs ONLY when the trigger is a pull_request (opened/updated).
+  # Downloads the build artifact and deploys it to an SWA preview environment
+  # with a unique URL, so reviewers can test the Blazor app alongside the
+  # staging Function App.
+  # ============================================================================
+  deploy-staging:
+    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    needs: build                    # Waits for the build job to complete
+    runs-on: ubuntu-latest
+    environment: staging            # Uses the 'staging' GitHub environment (for secrets/protection rules)
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: swa-app
+          path: ./swa-output
+
+      # Deploy the pre-built Blazor app to an SWA preview environment
+      # skip_app_build: true — tells SWA to use our pre-built files as-is
+      - name: Deploy to SWA Preview Environment
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           skip_app_build: true
-          app_location: "publish_output/wwwroot"
+          app_location: "./swa-output"
 
+  # ============================================================================
+  # JOB 3: DEPLOY TO PRODUCTION
+  # Runs ONLY when code is pushed to 'master' or the workflow is triggered manually.
+  # Downloads the build artifact and deploys it to the live Static Web App.
+  # ============================================================================
+  deploy-production:
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
+    needs: build                    # Waits for the build job to complete
+    runs-on: ubuntu-latest
+    environment: production         # Uses the 'production' GitHub environment (for secrets/protection rules)
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: swa-app
+          path: ./swa-output
+
+      # Deploy the pre-built Blazor app to the live SWA production slot
+      # skip_app_build: true — tells SWA to use our pre-built files as-is
+      - name: Deploy to SWA Production
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          skip_app_build: true
+          app_location: "./swa-output"
+
+  # ============================================================================
+  # JOB 4: CLOSE STAGING
+  # Runs ONLY when a PR is closed (merged or abandoned).
+  # Destroys the SWA preview environment to free up resources.
+  # This job is independent — it does NOT need a build.
+  # ============================================================================
   close-staging:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
-    name: Close Staging Environment
     steps:
+      # Tell SWA to tear down the preview environment for this PR
       - name: Destroy preview environment
         uses: Azure/static-web-apps-deploy@v1
         with:
