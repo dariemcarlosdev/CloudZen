@@ -3,6 +3,20 @@
 @inject IChatbotService ChatbotService
 
 <div class="chatbot-widget">
+    @* Greeting tooltip bubble *@
+    @if (showGreeting && !isOpen)
+    {
+        <div class="greeting-bubble">
+            <div class="greeting-logo">
+                <img src="images/cloudzen-logo.png" alt="CloudZen" />
+            </div>
+            <div class="greeting-text">
+                Hi there, have a question?<br />Text us here.
+            </div>
+            <button class="greeting-close" @onclick="DismissGreeting" @onclick:stopPropagation="true">×</button>
+        </div>
+    }
+
     @* Floating toggle button *@
     <button class="chatbot-fab @(isOpen ? "fab-active" : "")" @onclick="ToggleChat" title="Chat with CloudZen AI">
         @if (isOpen)
@@ -135,6 +149,7 @@
     private string inputText = string.Empty;
     private bool isLoading;
     private bool isOpen;
+    private bool showGreeting = true;
     private bool showSuggestions = true;
 
     private ElementReference messagesAreaRef;
@@ -154,6 +169,12 @@
     private void ToggleChat()
     {
         isOpen = !isOpen;
+        if (isOpen) showGreeting = false;
+    }
+
+    private void DismissGreeting()
+    {
+        showGreeting = false;
     }
 
     private async Task HandleKeyDown(KeyboardEventArgs e)
