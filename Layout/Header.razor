@@ -29,9 +29,9 @@
             CloudZen
             <img src="/images/cloudzen-logo.png" alt="CloudZen Logo" width="36" height="36" style="width:2.25rem;height:2.25rem;" class="w-9 h-9 object-cover" />
         </a>
-        @* Show "Back to Home" button only when on the Who I Am page and mobile menu is closed.
+        @* Show "Back to Home" button only when on a sub-page (Who I Am, Contact) and mobile menu is closed.
            The button navigates back to the home/hero section when clicked. *@
-        @if (isWhoIAmPage && !isMobileMenuOpen)
+        @if (isSubPage && !isMobileMenuOpen)
         {
             <button class="ml-2 text-teal-cyan-aqua-200 hover:text-teal-cyan-aqua-400 transition flex items-center" @onclick="NavigateToHero" title="Back to Home">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,7 +63,7 @@
         <a href="#services" @onclick='() => SetActive("#services")' class="@GetNavClass("#services")">Services</a>
         <a href="#cases" @onclick='() => SetActive("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
 @*         <a href="#testimonials" @onclick='() => SetActive("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a> *@
-        <a href="#contact" @onclick='() => SetActive("#contact")' class="@GetContactClass()">Contact</a>
+        <NavLink href="/contact" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition" ActiveClass="ring-2">Contact</NavLink>
     </nav>
     <!-- Mobile nav -->
     @if (isMobileMenuOpen)
@@ -75,7 +75,7 @@
             <a href="#services" @onclick='() => OnMobileNavClick("#services")' class="@GetNavClass("#services")">Services</a>
             <a href="#cases" @onclick='() => OnMobileNavClick("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
 @*             <a href="#testimonials" @onclick='() => OnMobileNavClick("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a> *@
-            <a href="#contact" @onclick='() => OnMobileNavClick("#contact")' class="@GetContactClass()">Contact</a>
+            <NavLink href="/contact" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition" ActiveClass="ring-2" @onclick='CloseMobileMenu'>Contact</NavLink>
         </nav>
     }
 </header>
@@ -83,7 +83,7 @@
 @code {
     private string activeSection = "#hero";
     private bool isMobileMenuOpen = false;
-    private bool isWhoIAmPage;
+    private bool isSubPage;
 	private bool isHamburgerActive = false;
 
     // Handles the hamburger menu click animation and toggles the mobile menu.
@@ -96,25 +96,27 @@
         StateHasChanged();
     }
 
-	// Called when the component is initialized. Subscribes to location changes to update isWhoIAmPage.
-    protected override void OnInitialized()
-    {
-        UpdateIsWhoIAmPage();
-        NavigationManager.LocationChanged += HandleLocationChanged;
-    }
+	// Called when the component is initialized. Subscribes to location changes to update isSubPage.
+	protected override void OnInitialized()
+	{
+		UpdateIsSubPage();
+		NavigationManager.LocationChanged += HandleLocationChanged;
+	}
 
     // Handles route changes and updates the header state accordingly.
     private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        UpdateIsWhoIAmPage();
+        UpdateIsSubPage();
         InvokeAsync(StateHasChanged);
     }
 
-	// Updates the isWhoIAmPage flag based on the current URI.
-    private void UpdateIsWhoIAmPage()
-    {
-        isWhoIAmPage = NavigationManager.Uri.EndsWith("/whoiam", StringComparison.OrdinalIgnoreCase);
-    }
+	// Updates the isSubPage flag based on the current URI.
+	private void UpdateIsSubPage()
+	{
+		var uri = NavigationManager.Uri;
+		isSubPage = uri.EndsWith("/whoiam", StringComparison.OrdinalIgnoreCase)
+				 || uri.EndsWith("/contact", StringComparison.OrdinalIgnoreCase);
+	}
 
     // Unsubscribes from the location changed event to avoid memory leaks.
     public void Dispose()
