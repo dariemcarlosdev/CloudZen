@@ -40,6 +40,94 @@
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
+/* ---------- Greeting Tooltip Bubble ---------- */
+.greeting-bubble {
+    position: absolute;
+    bottom: 68px;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 36px 12px 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    white-space: nowrap;
+    animation: greetingFadeIn 0.4s ease;
+    z-index: 1;
+}
+
+.greeting-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -7px;
+    right: 22px;
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    transform: rotate(45deg);
+}
+
+.greeting-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.greeting-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.greeting-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e293b;
+    line-height: 1.4;
+}
+
+.greeting-close {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    border-radius: 50%;
+    transition: all 0.15s ease;
+}
+
+.greeting-close:hover {
+    color: #475569;
+    background: #f1f5f9;
+}
+
+@keyframes greetingFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* ---------- Chat Container ---------- */
 .chat-container {
     position: absolute;
