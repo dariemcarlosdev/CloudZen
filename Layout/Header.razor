@@ -22,18 +22,17 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 
-<header class="fixed top-0 left-0 z-50 w-full flex justify-between items-center p-6 bg-gray-900 backdrop-blur shadow">
-    <div class="text-2xl font-semibold flex items-center gap-2">
-        <a href="" class="flex items-center gap-2 font-ibm-plex font-semibold text-white hover:text-teal-cyan-aqua-300 transition-colors"
-           @* @onclick='() => ScrollToHero()' *@> 
-            CloudZen
-            <img src="/images/cloudzen-logo.png" alt="CloudZen Logo" width="36" height="36" style="width:2.25rem;height:2.25rem;" class="w-9 h-9 object-cover" />
-        </a>
+<header class="fixed top-0 left-0 z-50 w-full h-24 flex justify-between items-center px-6 py-2 bg-white backdrop-blur shadow">
+    <div class="text-2xl font-semibold flex items-center gap-2 h-full">
+        <a href="" class="flex items-center gap-2 font-ibm-plex font-semibold text-gray-800 hover:text-teal-cyan-aqua-500 transition-colors"
+           @* @onclick='() => ScrollToHero()' *@>
+            <img src="/images/HeaderLogo.png" alt="CloudZen Logo" class="h-16 object-contain" />
+</a>
         @* Show "Back to Home" button only when on a sub-page (Who I Am, Contact) and mobile menu is closed.
            The button navigates back to the home/hero section when clicked. *@
         @if (isSubPage && !isMobileMenuOpen)
         {
-            <button class="ml-2 text-teal-cyan-aqua-200 hover:text-teal-cyan-aqua-400 transition flex items-center" @onclick="NavigateToHero" title="Back to Home">
+            <button class="ml-2 text-teal-cyan-aqua-200 hover:text-teal-cyan-aqua-500 transition flex items-center" @onclick="NavigateToHero" title="Back to Home">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
@@ -48,7 +47,7 @@
         </svg>
     </button> *@
     <!-- Hamburger for mobile -->
-    <button class="md:hidden text-white focus:outline-none transition-transform duration-150 @(isHamburgerActive ? "hamburger-active" : "")"
+    <button class="md:hidden text-gray-800 focus:outline-none transition-transform duration-150 @(isHamburgerActive ? "hamburger-active" : "")"
             @onclick="OnHamburgerClick"
             aria-label="Open menu">
         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,26 +58,32 @@
     <nav class="hidden md:flex items-center gap-6 text-base">
         <a href="#mission" @onclick='() => SetActive("#mission")' class="@GetNavClass("#mission")">Mission</a>
         <a href="#value" @onclick='() => SetActive("#value")' class="@GetNavClass("#value")">Value</a>
-        <NavLink href="/whoiam" class="text-white  hover:text-teal-cyan-aqua-200 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-300 text-lg font-semibold">Who I Am</NavLink>
+        <NavLink href="/whoiam" class="text-gray-700  hover:text-teal-cyan-aqua-500 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-500 text-lg font-semibold">Who I Am</NavLink>
         <a href="#services" @onclick='() => SetActive("#services")' class="@GetNavClass("#services")">Services</a>
         <a href="#cases" @onclick='() => SetActive("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
 @*         <a href="#testimonials" @onclick='() => SetActive("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a> *@
-        <NavLink href="/contact" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition" ActiveClass="ring-2">Contact</NavLink>
+        <NavLink href="/contact" class="px-4 py-2 bg-indigo-600 text-gray-50 rounded-lg hover:bg-indigo-700 transition" ActiveClass="ring-2">Contact</NavLink>
     </nav>
     <!-- Mobile nav -->
     @if (isMobileMenuOpen)
     {
-        <nav class="absolute top-full left-0 w-full bg-gray-900 flex flex-col items-center gap-4 py-6 md:hidden shadow-lg z-50">
+        <nav class="absolute top-full left-0 w-full bg-white flex flex-col items-center gap-4 py-6 md:hidden shadow-lg z-50">
             <a href="#mission" @onclick='() => OnMobileNavClick("#mission")' class="@GetNavClass("#mission")">Mission</a>
             <a href="#value" @onclick='() => OnMobileNavClick("#value")' class="@GetNavClass("#value")">Value</a>
-            <NavLink href="/whoiam" class="text-white  hover:text-teal-cyan-aqua-200 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-300 text-lg font-semibold" @onclick='CloseMobileMenu'>Who I Am</NavLink>
+            <NavLink href="/whoiam" class="text-gray-700  hover:text-teal-cyan-aqua-500 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-500 text-lg font-semibold" @onclick='CloseMobileMenu'>Who I Am</NavLink>
             <a href="#services" @onclick='() => OnMobileNavClick("#services")' class="@GetNavClass("#services")">Services</a>
             <a href="#cases" @onclick='() => OnMobileNavClick("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
 @*             <a href="#testimonials" @onclick='() => OnMobileNavClick("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a> *@
-            <NavLink href="/contact" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition" ActiveClass="ring-2" @onclick='CloseMobileMenu'>Contact</NavLink>
+            <NavLink href="/contact" class="px-4 py-2 bg-indigo-600 text-gray-50 rounded-lg hover:bg-indigo-700 transition" ActiveClass="ring-2" @onclick='CloseMobileMenu'>Contact</NavLink>
         </nav>
     }
 </header>
+
+@* Overlay: covers the viewport behind the mobile menu so clicking outside closes it *@
+@if (isMobileMenuOpen)
+{
+    <div class="mobile-overlay" @onclick="CloseMobileMenu"></div>
+}
 
 @code {
     private string activeSection = "#hero";
@@ -152,12 +157,12 @@
     // Returns the CSS class for a navigation link based on the active section.
     private string GetNavClass(string section) =>
         activeSection == section
-            ? "text-teal-cyan-aqua-300"
-            : "text-white hover:text-teal-cyan-aqua-200";
+            ? "text-teal-cyan-aqua-500"
+            : "text-gray-700 hover:text-teal-cyan-aqua-500";
 
     // Returns the CSS class for the contact link, including highlighting if active.
     private string GetContactClass() =>
-        $"px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition {(activeSection == "#contact" ? "ring-2" : "")}";
+        $"px-4 py-2 bg-indigo-600 text-gray-50 rounded-lg hover:bg-indigo-700 transition {(activeSection == "#contact" ? "ring-2" : "")}";
 
     // Navigates to the home page ("/").
     private void NavigateToHero()

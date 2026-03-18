@@ -64,47 +64,6 @@ h1:focus {
         content: "An error has occurred."
     }
 
-.loading-progress {
-    position: relative;
-    display: block;
-    width: 8rem;
-    height: 8rem;
-    margin: 20vh auto 1rem auto;
-}
-
-.loading-progress circle {
-        fill: none;
-        stroke: #e0e0e0;
-        stroke-width: 0.6rem;
-        transform-origin: 50% 50%;
-        transform: rotate(-90deg);
-}
-
-        .loading-progress circle:last-child {
-            stroke: #1b6ec2;
-            stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
-            transition: stroke-dasharray 0.05s ease-in-out;
-        }
-
-.loading-progress-text {
-    position: absolute;
-    text-align: center;
-    font-weight: bold;
-    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
-}
-
-
-.loading-progress-text {
-    position: absolute;
-    text-align: center;
-    font-weight: bold;
-    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
-}
-
-    .loading-progress-text:after {
-        content: var(--blazor-load-percentage-text, "Loading");
-    }
-
 code {
     color: #c02d76;
 }
@@ -114,15 +73,6 @@ code {
     height: 0.75rem; /* Equivalent to h-3 */
     border-radius: 9999px; /* Equivalent to rounded-full */
     transition: width 0.3s ease;
-}
-/* Used in Shared\Header.razor: Hamburger menu button */
-.hamburger-active {
-    /* Subtle background highlight and gentle scale for better UX */
-    background-color: #74b7bb;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
-    border-radius: 0.5rem;
-    transform: scale(1.08);
-    transition: background-color 120ms cubic-bezier(0.4,0,0.2,1), box-shadow 120ms cubic-bezier(0.4,0,0.2,1), transform 120ms cubic-bezier(0.4,0,0.2,1);
 }
 
 /* Scroll to Top Button Styles */
