@@ -107,4 +107,7 @@ builder.Services.AddScoped<PersonalService>();
 // Register ToolService for the Tools Overview section
 builder.Services.AddScoped<ToolService>();
 
+// Register FeatureHighlightService for the Features Showcase section
+builder.Services.AddScoped<FeatureHighlightService>();
+
 await builder.Build().RunAsync();
