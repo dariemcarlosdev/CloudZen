@@ -20,7 +20,7 @@ h1:focus {
 }
 
 .content {
-    padding-top: 1.1rem;
+    padding-top: 0;
 }
 
 .valid.modified:not([type=checkbox]) {

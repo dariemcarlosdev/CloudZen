@@ -1,61 +1,36 @@
-﻿<section id="hero" class="relative bg-white min-h-[60vh] flex items-center justify-center overflow-hidden">
-    <!-- Changed min-h-screen to min-h-[60vh] to reduce hero section height -->
-    <div class="absolute inset-0 pointer-events-none select-none" aria-hidden="true">
-        <div class="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-blue-50 blur-3xl"></div>
-        <div class="absolute -bottom-32 -left-32 w-96 h-96 rounded-full bg-indigo-50 blur-3xl"></div>
-    </div>
+﻿<section id="hero" class="relative bg-white min-h-[60vh] flex items-center overflow-hidden">
 
-    <div class="relative max-w-7xl w-full px-6 flex flex-col lg:flex-row items-center justify-center gap-16">
-        <div class="flex-1 text-center lg:text-left flex flex-col items-center lg:items-start">
-            <!-- Increased top margin for h1 on mobile: mt-24 (sm:mt-6 for larger screens) -->
-            <div class="text-center sm:text-left text-xl sm:text-2xl font-medium text-gray-800 mb-0">
+    <div class="relative max-w-7xl w-full mx-auto px-6 flex flex-col lg:flex-row items-stretch gap-1 py-16">
+        <!-- Left: Text content -->
+        <div class="flex-[2.5] text-center lg:text-left">
+            <h1 class="text-5xl md:text-5xl font-bold text-gray-800 mb-6 leading-tight">
                 You don't need to speak tech. You just need results.
-            </div>
-            <div class="text-center sm:text-left">
-                <h1 class="text-4xl md:text-5xl font-bold text-gray-700 mb-4">
-                    Technology That Works - 
-                    <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-700 bg-clip-text text-transparent">
-                        So You Can Focus on Growing
-                    </span>
-                </h1>
-                <p class="text-lg text-center sm:text-left sm:text-xl text-gray-600 leading-relaxed max-w-2xl mx-1 lg:mx-0 mb-8">
-                    Modernizing outdated systems, automating daily tasks, and building tools that make business life easier - without the jargon or the guesswork.
-                    <br /><br />
-                    You focus on your customers while CloudZen manages the technology that powers your growth.
-                </p>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center w-full">
-                <a href="#contact" class="px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center">
-                    <i class="bi bi-calendar-event mr-2 transition-transform group-hover:translate-x-1"></i>
+            </h1>
+            <p class="text-lg sm:text-xl text-gray-600 mb-5">
+                <span class="bg-clip-text">
+                    Technology That Works - So You Can Focus on your What Matters Most.
+                </span>
+            </p>
+            <p class="text-lg sm:text-lg text-gray-500 leading-relaxed max-w-xl mx-auto lg:mx-0 mb-5">
+                Modernizing outdated systems, automating daily tasks, and building tools that make business life easier - without the jargon or the guesswork.
+            </p>
+@*             <p class="text-base sm:text-lg text-gray-500 leading-relaxed max-w-xl mx-auto lg:mx-0 mb-8">
+                You focus on your customers while CloudZen manages the technology that powers your growth.
+            </p> *@
+            <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <a href="#contact" class="px-8 py-4 bg-cloudzen-steel text-white font-semibold rounded-xl shadow-lg hover:bg-cloudzen-steel-hover transition-all duration-300 hover:scale-105 flex items-center justify-center">
+                    <i class="bi bi-calendar-event mr-2"></i>
                     Book a Consultation
                 </a>
-                <a href="#services" class="px-8 py-4 rounded-lg bg-gray-100 text-gray-800 font-semibold hover:shadow-xl transition-all duration-300 hover:scale-105 flex items-center">
-                    <i class="bi bi-search mr-2 transition-transform group-hover:translate-x-1"></i>
+                <a href="#services" class="px-8 py-4 rounded-xl bg-teal-cyan-aqua-500 text-white font-semibold border border-gray-200 hover:bg-teal-cyan-aqua-400 hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center justify-center">
+                    <i class="bi bi-search mr-2"></i>
                     Explore Services
                 </a>
             </div>
         </div>
-        <div class="flex-1 grid grid-cols-2 gap-6 w-full max-w-md">
-            <div class="p-6 rounded-xl bg-white shadow border border-gray-100 flex flex-col items-center text-center">
-                <div class="text-3xl mb-3">⚡</div>
-                <h3 class="font-semibold mb-1">Speed & Reliability</h3>
-                <p class="text-sm text-gray-600">Fast systems that grow with you.</p>
-            </div>
-            <div class="p-6 rounded-xl bg-white shadow border border-gray-100 flex flex-col items-center text-center">
-                <div class="text-3xl mb-3">🔐</div>
-                <h3 class="font-semibold mb-1">Peace of Mind</h3>
-                <p class="text-sm text-gray-600">Your data and systems, safeguarded.</p>
-            </div>
-            <div class="p-6 rounded-xl bg-white shadow border border-gray-100 flex flex-col items-center text-center">
-                <div class="text-3xl mb-3">🤖</div>
-                <h3 class="font-semibold mb-1">Smart Automation</h3>
-                <p class="text-sm text-gray-600">Let technology handle the repetitive stuff.</p>
-            </div>
-            <div class="p-6 rounded-xl bg-white shadow border border-gray-100 flex flex-col items-center text-center">
-                <div class="text-3xl mb-3">🚀</div>
-                <h3 class="font-semibold mb-1">Faster Results</h3>
-                <p class="text-sm text-gray-600">Get to market quickly and confidently.</p>
-            </div>
+        <!-- Right: Hero illustration -->
+        <div class="flex-[2] hidden lg:flex items-center justify-center">
+            <img src="/images/hero_backgound.webp" alt="CloudZen hero illustration" class="w-full h-full object-cover rounded-2xl" />
         </div>
     </div>
 </section>

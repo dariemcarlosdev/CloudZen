@@ -104,4 +104,7 @@ builder.Services.AddScoped<ProjectService>();
 // Register PersonalService for managing service offerings
 builder.Services.AddScoped<PersonalService>();
 
+// Register ToolService for the Tools Overview section
+builder.Services.AddScoped<ToolService>();
+
 await builder.Build().RunAsync();

@@ -24,7 +24,7 @@
 
 <header class="fixed top-0 left-0 z-50 w-full h-24 flex justify-between items-center px-6 py-2 bg-white backdrop-blur shadow">
     <div class="text-2xl font-semibold flex items-center gap-2 h-full">
-        <a href="" class="flex items-center gap-2 font-ibm-plex font-semibold text-gray-800 hover:text-teal-cyan-aqua-500 transition-colors"
+        <a href="" class="flex items-center gap-2 font-ibm-plex font-semibold text-gray-800 hover:text-teal-cyan-aqua-600 transition-colors"
            @* @onclick='() => ScrollToHero()' *@>
             <img src="/images/HeaderLogo.png" alt="CloudZen Logo" class="h-16 object-contain" />
 </a>
@@ -32,7 +32,7 @@
            The button navigates back to the home/hero section when clicked. *@
         @if (isSubPage && !isMobileMenuOpen)
         {
-            <button class="ml-2 text-teal-cyan-aqua-200 hover:text-teal-cyan-aqua-500 transition flex items-center" @onclick="NavigateToHero" title="Back to Home">
+            <button class="ml-2 text-teal-cyan-aqua-200 hover:text-teal-cyan-aqua-600 transition flex items-center" @onclick="NavigateToHero" title="Back to Home">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                 </svg>
@@ -58,7 +58,7 @@
     <nav class="hidden md:flex items-center gap-6 text-base">
         <a href="#mission" @onclick='() => SetActive("#mission")' class="@GetNavClass("#mission")">Mission</a>
         <a href="#value" @onclick='() => SetActive("#value")' class="@GetNavClass("#value")">Value</a>
-        <NavLink href="/whoiam" class="text-gray-700  hover:text-teal-cyan-aqua-500 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-500 text-lg font-semibold">Who I Am</NavLink>
+        <NavLink href="/whoiam" class="text-gray-700  hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">Who I Am</NavLink>
         <a href="#services" @onclick='() => SetActive("#services")' class="@GetNavClass("#services")">Services</a>
         <a href="#cases" @onclick='() => SetActive("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
 @*         <a href="#testimonials" @onclick='() => SetActive("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a> *@
@@ -70,7 +70,7 @@
         <nav class="absolute top-full left-0 w-full bg-white flex flex-col items-center gap-4 py-6 md:hidden shadow-lg z-50">
             <a href="#mission" @onclick='() => OnMobileNavClick("#mission")' class="@GetNavClass("#mission")">Mission</a>
             <a href="#value" @onclick='() => OnMobileNavClick("#value")' class="@GetNavClass("#value")">Value</a>
-            <NavLink href="/whoiam" class="text-gray-700  hover:text-teal-cyan-aqua-500 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-500 text-lg font-semibold" @onclick='CloseMobileMenu'>Who I Am</NavLink>
+            <NavLink href="/whoiam" class="text-gray-700  hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>Who I Am</NavLink>
             <a href="#services" @onclick='() => OnMobileNavClick("#services")' class="@GetNavClass("#services")">Services</a>
             <a href="#cases" @onclick='() => OnMobileNavClick("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
 @*             <a href="#testimonials" @onclick='() => OnMobileNavClick("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a> *@
