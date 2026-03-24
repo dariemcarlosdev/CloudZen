@@ -1,0 +1,16 @@
+@using CloudZen.Models
+
+@* A single service card with Bootstrap Icon, title, and HTML description. *@
+
+<div class="group p-8 bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl hover:border-teal-cyan-aqua-200 transition-all duration-300 hover:-translate-y-1">
+    <div class="w-14 h-14 mb-5 bg-teal-cyan-aqua-50 rounded-xl flex items-center justify-center text-teal-cyan-aqua-600 text-2xl group-hover:bg-teal-cyan-aqua-600 group-hover:text-white transition-colors duration-300">
+        <i class="bi @Service.Icon"></i>
+    </div>
+    <h3 class="text-lg font-bold text-gray-800 mb-3">@Service.Title</h3>
+    <p class="text-gray-500 text-sm leading-relaxed">@((MarkupString)Service.Description)</p>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ServiceInfo Service { get; set; } = default!;
+}

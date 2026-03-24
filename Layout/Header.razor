@@ -22,7 +22,8 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 
-<header class="fixed top-0 left-0 z-50 w-full h-24 flex justify-between items-center px-6 py-2 bg-white backdrop-blur shadow">
+<header class="fixed top-0 left-0 z-50 w-full h-24 bg-white">
+    <div class="max-w-7xl mx-auto h-full flex justify-between items-center px-4 sm:px-6">
     <div class="text-2xl font-semibold flex items-center gap-2 h-full">
         <a href="" class="flex items-center gap-2 font-ibm-plex font-semibold text-gray-800 hover:text-teal-cyan-aqua-600 transition-colors"
            @* @onclick='() => ScrollToHero()' *@>
@@ -56,27 +57,24 @@
     </button>
     <!-- Desktop nav -->
     <nav class="hidden md:flex items-center gap-6 text-base">
-        <a href="#mission" @onclick='() => SetActive("#mission")' class="@GetNavClass("#mission")">Mission</a>
-        <a href="#value" @onclick='() => SetActive("#value")' class="@GetNavClass("#value")">Value</a>
-        <NavLink href="/whoiam" class="text-gray-700  hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">Who I Am</NavLink>
-        <a href="#services" @onclick='() => SetActive("#services")' class="@GetNavClass("#services")">Services</a>
+        <NavLink href="/services" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">Services</NavLink>
         <a href="#cases" @onclick='() => SetActive("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
-@*         <a href="#testimonials" @onclick='() => SetActive("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a> *@
-        <NavLink href="/contact" class="px-4 py-2 bg-indigo-600 text-gray-50 rounded-lg hover:bg-indigo-700 transition" ActiveClass="ring-2">Contact</NavLink>
+        <NavLink href="/mission" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">About</NavLink>
+        <NavLink href="/whoiam" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">Who I Am</NavLink>
+        <NavLink href="/contact" class="px-4 py-2 bg-orange-400 text-white rounded-full hover:bg-orange-500 transition" ActiveClass="ring-2">Contact</NavLink>
     </nav>
     <!-- Mobile nav -->
     @if (isMobileMenuOpen)
     {
         <nav class="absolute top-full left-0 w-full bg-white flex flex-col items-center gap-4 py-6 md:hidden shadow-lg z-50">
-            <a href="#mission" @onclick='() => OnMobileNavClick("#mission")' class="@GetNavClass("#mission")">Mission</a>
-            <a href="#value" @onclick='() => OnMobileNavClick("#value")' class="@GetNavClass("#value")">Value</a>
-            <NavLink href="/whoiam" class="text-gray-700  hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>Who I Am</NavLink>
-            <a href="#services" @onclick='() => OnMobileNavClick("#services")' class="@GetNavClass("#services")">Services</a>
+            <NavLink href="/services" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>Services</NavLink>
             <a href="#cases" @onclick='() => OnMobileNavClick("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
-@*             <a href="#testimonials" @onclick='() => OnMobileNavClick("#testimonials")' class="@GetNavClass("#testimonials")">Testimonials</a> *@
-            <NavLink href="/contact" class="px-4 py-2 bg-indigo-600 text-gray-50 rounded-lg hover:bg-indigo-700 transition" ActiveClass="ring-2" @onclick='CloseMobileMenu'>Contact</NavLink>
+            <NavLink href="/mission" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>About</NavLink>
+            <NavLink href="/whoiam" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>Who I Am</NavLink>
+            <NavLink href="/contact" class="px-4 py-2 bg-orange-400 text-white rounded-full hover:bg-orange-500 transition" ActiveClass="ring-2" @onclick='CloseMobileMenu'>Contact</NavLink>
         </nav>
     }
+    </div>
 </header>
 
 @* Overlay: covers the viewport behind the mobile menu so clicking outside closes it *@
@@ -120,7 +118,9 @@
 	{
 		var uri = NavigationManager.Uri;
 		isSubPage = uri.EndsWith("/whoiam", StringComparison.OrdinalIgnoreCase)
-				 || uri.EndsWith("/contact", StringComparison.OrdinalIgnoreCase);
+				 || uri.EndsWith("/contact", StringComparison.OrdinalIgnoreCase)
+				 || uri.EndsWith("/mission", StringComparison.OrdinalIgnoreCase)
+				 || uri.EndsWith("/services", StringComparison.OrdinalIgnoreCase);
 	}
 
     // Unsubscribes from the location changed event to avoid memory leaks.

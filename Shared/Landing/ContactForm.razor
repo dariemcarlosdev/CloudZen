@@ -3,17 +3,17 @@
 @using CloudZen.Services.Abstractions
 @inject IEmailService EmailService
 
-<section id="contact" class="py-24 bg-gradient-to-br from-slate-50 via-white to-indigo-50">
+<section id="contact" class="py-16 md:py-20 bg-gradient-to-br from-gray-50 via-white to-teal-50">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Header Section -->
         <div class="text-center mb-12">
-            <span class="inline-block px-4 py-1.5 bg-indigo-100 text-indigo-700 text-sm font-semibold rounded-full mb-4">
+            <span class="inline-block px-4 py-1.5 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-600 text-sm font-semibold rounded-full mb-4">
                 <i class="bi bi-envelope-paper mr-2"></i>Get In Touch
             </span>
             <h2 class="text-4xl md:text-5xl font-bold text-gray-700 mb-4">
                 Let's Start a
-                <span class="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <span class="text-teal-cyan-aqua-600">
                     Conversation
                 </span>
             </h2>
@@ -25,10 +25,10 @@
         <!-- Form Card -->
         <div class="relative overflow-hidden">
             <!-- Decorative Elements -->
-            <div class="absolute -top-4 -left-4 w-24 h-24 bg-indigo-200 rounded-full opacity-20 blur-2xl"></div>
-            <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-200 rounded-full opacity-20 blur-2xl"></div>
+            <div class="absolute -top-4 -left-4 w-24 h-24 bg-teal-200 rounded-full opacity-20 blur-2xl"></div>
+            <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-teal-200 rounded-full opacity-20 blur-2xl"></div>
             
-            <div class="relative bg-white rounded-2xl shadow-xl shadow-indigo-100/50 border border-gray-100 overflow-hidden">
+            <div class="relative bg-white rounded-2xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
                 
                 @if (!submitted)
                 {
@@ -41,52 +41,52 @@
                                 <!-- Name Field -->
                                 <div class="space-y-2">
                                     <label class="block text-sm font-semibold text-gray-700">
-                                        <i class="bi bi-person mr-2 text-indigo-500"></i>Your Name
+                                        <i class="bi bi-person mr-2 text-teal-cyan-aqua-600"></i>Your Name
                                     </label>
                                     <InputText @bind-Value="formModel.Name" 
                                                placeholder="John Doe"
-                                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
                                                disabled="@isSubmitting" />
-                                    <ValidationMessage For="@(() => formModel.Name)" class="text-red-500 text-xs mt-1" />
+                                    <ValidationMessage For="@(() => formModel.Name)" class="text-orange-500 text-xs mt-1" />
                                 </div>
 
                                 <!-- Email Field -->
                                 <div class="space-y-2">
                                     <label class="block text-sm font-semibold text-gray-700">
-                                        <i class="bi bi-envelope mr-2 text-indigo-500"></i>Email Address
+                                        <i class="bi bi-envelope mr-2 text-teal-cyan-aqua-600"></i>Email Address
                                     </label>
                                     <InputText @bind-Value="formModel.Email" 
                                                type="email" 
                                                placeholder="john@example.com"
-                                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                                disabled="@isSubmitting" />
-                                    <ValidationMessage For="@(() => formModel.Email)" class="text-red-500 text-xs mt-1" />
+                                    <ValidationMessage For="@(() => formModel.Email)" class="text-orange-500 text-xs mt-1" />
                                 </div>
                             </div>
 
                             <!-- Subject Field -->
                             <div class="space-y-2 mt-6">
                                 <label class="block text-sm font-semibold text-gray-700">
-                                    <i class="bi bi-chat-left-text mr-2 text-indigo-500"></i>Subject
+                                    <i class="bi bi-chat-left-text mr-2 text-teal-cyan-aqua-600"></i>Subject
                                 </label>
                                 <InputText @bind-Value="formModel.Subject" 
                                            placeholder="How can I help you?"
-                                           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed" 
+                                           class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                                            disabled="@isSubmitting" />
-                                <ValidationMessage For="@(() => formModel.Subject)" class="text-red-500 text-xs mt-1" />
+                                <ValidationMessage For="@(() => formModel.Subject)" class="text-orange-500 text-xs mt-1" />
                             </div>
 
                             <!-- Message Field -->
                             <div class="space-y-2 mt-6">
                                 <label class="block text-sm font-semibold text-gray-700">
-                                    <i class="bi bi-pencil-square mr-2 text-indigo-500"></i>Your Message
+                                    <i class="bi bi-pencil-square mr-2 text-teal-cyan-aqua-600"></i>Your Message
                                 </label>
                                 <InputTextArea @bind-Value="formModel.Message" 
                                                placeholder="Tell me about your project, goals, and timeline..."
-                                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition duration-200 h-36 resize-none disabled:opacity-50 disabled:cursor-not-allowed" 
+                                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition duration-200 h-36 resize-none disabled:opacity-50 disabled:cursor-not-allowed"
                                                disabled="@isSubmitting" />
                                 <div class="flex justify-between items-center">
-                                    <ValidationMessage For="@(() => formModel.Message)" class="text-red-500 text-xs" />
+                                    <ValidationMessage For="@(() => formModel.Message)" class="text-orange-500 text-xs" />
                                     <span class="text-xs text-gray-400">@(formModel.Message?.Length ?? 0)/500</span>
                                 </div>
                             </div>
@@ -108,7 +108,7 @@
                             <!-- Submit Button -->
                             <div class="mt-8">
                                 <button type="submit" 
-                                        class="w-full group relative px-8 py-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold rounded-xl hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-indigo-200 hover:shadow-xl hover:shadow-indigo-300"
+                                        class="w-full group relative px-8 py-4 bg-orange-400 text-white font-semibold rounded-full hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-orange-200 hover:shadow-xl hover:shadow-orange-300"
                                         disabled="@isSubmitting">
                                     @if (isSubmitting)
                                     {
@@ -139,7 +139,7 @@
                                     <span>Secure & Encrypted</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <i class="bi bi-clock text-indigo-500"></i>
+                                    <i class="bi bi-clock text-teal-cyan-aqua-600"></i>
                                     <span>Response within 24h</span>
                                 </div>
                                 <div class="flex items-center gap-2">
@@ -172,22 +172,22 @@
                             <h4 class="font-semibold text-gray-800 mb-3">What happens next?</h4>
                             <ul class="text-left text-sm text-gray-600 space-y-2">
                                 <li class="flex items-center gap-2">
-                                    <i class="bi bi-1-circle-fill text-indigo-500"></i>
+                                    <i class="bi bi-1-circle-fill text-teal-cyan-aqua-600"></i>
                                     <span>I'll review your message</span>
                                 </li>
                                 <li class="flex items-center gap-2">
-                                    <i class="bi bi-2-circle-fill text-indigo-500"></i>
+                                    <i class="bi bi-2-circle-fill text-teal-cyan-aqua-600"></i>
                                     <span>Prepare a personalized response</span>
                                 </li>
                                 <li class="flex items-center gap-2">
-                                    <i class="bi bi-3-circle-fill text-indigo-500"></i>
+                                    <i class="bi bi-3-circle-fill text-teal-cyan-aqua-600"></i>
                                     <span>Reach out to schedule a call if needed</span>
                                 </li>
                             </ul>
                         </div>
 
                         <button @onclick="ResetForm" 
-                                class="inline-flex items-center px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200">
+                                class="inline-flex items-center px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-teal-cyan-aqua-300 hover:text-teal-cyan-aqua-600 transition-all duration-200">
                             <i class="bi bi-arrow-repeat mr-2"></i>
                             Send Another Message
                         </button>
@@ -201,7 +201,7 @@
             <p class="text-gray-500 mb-4">Or reach out directly</p>
             <div class="flex flex-wrap justify-center gap-4">
                 <a href="mailto:cloudzen.inc@gmail.com" 
-                   class="inline-flex items-center px-5 py-2.5 bg-white border border-gray-200 rounded-full text-gray-700 hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200 shadow-sm hover:shadow">
+                   class="inline-flex items-center px-5 py-2.5 bg-white border border-gray-200 rounded-full text-gray-700 hover:border-teal-cyan-aqua-300 hover:text-teal-cyan-aqua-600 transition-all duration-200 shadow-sm hover:shadow">
                     <i class="bi bi-envelope mr-2"></i>
                     cloudzen.inc@gmail.com
                 </a>

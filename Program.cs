@@ -110,4 +110,7 @@ builder.Services.AddScoped<ToolService>();
 // Register FeatureHighlightService for the Features Showcase section
 builder.Services.AddScoped<FeatureHighlightService>();
 
+// Register MissionService for the About Us / Mission / Standards section
+builder.Services.AddScoped<MissionService>();
+
 await builder.Build().RunAsync();

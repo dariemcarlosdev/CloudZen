@@ -75,6 +75,33 @@ window.scrollToElementById = function (id) {
 };
 
 /**
+ * Initializes the header glass morphism effect on scroll.
+ * Adds/removes 'header-scrolled' class based on scroll position.
+ */
+(function () {
+    let ticking = false;
+    function updateHeader() {
+        const header = document.querySelector('header');
+        if (!header) return;
+        if (window.scrollY > 20) {
+            header.classList.add('header-scrolled');
+        } else {
+            header.classList.remove('header-scrolled');
+        }
+    }
+    window.addEventListener('scroll', function () {
+        if (!ticking) {
+            window.requestAnimationFrame(function () {
+                updateHeader();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    });
+    updateHeader();
+})();
+
+/**
  * Initializes the scroll-to-top button functionality.
  * Shows/hides the button based on scroll position and handles scroll visibility updates.
  * @param {object} dotNetHelper - Reference to the Blazor component for state updates.

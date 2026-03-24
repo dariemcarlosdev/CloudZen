@@ -15,7 +15,7 @@ public class FeatureHighlightService
             TitleBold: "Autopilot",
             TitleSuffix: "",
             Description: "Stop wasting hours on repetitive tasks. CloudZen sets up smart systems that handle the boring stuff — scheduling, data entry, follow-ups — so you can focus on the work that actually makes you money.",
-            ImagePath: "/images/features/automation.webp"
+            ImagePath: "/images/features/autopilot.webp"
         ),
         new FeatureHighlight(
             Subtitle: "Built Around Your Workflow",
@@ -47,7 +47,7 @@ public class FeatureHighlightService
             TitleBold: "Faster Results",
             TitleSuffix: " Mean Happier Customers",
             Description: "CloudZen helps you clear the bottlenecks so you can respond to clients and deliver your services quicker. When you move faster, your customers stay happier — and keep coming back.",
-            ImagePath: "/images/features/faster-results.webp"
+            ImagePath: "/images/features/faster-result-1.webp"
         )
     };
 }

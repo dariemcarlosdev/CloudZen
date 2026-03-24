@@ -3,7 +3,7 @@
 @* A single feature highlight row: text on one side, illustration on the other.
    The layout alternates direction based on the IsReversed parameter. *@
 
-<div class="flex flex-col @(IsReversed ? "md:flex-row-reverse" : "md:flex-row") items-center gap-10 py-16 max-w-6xl mx-auto px-6">
+<div class="flex flex-col @(IsReversed ? "md:flex-row-reverse" : "md:flex-row") items-center gap-6 md:gap-10 py-10 md:py-16 max-w-6xl mx-auto px-4 sm:px-6">
     <!-- Text side -->
     <div class="flex-1 text-center md:text-left">
         @if (!string.IsNullOrEmpty(Feature.Subtitle))
