@@ -1,7 +1,5 @@
 ﻿@page "/mission"
 @using CloudZen.Models
-@using CloudZen.Services
-@inject MissionService MissionService
 
 <PageTitle>About Us — CloudZen | Smart Technology for Growing Businesses</PageTitle>
 <HeadContent>
@@ -106,14 +104,3 @@
     </div>
 
 </section>
-
-@code {
-    private List<string> _missionPoints = new();
-    private List<StandardInfo> _standards = new();
-
-    protected override void OnInitialized()
-    {
-        _missionPoints = MissionService.GetMissionPoints();
-        _standards = MissionService.GetStandards();
-    }
-}

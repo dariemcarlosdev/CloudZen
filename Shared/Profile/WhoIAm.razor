@@ -1,12 +1,7 @@
 @page "/whoiam"
-@using CloudZen.Services
 @using CloudZen.Models
 @using CloudZen.Shared.Profile
 @using CloudZen.Shared.Projects
-@inject ResumeService ResumeService
-@inject ProjectService ProjectService
-@inject IJSRuntime JS
-@inject NavigationManager NavigationManager
 
 <PageTitle>Who I Am — Dariem C. Macias | CloudZen Software Engineer & Consultant</PageTitle>
 <HeadContent>
@@ -84,64 +79,4 @@
         </div>
     </div>
 </section>
-
-@code {
-
-    // Attributes to hold all projects and filtered projects
-    private List<ProjectInfo> Projects = new();
-    private List<ProjectInfo> FilteredProjects = new();
-
-    protected override void OnInitialized()
-    {
-        // Load projects from ProjectService
-        Projects = ProjectService.GetAllProjects();
-        // Initially show all projects, FilteredProjects is same as Projects for no filters applied.
-        FilteredProjects = Projects;
-    }
-
-    /// <summary>
-    /// Handles filter changes from the ProjectFilter component.
-    /// Filters projects based on selected status and project type.
-    /// This method is passed as a callback to the ProjectFilter component.
-    /// </summary>
-/// <param name="filters">Tuple containing status and project type filter values.</param>
-private void HandleFilterChange((string Status, string ProjectType) filters)
-{
-        // Apply filtering logic
-    FilteredProjects = Projects
-        .Where(p => string.IsNullOrEmpty(filters.Status) || p.Status == filters.Status)
-        .Where(p => string.IsNullOrEmpty(filters.ProjectType) || 
-                    (filters.ProjectType == "Customer" 
-                        ? p.ProjectType.StartsWith("Customer:") 
-                        : p.ProjectType == filters.ProjectType))
-        .ToList();
-}
-
-    /// <summary>
-    /// Method to download the resume using ResumeService and JS interop.
-    /// </summary>
-    /// <returns></returns>
-    private async Task DownloadResume()
-    {
-        var resumeBytes = await ResumeService.DownloadResumeAsync();
-        var uri = new Uri(ResumeService.ResumeBlobUrl);
-        var fileName = System.IO.Path.GetFileName(uri.LocalPath);
-        await JS.InvokeVoidAsync("saveAsFile", fileName, resumeBytes);
-    }
-
-    // Last significant change: OnAfterRenderAsync checks for scroll query parameter and uses JS interop to scroll to Highlighted Projects from CaseStudies.razor.
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            var uri = new Uri(NavigationManager.Uri);
-            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-            var scrollTarget = query["scroll"];
-            if (scrollTarget == "highlighted-projects")
-            {
-                await JS.InvokeVoidAsync("scrollToElementById", "highlighted-projects");
-            }
-        }
-    }
-}
 

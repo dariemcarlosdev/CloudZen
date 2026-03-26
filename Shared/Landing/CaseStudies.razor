@@ -1,33 +1,13 @@
 ﻿@using CloudZen.Models
+
 @* 
     Case Studies Component
-    
+
     PURPOSE:
     Showcases real-world project case studies with measurable results and business impact.
-    Dynamically loads featured projects from ProjectService and presents them in an 
-    attractive, customer-friendly format.
-    
-    KEY FEATURES:
-    - Automatic project selection (completed customer work + impressive side projects)
-    - Technical jargon conversion to business-friendly language
-    - Responsive card grid layout (1-3 columns based on screen size)
-    - Hover effects and animations for better UX
-    - GitHub links for open-source projects
-    - CTA to view full project portfolio
-    
-    DEPENDENCIES:
-    - ProjectService: Provides project data
-    - Models.ProjectInfo: Project data model
-    - Tailwind CSS: For styling and responsive design
-    
-    CUSTOMIZATION:
-    - Modify OnInitialized() to change project selection criteria
-    - Update GetShortTitle() to add new title mappings
-    - Edit GetCustomerFriendlyDescription() to add more jargon replacements
-    - Adjust Take(3) to display more/fewer projects
+    Dynamically loads featured projects from IProjectService and presents them in an 
+    attractive, customer-friendly format. Text transformations delegated to ICaseStudyService.
 *@
-
-@inject CloudZen.Services.ProjectService ProjectService
 
 <section id="cases" class="py-16 md:py-20 bg-gradient-to-br from-gray-50 to-gray-100 scroll-mt-24">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
@@ -53,12 +33,12 @@
                         <!-- Category Badge (top-right) -->
                         <div class="absolute top-4 right-4">
                             <span class="bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-semibold">
-                                @GetProjectCategory(project.ProjectType)
+                                @CaseStudyService.GetProjectCategory(project.ProjectType)
                             </span>
                         </div>
                         <!-- Project Title (shortened for display) -->
                         <h3 class="font-bold text-xl text-white pr-24 leading-tight">
-                            @GetShortTitle(project.Name)
+                            @CaseStudyService.GetShortTitle(project.Name)
                         </h3>
                     </div>
 
@@ -66,7 +46,7 @@
                     <div class="p-6">
                         <!-- Project Description (simplified, max 3 lines) -->
                         <p class="text-gray-600 text-sm mb-4 line-clamp-3">
-                            @GetCustomerFriendlyDescription(project.Description)
+                            @CaseStudyService.GetCustomerFriendlyDescription(project.Description)
                         </p>
 
                         <!-- Key Results Section - Shows top 2 results with checkmark icons -->
@@ -83,7 +63,7 @@
                                             <svg class="w-5 h-5 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="#61C2C8" stroke-width="2.5" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
                                             </svg>
-                                            <span>@GetSimplifiedResult(result)</span>
+                                            <span>@CaseStudyService.GetSimplifiedResult(result)</span>
                                         </li>
                                     }
                                 </ul>
@@ -142,127 +122,3 @@
     </div>
 </section>
 
-@code {
-    /// <summary>
-    /// Collection of featured case study projects to display.
-    /// Populated in OnInitialized with filtered data from ProjectService.
-    /// </summary>
-    private List<ProjectInfo> _caseStudyProjects = new();
-
-    /// <summary>
-    /// Lifecycle method - Initializes component state when first rendered.
-    /// Filters and selects the most relevant projects for case study display.
-    /// 
-    /// SELECTION CRITERIA:
-    /// - Status: "Completed" or "In Progress"
-    /// - Type: Customer projects OR specific high-impact side projects
-    /// - Limit: Top 3 projects
-    /// 
-    /// TO MODIFY: Adjust filter criteria or Take() count to change displayed projects.
-    /// </summary>
-    protected override void OnInitialized()
-    {
-        // Fetch all projects from the service
-        var allProjects = ProjectService.GetAllProjects();
-        
-        // Filter for completed/in-progress projects that are either:
-        // 1. Customer work (contains "Customer" in ProjectType)
-        // 2. Notable side projects (VPKFILEPROCESSOR, Smart Menu)
-        _caseStudyProjects = allProjects
-            .Where(p => (p.Status == "Completed" || p.Status == "In Progress") &&
-                       (p.ProjectType.Contains("Customer") || 
-                        p.Name.Contains("FILE PROCESSOR") ||
-                        p.Name.Contains("Smart Menu")))
-            .Take(3)  // Limit to 3 featured projects
-            .ToList();
-    }
-
-    /// <summary>
-    /// Determines the display category badge for a project based on its type.
-    /// </summary>
-    /// <param name="projectType">The ProjectType property from ProjectInfo</param>
-    /// <returns>"Customer Success" for client work, "Innovation Project" for side projects</returns>
-    private string GetProjectCategory(string projectType)
-    {
-        if (projectType.Contains("Customer"))
-        {
-            return "Customer Success";
-        }
-        return "Innovation Project";
-    }
-
-    /// <summary>
-    /// Converts long project titles into shorter, more display-friendly versions.
-    /// Uses pattern matching to identify specific projects and provide simplified titles.
-    /// </summary>
-    /// <param name="title">Original project name from ProjectInfo</param>
-    /// <returns>Shortened title (max 50 chars) for better card layout</returns>
-    /// <remarks>
-    /// TO EXTEND: Add new if conditions for additional project name mappings.
-    /// Default behavior: Truncate titles longer than 50 characters with "..."
-    /// </remarks>
-    private string GetShortTitle(string title)
-    {
-        // Map known project names to simplified versions
-        if (title.Contains("WPBT"))
-            return "Assessment Platform Modernization";
-        if (title.Contains("ETL Optimization"))
-            return "Data Pipeline Optimization";
-        if (title.Contains("VPKFILEPROCESSOR"))
-            return "File Processing Automation";
-        if (title.Contains("Smart Menu"))
-            return "AI Menu Optimization";
-        
-        // Fallback: Truncate long titles
-        return title.Length > 50 ? title.Substring(0, 47) + "..." : title;
-    }
-
-    /// <summary>
-    /// Translates technical descriptions into business-friendly language.
-    /// Removes technical jargon and focuses on business value for non-technical readers.
-    /// </summary>
-    /// <param name="description">Technical project description from ProjectInfo</param>
-    /// <returns>Simplified, customer-friendly description (max 150 chars)</returns>
-    /// <remarks>
-    /// TO EXTEND: Add more .Replace() calls for additional technical terms.
-    /// This helps make the portfolio accessible to business decision-makers.
-    /// </remarks>
-    private string GetCustomerFriendlyDescription(string description)
-    {
-        // Replace technical terms with business-friendly equivalents
-        var simplified = description
-            .Replace("ASP.NET Web Forms to modular ASP.NET Core architecture", "outdated systems to modern technology")
-            .Replace("SSIS ETL pipeline", "data processing pipeline")
-            .Replace("ABAP-driven delta extraction", "smart data extraction")
-            .Replace("cloud-native solution", "modern online solution")
-            .Replace("Blazor Server interface", "user-friendly web interface")
-            .Replace("Azure Event Grid", "automated notifications");
-        
-        // Truncate if too long to maintain card uniformity
-        return simplified.Length > 150 ? simplified.Substring(0, 147) + "..." : simplified;
-    }
-
-    /// <summary>
-    /// Simplifies technical result statements for non-technical audiences.
-    /// Similar to GetCustomerFriendlyDescription but for individual result items.
-    /// </summary>
-    /// <param name="result">Technical result statement from ProjectInfo.Results</param>
-    /// <returns>Simplified result text (max 80 chars)</returns>
-    /// <remarks>
-    /// TO EXTEND: Add more .Replace() calls for additional technical terms found in results.
-    /// Keep additions aligned with your target audience's vocabulary.
-    /// </remarks>
-    private string GetSimplifiedResult(string result)
-    {
-        // Replace technical terminology with accessible language
-        var simplified = result
-            .Replace("turnaround times by roughly", "delivery speed by")
-            .Replace("Runtime Reduction through Delta Processing", "faster processing")
-            .Replace("Scales-Out efficiently with large datasets", "Handles growing data smoothly")
-            .Replace("CI/CD pipelines", "automated deployments")
-            .Replace("Azure Event Grid", "automated notifications");
-        
-        // Truncate for consistency in result lists
-        return simplified.Length > 80 ? simplified.Substring(0, 77) + "..." : simplified;
-    }
-}

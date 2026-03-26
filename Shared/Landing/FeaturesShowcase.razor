@@ -1,6 +1,4 @@
 @using CloudZen.Models
-@using CloudZen.Services
-@inject FeatureHighlightService FeatureHighlightService
 
 @* Section: Feature highlights with alternating text/image layout. *@
 
@@ -10,12 +8,3 @@
         <FeatureHighlightCard Feature="@_features[i]" IsReversed="@(i % 2 != 0)" />
     }
 </section>
-
-@code {
-    private List<FeatureHighlight> _features = new();
-
-    protected override void OnInitialized()
-    {
-        _features = FeatureHighlightService.GetAllFeatures();
-    }
-}

@@ -1,7 +1,5 @@
 ﻿@using System.ComponentModel.DataAnnotations
 @using CloudZen.Models
-@using CloudZen.Services.Abstractions
-@inject IEmailService EmailService
 
 <section id="contact" class="py-16 md:py-20 bg-gradient-to-br from-gray-50 via-white to-teal-50">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -216,49 +214,3 @@
     </div>
 </section>
 
-@code {
-    private ContactFormModel formModel = new();
-    private bool submitted = false;
-    private bool isSubmitting = false;
-    private string? errorMessage;
-
-    private async Task HandleValidSubmit()
-    {
-        isSubmitting = true;
-        errorMessage = null;
-
-        try
-        {
-            var result = await EmailService.SendEmailAsync(
-                formModel.Subject!,
-                formModel.Message!,
-                formModel.Name!,
-                formModel.Email!
-            );
-
-            if (result.Success)
-            {
-                submitted = true;
-            }
-            else
-            {
-                errorMessage = result.Error ?? "Failed to send message. Please try again.";
-            }
-        }
-        catch (Exception)
-        {
-            errorMessage = "An unexpected error occurred. Please try again later.";
-        }
-        finally
-        {
-            isSubmitting = false;
-        }
-    }
-
-    private void ResetForm()
-    {
-        formModel = new ContactFormModel();
-        submitted = false;
-        errorMessage = null;
-    }
-}

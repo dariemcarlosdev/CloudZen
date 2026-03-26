@@ -1,25 +1,8 @@
-﻿@using CloudZen.Services
-
 <section id="contact" class="py-16 bg-orange-400 text-center text-white">
-    <h2 class="text-3xl font-bold mb-6">Let’s Modernize Your Business</h2>
+    <h2 class="text-3xl font-bold mb-6">Let's Modernize Your Business</h2>
     <p class="mb-8">Schedule a free consultation to discover how CloudZen can help.</p>
     <button class="px-8 py-3 bg-white text-orange-500 font-semibold rounded-full shadow" @onclick="BookConsultation">
         <i class="bi bi-envelope-at mr-2 transition-transform group-hover:translate-x-1"></i>
         Schedule Now
     </button>
 </section>
-
-@code {
-    [Inject] IJSRuntime JS { get; set; }
-    [Inject] GoogleCalendarUrlService CalendarUrlService { get; set; }
-
-    // Quick solution: Open a pre-filled Google Calendar event in a new tab using a special URL.
-    // This avoids the need for a backend service and Google OAuth integration, which would be required
-    // to create events directly via the Google Calendar API. This approach is secure for Blazor WebAssembly
-    // (client-side) apps, as it does not expose sensitive credentials or require server-side logic.
-    private async Task BookConsultation()
-    {
-        var url = CalendarUrlService.CreateConsultationUrl();
-        await JS.InvokeVoidAsync("open", url, "_blank");
-    }
-}

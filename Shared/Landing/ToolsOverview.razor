@@ -1,6 +1,4 @@
 @using CloudZen.Models
-@using CloudZen.Services
-@inject ToolService ToolService
 
 @* Section: "All the tools you need to grow in one place."
    Displays a grid of tool cards with SVG icons.
@@ -26,12 +24,3 @@
         </a>
     </div>
 </section>
-
-@code {
-    private List<ToolInfo> _tools = new();
-
-    protected override void OnInitialized()
-    {
-        _tools = ToolService.GetAllTools();
-    }
-}
