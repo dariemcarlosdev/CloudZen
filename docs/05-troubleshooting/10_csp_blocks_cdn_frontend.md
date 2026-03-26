@@ -1,20 +1,14 @@
-# Known Issues
-
-This document tracks production issues encountered, their root cause, resolution, and verification steps.
-
----
-
-## Issue #1 — CSP Blocks CDN Resources on First Load (Service Worker)
+# Issue #1 — CSP Blocks CDN Resources on First Load (Service Worker)
 
 **Date:** June 2025
 **Status:** Resolved
 **Affected files:** `wwwroot/staticwebapp.config.json`, `wwwroot/service-worker.published.js`
 
-### Description
+## Description
 
 On first load in production, the Azure Static Web App fails to render correctly — the browser console floods with hundreds of `Content Security Policy` violations blocking requests to CDN origins (`cdn.jsdelivr.net`, `cdn.tailwindcss.com`, `fonts.googleapis.com`). A hard refresh (`Ctrl+Shift+R`) resolves the issue temporarily, but every new visitor or cleared cache reproduces it.
 
-### Why It Happens
+## Why It Happens
 
 In a Blazor WebAssembly PWA, the published service worker (`service-worker.published.js`) intercepts **all** fetch requests — including those for external CDN resources like Tailwind CSS, Bootstrap Icons, and Google Fonts. When the service worker calls `fetch(event.request)` for these cross-origin URLs, the browser enforces the `connect-src` Content Security Policy directive. The original `connect-src` only allowed `'self'` and the Azure Function/Blob Storage origins, so every CDN fetch was blocked.
 
@@ -22,7 +16,7 @@ A hard refresh bypasses the service worker entirely, which is why the page loade
 
 Additionally, the CSP lacked explicit `style-src` and `script-src` directives. The browser fell back to `default-src` for stylesheet and script evaluation, which in some cases was truncated or misapplied by the Azure Static Web Apps platform, causing Google Fonts stylesheets to be blocked.
 
-### How It Was Solved
+## How It Was Solved
 
 **1. Updated CSP in `staticwebapp.config.json`:**
 
@@ -49,7 +43,7 @@ Additionally, the CSP lacked explicit `style-src` and `script-src` directives. T
   });
   ```
 
-### How to Test
+## How to Test
 
 **For new visitors / clean verification:**
 
@@ -71,22 +65,3 @@ The old service worker cached the old CSP headers with the HTML responses. You m
 5. Go to **Application** → **Storage** → click **Clear site data**.
 6. Close the tab and reopen your site.
 7. Subsequent visits will use the new service worker without issues.
-
----
-
-## Concepts Reference
-
-### Service Workers in Azure Static Web Apps
-
-A **service worker** is a JavaScript file that runs in the background of the browser, separate from the web page. In a Blazor WebAssembly PWA, it serves two purposes:
-
-- **Offline support**: On install, it caches all app assets (`.dll`, `.wasm`, `.html`, `.css`, `.js`) listed in the assets manifest. On subsequent visits, it serves cached responses instead of hitting the network.
-- **Fetch interception**: It listens to the `fetch` event and intercepts every HTTP request the page makes — including requests for external CDN resources.
-
-**Key behavior that causes CSP issues:** When a service worker calls `fetch()`, those requests are governed by the **`connect-src`** CSP directive — not `script-src`, `style-src`, or `default-src`. This means even if `default-src` allows a CDN origin, the service worker's fetch to that same origin will be blocked if `connect-src` doesn't include it.
-
-**Development vs. Production:** Blazor uses two service worker files:
-- `service-worker.js` — Used in development; does nothing (empty fetch handler).
-- `service-worker.published.js` — Used in production; implements full caching and fetch interception. This is why the issue only appears in production.
-
-Azure Static Web Apps applies the CSP headers defined in `staticwebapp.config.json` to all responses. The service worker, running within that CSP context, must comply with all directives — particularly `connect-src` for any `fetch()` calls it makes.
