@@ -9,6 +9,8 @@
     <link rel="canonical" href="https://www.cloud-zen.net/" />
 </HeadContent>
 
+@inject NavigationManager NavigationManager
+
 <div class="min-h-screen flex flex-col bg-gray-50">
     <main class="flex-1 flex flex-col items-center w-full">
         <div class="w-full max-w-7xl">
@@ -26,7 +28,20 @@
     {
         if (firstRender)
         {
-            await JS.InvokeVoidAsync("scrollToHero");
+            var uri = new Uri(NavigationManager.Uri);
+            var fragment = uri.Fragment;
+
+            if (!string.IsNullOrEmpty(fragment))
+            {
+                // Strip the '#' and scroll to the element (e.g. #cases)
+                var elementId = fragment.TrimStart('#');
+                await Task.Delay(100); // Allow DOM to render
+                await JS.InvokeVoidAsync("scrollToElementById", elementId);
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("scrollToHero");
+            }
         }
     }
 }

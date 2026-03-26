@@ -29,17 +29,6 @@
            @* @onclick='() => ScrollToHero()' *@>
             <img src="/images/HeaderLogo.png" alt="CloudZen Logo" class="h-16 object-contain" width="160" height="64" />
 </a>
-        @* Show "Back to Home" button only when on a sub-page (Who I Am, Contact) and mobile menu is closed.
-           The button navigates back to the home/hero section when clicked. *@
-        @if (isSubPage && !isMobileMenuOpen)
-        {
-            <button class="ml-2 text-teal-cyan-aqua-200 hover:text-teal-cyan-aqua-600 transition flex items-center" @onclick="NavigateToHero" title="Back to Home">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-                <span class="ml-1 text-base font-semibold">Back</span>
-            </button>
-        }
     </div>
 @*     <!-- Hamburger for mobile -->
     <button class="md:hidden text-white focus:outline-none" @onclick="ToggleMobileMenu" aria-label="Open menu">
@@ -59,7 +48,7 @@
     <!-- Desktop nav -->
     <nav class="hidden md:flex items-center gap-6 text-base">
         <NavLink href="/services" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">Services</NavLink>
-        <a href="#cases" @onclick='() => SetActive("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
+        <a href="/#cases" @onclick='() => SetActive("#cases")' class="@GetNavClass("#cases")">Our Work</a>
         <NavLink href="/mission" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">About</NavLink>
         <NavLink href="/whoiam" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">Who I Am</NavLink>
         <NavLink href="/contact" class="px-4 py-2 bg-orange-400 text-white rounded-full hover:bg-orange-500 transition" ActiveClass="ring-2">Contact</NavLink>
@@ -69,7 +58,7 @@
     {
         <nav class="absolute top-full left-0 w-full bg-white flex flex-col items-center gap-4 py-6 md:hidden shadow-lg z-50">
             <NavLink href="/services" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>Services</NavLink>
-            <a href="#cases" @onclick='() => OnMobileNavClick("#cases")' class="@GetNavClass("#cases")">Case Studies</a>
+            <a href="/#cases" @onclick='() => OnMobileNavClick("#cases")' class="@GetNavClass("#cases")">Our Work</a>
             <NavLink href="/mission" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>About</NavLink>
             <NavLink href="/whoiam" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>Who I Am</NavLink>
             <NavLink href="/contact" class="px-4 py-2 bg-orange-400 text-white rounded-full hover:bg-orange-500 transition" ActiveClass="ring-2" @onclick='CloseMobileMenu'>Contact</NavLink>
@@ -86,8 +75,7 @@
 
 @code {
     private string activeSection = "#hero";
-    private bool isMobileMenuOpen = false;
-    private bool isSubPage;
+	private bool isMobileMenuOpen = false;
 	private bool isHamburgerActive = false;
 
     // Handles the hamburger menu click animation and toggles the mobile menu.
@@ -100,28 +88,16 @@
         StateHasChanged();
     }
 
-	// Called when the component is initialized. Subscribes to location changes to update isSubPage.
+	// Called when the component is initialized. Subscribes to location changes.
 	protected override void OnInitialized()
 	{
-		UpdateIsSubPage();
 		NavigationManager.LocationChanged += HandleLocationChanged;
 	}
 
-    // Handles route changes and updates the header state accordingly.
-    private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        UpdateIsSubPage();
-        InvokeAsync(StateHasChanged);
-    }
-
-	// Updates the isSubPage flag based on the current URI.
-	private void UpdateIsSubPage()
+	// Handles route changes and updates the header state accordingly.
+	private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
 	{
-		var uri = NavigationManager.Uri;
-		isSubPage = uri.EndsWith("/whoiam", StringComparison.OrdinalIgnoreCase)
-				 || uri.EndsWith("/contact", StringComparison.OrdinalIgnoreCase)
-				 || uri.EndsWith("/mission", StringComparison.OrdinalIgnoreCase)
-				 || uri.EndsWith("/services", StringComparison.OrdinalIgnoreCase);
+		InvokeAsync(StateHasChanged);
 	}
 
     // Unsubscribes from the location changed event to avoid memory leaks.
@@ -164,10 +140,4 @@
     // Returns the CSS class for the contact link, including highlighting if active.
     private string GetContactClass() =>
         $"px-4 py-2 bg-indigo-600 text-gray-50 rounded-lg hover:bg-indigo-700 transition {(activeSection == "#contact" ? "ring-2" : "")}";
-
-    // Navigates to the home page ("/").
-    private void NavigateToHero()
-    {
-        NavigationManager.NavigateTo("/");
-    }
 }
