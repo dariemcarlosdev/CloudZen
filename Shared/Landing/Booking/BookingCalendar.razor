@@ -1,0 +1,56 @@
+@using CloudZen.Services.Abstractions
+
+@* BookingCalendar.razor — Calendar grid with month navigation for date selection. *@
+
+<div class="flex-1 p-6 flex flex-col">
+    <h4 class="text-lg font-semibold text-gray-800 mb-4">Select Date &amp; Time</h4>
+
+    <!-- Month Navigation -->
+    <div class="flex items-center justify-center gap-4 mb-4">
+        <button @onclick="PreviousMonth" class="text-gray-400 hover:text-teal-cyan-aqua-400 transition disabled:opacity-30" disabled="@BookingService.IsPreviousMonthDisabled(DisplayMonth)">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="text-base font-semibold text-gray-700 min-w-[140px] text-center">
+            @DisplayMonth.ToString("MMMM yyyy")
+        </span>
+        <button @onclick="NextMonth" class="text-teal-cyan-aqua-400 hover:text-teal-cyan-aqua-600 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+    </div>
+
+    <!-- Day Headers (Mon–Sun) -->
+    <div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-400 mb-1">
+        <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="grid grid-cols-7 text-center text-sm gap-y-1">
+        @foreach (var cell in calendarCells)
+        {
+            @if (cell == null)
+            {
+                <span></span>
+            }
+            else
+            {
+                var day = cell.Value;
+                var date = new DateTime(DisplayMonth.Year, DisplayMonth.Month, day);
+                var isAvailable = BookingService.IsDateAvailable(date);
+                var isSelected = SelectedDate.HasValue && SelectedDate.Value == date;
+                var isToday = date == DateTime.Today;
+
+                <button disabled="@(!isAvailable)"
+                        @onclick="() => OnDateSelected.InvokeAsync(date)"
+                        class="@GetDayCss(isAvailable, isSelected, isToday)">
+                    @day
+                </button>
+            }
+        }
+    </div>
+
+    <!-- Time Zone Picker -->
+    <div class="mt-auto pt-4">
+        <BookingTimeZonePicker TimeZoneLabel="@TimeZoneLabel"
+                               OnTimeZoneChanged="OnTimeZoneChanged" />
+    </div>
+</div>

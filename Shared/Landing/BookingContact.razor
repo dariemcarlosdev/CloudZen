@@ -1,15 +1,14 @@
-@using System.ComponentModel.DataAnnotations
-@using System.Globalization
 @using CloudZen.Models
 @using CloudZen.Services.Abstractions
-@inject IEmailService EmailService
+@using CloudZen.Shared.Landing.Booking
 
 @* =============================================================================
-   BookingContact.razor — Multi-step scheduling & contact component
+   BookingContact.razor — Multi-step scheduling & contact orchestrator
+   Holds state and composes child components via parameters / EventCallbacks.
    Flow:
-     Step 1: Select Date & Time (calendar + time slots)
-     Step 2: Enter Details (form with name, phone, email, business, opt-in)
-     Step 3: Confirmation
+     Step 1: Select Date & Time  → BookingSidebar, BookingCalendar, BookingTimeSlots
+     Step 2: Enter Details       → BookingSidebar, BookingDetailsForm
+     Step 3: Confirmation        → BookingConfirmation
    ============================================================================= *@
 
 <section id="booking" class="py-24">
@@ -29,132 +28,21 @@
             @if (currentStep == Step.SelectDateTime)
             {
                 <div class="flex flex-col md:flex-row min-h-[520px]">
+                    <BookingSidebar SelectedDate="@selectedDate" />
 
-                    <!-- Left Sidebar -->
-                    <div class="md:w-[280px] border-b md:border-b-0 md:border-r border-gray-200 p-6 flex flex-col gap-4">
-                        <img src="/images/cloudzen-logo-2.png" alt="CloudZen Logo" class="w-16 h-16 object-cover rounded-full" loading="lazy" width="64" height="64" />
-                        <span class="text-sm font-semibold text-teal-cyan-aqua-600">Bookings</span>
-                        <h3 class="text-xl font-bold text-gray-800 leading-tight">CloudZen Virtual Meeting</h3>
-                        <div class="flex items-center gap-2 text-gray-500 text-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M12 6v6l4 2"/></svg>
-                            30 Mins
-                        </div>
-                        @if (selectedDate.HasValue)
-                        {
-                            <div class="flex items-center gap-2 text-gray-500 text-sm">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path stroke-width="2" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                                @selectedDate.Value.ToString("ddd, MMM dd, yyyy")
-                            </div>
-                        }
-                        <p class="text-sm text-gray-400 mt-2 leading-relaxed">
-                            Schedule a 30 minute virtual meeting to speak with one of our team members to see how CloudZen can bring AI Solutions to your business!
-                        </p>
-                    </div>
+                    <BookingCalendar DisplayMonth="@displayMonth"
+                                     SelectedDate="@selectedDate"
+                                     TimeZoneLabel="@timeZoneLabel"
+                                     OnDateSelected="SelectDate"
+                                     OnDisplayMonthChanged="SetDisplayMonth"
+                                     OnTimeZoneChanged="HandleTimeZoneChanged" />
 
-                    <!-- Center: Calendar -->
-                    <div class="flex-1 p-6 flex flex-col">
-                        <h4 class="text-lg font-semibold text-gray-800 mb-4">Select Date &amp; Time</h4>
-
-                        <!-- Month Navigation -->
-                        <div class="flex items-center justify-center gap-4 mb-4">
-                            <button @onclick="PreviousMonth" class="text-gray-400 hover:text-teal-cyan-aqua-400 transition disabled:opacity-30" disabled="@IsPreviousMonthDisabled()">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                            </button>
-                            <span class="text-base font-semibold text-gray-700 min-w-[140px] text-center">
-                                @displayMonth.ToString("MMMM yyyy")
-                            </span>
-                            <button @onclick="NextMonth" class="text-teal-cyan-aqua-400 hover:text-teal-cyan-aqua-600 transition">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            </button>
-                        </div>
-
-                        <!-- Day Headers (Mon–Sun) -->
-                        <div class="grid grid-cols-7 text-center text-xs font-semibold text-gray-400 mb-1">
-                            <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-                        </div>
-
-                        <!-- Calendar Grid -->
-                        <div class="grid grid-cols-7 text-center text-sm gap-y-1">
-                            @foreach (var cell in calendarCells)
-                            {
-                                @if (cell == null)
-                                {
-                                    <span></span>
-                                }
-                                else
-                                {
-                                    var day = cell.Value;
-                                    var date = new DateTime(displayMonth.Year, displayMonth.Month, day);
-                                    var isAvailable = IsDateAvailable(date);
-                                    var isSelected = selectedDate.HasValue && selectedDate.Value == date;
-                                    var isToday = date == DateTime.Today;
-
-                                    <button disabled="@(!isAvailable)"
-                                            @onclick="() => SelectDate(date)"
-                                            class="@GetDayCss(isAvailable, isSelected, isToday)">
-                                        @day
-                                    </button>
-                                }
-                            }
-                        </div>
-
-                        <!-- Time Zone -->
-                        <div class="mt-auto pt-4 relative">
-                            <span class="text-sm font-semibold text-gray-600">Time zone</span>
-                            <button type="button" @onclick="ToggleTimeZoneDropdown" class="flex items-center gap-2 mt-1 text-sm text-gray-500 w-full cursor-pointer hover:text-teal-cyan-aqua-500 transition">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
-                                <span class="truncate">@timeZoneLabel</span>
-                                <svg class="w-3 h-3 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                            </button>
-                            @if (isTimeZoneDropdownOpen)
-                            {
-                                <div class="fixed inset-0 z-40" @onclick="CloseTimeZoneDropdown"></div>
-                                <div class="absolute bottom-full left-0 mb-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 flex flex-col">
-                                    <div class="p-2 border-b border-gray-100">
-                                        <input type="text"
-                                               @bind="timeZoneSearch"
-                                               @bind:event="oninput"
-                                               placeholder="Search time zones..."
-                                               class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-cyan-aqua-300 placeholder-gray-400" />
-                                    </div>
-                                    <div class="overflow-y-auto flex-1">
-                                        @foreach (var tz in FilteredTimeZones)
-                                        {
-                                            var isSelected = tz.Id == selectedTimeZoneId;
-                                            <button type="button"
-                                                    @onclick="() => SelectTimeZone(tz)"
-                                                    class="@(isSelected ? "bg-teal-cyan-aqua-50 text-teal-cyan-aqua-600" : "text-gray-600 hover:bg-gray-50") w-full text-left px-3 py-2 text-sm transition truncate">
-                                                @FormatTimeZoneOption(tz)
-                                            </button>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        </div>
-                    </div>
-
-                    <!-- Right: Time Slots -->
                     @if (selectedDate.HasValue)
                     {
-                        <div class="md:w-[220px] border-t md:border-t-0 md:border-l border-gray-200 p-4 flex flex-col gap-2 overflow-y-auto max-h-[480px]">
-                            @foreach (var slot in availableTimeSlots)
-                            {
-                                var isSelectedSlot = selectedTime == slot;
-                                <div class="flex gap-2">
-                                    <button @onclick="() => SelectTime(slot)"
-                                            class="@GetTimeSlotCss(isSelectedSlot) flex-1 whitespace-nowrap">
-                                        @slot
-                                    </button>
-                                    @if (isSelectedSlot)
-                                    {
-                                        <button @onclick="ConfirmDateTime"
-                                                class="px-4 py-2 rounded-lg bg-teal-cyan-aqua-400 text-white text-sm font-semibold hover:bg-teal-cyan-aqua-500 transition whitespace-nowrap">
-                                            Select
-                                        </button>
-                                    }
-                                </div>
-                            }
-                        </div>
+                        <BookingTimeSlots TimeSlots="@BookingService.AvailableTimeSlots"
+                                          SelectedTime="@selectedTime"
+                                          OnTimeSelected="SelectTime"
+                                          OnConfirmed="ConfirmDateTime" />
                     }
                 </div>
             }
@@ -163,405 +51,28 @@
             @if (currentStep == Step.EnterDetails)
             {
                 <div class="flex flex-col md:flex-row min-h-[520px]">
+                    <BookingSidebar SelectedDate="@selectedDate"
+                                    TimeSlotRange="@BookingService.FormatSlotRange(selectedTime)"
+                                    TimeZoneLabel="@timeZoneLabel"
+                                    ShowBackButton="true"
+                                    OnBackClicked="GoBackToCalendar" />
 
-                    <!-- Left Sidebar (recap) -->
-                    <div class="md:w-[280px] border-b md:border-b-0 md:border-r border-gray-200 p-6 flex flex-col gap-4">
-                        <button @onclick="GoBackToCalendar" class="text-teal-cyan-aqua-400 hover:text-teal-cyan-aqua-600 transition self-start" title="Back">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7 7-7"/></svg>
-                        </button>
-                        <span class="text-sm font-semibold text-teal-cyan-aqua-400">Bookings</span>
-                        <h3 class="text-xl font-bold text-gray-800 leading-tight">CloudZen Virtual Meeting</h3>
-                        <div class="flex items-center gap-2 text-gray-500 text-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M12 6v6l4 2"/></svg>
-                            30 Mins
-                        </div>
-                        <div class="flex items-center gap-2 text-gray-500 text-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path stroke-width="2" d="M16 2v4M8 2v4M3 10h18"/></svg>
-                            @FormatSelectedSlotRange(), @selectedDate!.Value.ToString("ddd, MMM dd, yyyy")
-                        </div>
-                        <div class="flex items-center gap-2 text-gray-500 text-sm">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
-                            @timeZoneLabel
-                        </div>
-                    </div>
-
-                    <!-- Right: Form -->
-                    <div class="flex-1 p-6 md:p-10">
-                        <h4 class="text-lg font-semibold text-gray-800 mb-6">Enter Details</h4>
-
-                        <EditForm Model="@bookingForm" OnValidSubmit="HandleBookingSubmit">
-                            <DataAnnotationsValidator />
-
-                            <!-- Full Name -->
-                            <div class="mb-5">
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name <span class="text-red-400">*</span></label>
-                                <InputText @bind-Value="bookingForm.FullName"
-                                           placeholder="Full Name"
-                                           class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-cyan-aqua-300 focus:border-transparent transition disabled:opacity-50"
-                                           disabled="@isSubmitting" />
-                                <ValidationMessage For="@(() => bookingForm.FullName)" class="text-red-500 text-xs mt-1" />
-                            </div>
-
-                            <!-- Phone -->
-                            <div class="mb-5">
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Phone <span class="text-red-400">*</span></label>
-                                <div class="flex items-center gap-2">
-                                    <span class="text-lg">🇺🇸</span>
-                                    <InputText @bind-Value="bookingForm.Phone"
-                                               placeholder="Phone"
-                                               class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-cyan-aqua-300 focus:border-transparent transition disabled:opacity-50"
-                                               disabled="@isSubmitting" />
-                                </div>
-                                <ValidationMessage For="@(() => bookingForm.Phone)" class="text-red-500 text-xs mt-1" />
-                            </div>
-
-                            <!-- Email -->
-                            <div class="mb-5">
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Email <span class="text-red-400">*</span></label>
-                                <InputText @bind-Value="bookingForm.Email"
-                                           type="email"
-                                           placeholder="Email"
-                                           class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-cyan-aqua-300 focus:border-transparent transition disabled:opacity-50"
-                                           disabled="@isSubmitting" />
-                                <ValidationMessage For="@(() => bookingForm.Email)" class="text-red-500 text-xs mt-1" />
-                            </div>
-
-                            <!-- Business Name -->
-                            <div class="mb-5">
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Business Name <span class="text-red-400">*</span></label>
-                                <InputText @bind-Value="bookingForm.BusinessName"
-                                           placeholder="Name as Found on Google"
-                                           class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-cyan-aqua-300 focus:border-transparent transition disabled:opacity-50"
-                                           disabled="@isSubmitting" />
-                                <ValidationMessage For="@(() => bookingForm.BusinessName)" class="text-red-500 text-xs mt-1" />
-                            </div>
-
-                            <!-- Opt-In Consent -->
-                            <div class="mb-6">
-                                <label class="block text-sm font-semibold text-gray-700 mb-1">Opt-In Consent <span class="text-red-400">*</span></label>
-                                <label class="flex items-start gap-3 cursor-pointer">
-                                    <InputCheckbox @bind-Value="bookingForm.OptInConsent"
-                                                   class="mt-1 accent-teal-cyan-aqua-400 w-4 h-4"
-                                                   disabled="@isSubmitting" />
-                                    <span class="text-sm text-gray-600 leading-snug">
-                                        I confirm that I want to receive content from this company using any contact information I provide.
-                                    </span>
-                                </label>
-                                <ValidationMessage For="@(() => bookingForm.OptInConsent)" class="text-red-500 text-xs mt-1" />
-                            </div>
-
-                            <!-- Error Message -->
-                            @if (!string.IsNullOrEmpty(errorMessage))
-                            {
-                                <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-                                    @errorMessage
-                                </div>
-                            }
-
-                            <!-- Submit -->
-                            <div class="flex justify-end">
-                                <button type="submit"
-                                        class="px-6 py-3 rounded-lg bg-teal-cyan-aqua-400 text-white font-semibold hover:bg-teal-cyan-aqua-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-cyan-aqua-300 disabled:opacity-50 disabled:cursor-not-allowed transition shadow"
-                                        disabled="@isSubmitting">
-                                    @if (isSubmitting)
-                                    {
-                                        <span class="flex items-center gap-2">
-                                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                            </svg>
-                                            Scheduling...
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span>Schedule Virtual Meeting</span>
-                                    }
-                                </button>
-                            </div>
-                        </EditForm>
-                    </div>
+                    <BookingDetailsForm FormModel="@bookingForm"
+                                        IsSubmitting="@isSubmitting"
+                                        ErrorMessage="@errorMessage"
+                                        OnValidSubmit="HandleBookingSubmit" />
                 </div>
             }
 
             @* ── STEP 3: Confirmation ────────────────────────────────────── *@
             @if (currentStep == Step.Confirmation)
             {
-                <div class="p-12 md:p-16 text-center">
-                    <div class="relative inline-block mb-8">
-                        <div class="absolute inset-0 bg-teal-cyan-aqua-200 rounded-full animate-ping opacity-25"></div>
-                        <div class="relative w-20 h-20 bg-gradient-to-br from-teal-cyan-aqua-300 to-teal-cyan-aqua-500 rounded-full flex items-center justify-center shadow-lg">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        </div>
-                    </div>
-
-                    <h3 class="text-3xl font-bold text-gray-800 mb-3">Meeting Scheduled!</h3>
-                    <p class="text-lg text-gray-600 mb-2">
-                        Thank you, <strong>@bookingForm.FullName</strong>!
-                    </p>
-                    <p class="text-gray-500 mb-8 max-w-md mx-auto">
-                        Your 30-minute CloudZen Virtual Meeting is booked for
-                        <strong>@FormatSelectedSlotRange()</strong> on
-                        <strong>@selectedDate!.Value.ToString("dddd, MMMM dd, yyyy")</strong>.
-                        We'll send a confirmation to <strong>@bookingForm.Email</strong>.
-                    </p>
-
-                    <div class="bg-gray-50 rounded-xl p-6 mb-8 max-w-md mx-auto">
-                        <h4 class="font-semibold text-gray-800 mb-3">What happens next?</h4>
-                        <ul class="text-left text-sm text-gray-600 space-y-2">
-                            <li class="flex items-center gap-2">
-                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-teal-cyan-aqua-400 text-white text-xs flex items-center justify-center font-bold">1</span>
-                                <span>You'll receive a calendar invite &amp; meeting link</span>
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-teal-cyan-aqua-400 text-white text-xs flex items-center justify-center font-bold">2</span>
-                                <span>Our team will prepare for your consultation</span>
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <span class="flex-shrink-0 w-6 h-6 rounded-full bg-teal-cyan-aqua-400 text-white text-xs flex items-center justify-center font-bold">3</span>
-                                <span>Join the meeting &amp; explore AI solutions for your business</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <button @onclick="ResetBooking"
-                            class="inline-flex items-center px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-teal-cyan-aqua-300 hover:text-teal-cyan-aqua-500 transition-all duration-200">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                        Schedule Another Meeting
-                    </button>
-                </div>
+                <BookingConfirmation FullName="@(bookingForm.FullName ?? string.Empty)"
+                                     Email="@(bookingForm.Email ?? string.Empty)"
+                                     TimeSlotRange="@BookingService.FormatSlotRange(selectedTime)"
+                                     SelectedDate="@selectedDate!.Value"
+                                     OnReset="ResetBooking" />
             }
         </div>
     </div>
 </section>
-
-@code {
-    // ── State ────────────────────────────────────────────────────────────
-    private enum Step { SelectDateTime, EnterDetails, Confirmation }
-    private Step currentStep = Step.SelectDateTime;
-
-    private DateTime displayMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
-    private DateTime? selectedDate;
-    private string? selectedTime;
-
-    private BookingFormModel bookingForm = new();
-    private bool isSubmitting;
-    private string? errorMessage;
-
-    private string timeZoneLabel = GetLocalTimeZoneLabel();
-    private string selectedTimeZoneId = TimeZoneInfo.Local.Id;
-    private bool isTimeZoneDropdownOpen;
-    private string timeZoneSearch = string.Empty;
-
-    private static readonly TimeZoneInfo[] allTimeZones = TimeZoneInfo.GetSystemTimeZones().ToArray();
-
-    private IEnumerable<TimeZoneInfo> FilteredTimeZones =>
-        string.IsNullOrWhiteSpace(timeZoneSearch)
-            ? allTimeZones
-            : allTimeZones.Where(tz =>
-                FormatTimeZoneOption(tz).Contains(timeZoneSearch, StringComparison.OrdinalIgnoreCase));
-
-    // Available 30-min time slots offered each day
-    private readonly string[] availableTimeSlots =
-    [
-        "10:00 AM", "10:30 AM",
-        "12:00 PM", "12:30 PM",
-        "01:00 PM",
-        "02:30 PM",
-        "03:00 PM",
-        "05:00 PM"
-    ];
-
-    // ── Calendar helpers ─────────────────────────────────────────────────
-
-    // Cells for the calendar grid (null = empty leading/trailing cell)
-    private int?[] calendarCells => BuildCalendarCells();
-
-    private int?[] BuildCalendarCells()
-    {
-        var firstDay = new DateTime(displayMonth.Year, displayMonth.Month, 1);
-        int daysInMonth = DateTime.DaysInMonth(displayMonth.Year, displayMonth.Month);
-
-        // Monday = 0 offset
-        int startOffset = ((int)firstDay.DayOfWeek + 6) % 7;
-
-        var cells = new int?[startOffset + daysInMonth];
-        for (int i = 0; i < startOffset; i++)
-            cells[i] = null;
-        for (int d = 1; d <= daysInMonth; d++)
-            cells[startOffset + d - 1] = d;
-
-        return cells;
-    }
-
-    private bool IsDateAvailable(DateTime date)
-    {
-        // Weekdays from today onward
-        return date >= DateTime.Today
-            && date.DayOfWeek != DayOfWeek.Saturday
-            && date.DayOfWeek != DayOfWeek.Sunday;
-    }
-
-    private bool IsPreviousMonthDisabled()
-    {
-        return displayMonth.Year == DateTime.Today.Year && displayMonth.Month == DateTime.Today.Month;
-    }
-
-    private void PreviousMonth()
-    {
-        if (!IsPreviousMonthDisabled())
-            displayMonth = displayMonth.AddMonths(-1);
-    }
-
-    private void NextMonth() => displayMonth = displayMonth.AddMonths(1);
-
-    private void SelectDate(DateTime date)
-    {
-        selectedDate = date;
-        selectedTime = null; // reset time when date changes
-    }
-
-    private void SelectTime(string time) => selectedTime = time;
-
-    private void ConfirmDateTime()
-    {
-        if (selectedDate.HasValue && selectedTime is not null)
-            currentStep = Step.EnterDetails;
-    }
-
-    private void GoBackToCalendar() => currentStep = Step.SelectDateTime;
-
-    // ── Form submission ──────────────────────────────────────────────────
-
-    private async Task HandleBookingSubmit()
-    {
-        isSubmitting = true;
-        errorMessage = null;
-
-        try
-        {
-            var subject = $"New Booking: {bookingForm.FullName} — {selectedDate!.Value:MMM dd, yyyy} {selectedTime}";
-            var body = $"New meeting booking received:\n\n"
-                + $"Name: {bookingForm.FullName}\n"
-                + $"Phone: {bookingForm.Phone}\n"
-                + $"Email: {bookingForm.Email}\n"
-                + $"Business: {bookingForm.BusinessName}\n"
-                + $"Date: {selectedDate.Value:dddd, MMMM dd, yyyy}\n"
-                + $"Time: {FormatSelectedSlotRange()}\n"
-                + $"Time Zone: {timeZoneLabel}\n"
-                + "Opt-In Consent: Yes";
-
-            var result = await EmailService.SendEmailAsync(
-                subject,
-                body,
-                bookingForm.FullName!,
-                bookingForm.Email!
-            );
-
-            if (result.Success)
-            {
-                currentStep = Step.Confirmation;
-            }
-            else
-            {
-                errorMessage = result.Error ?? "Failed to schedule meeting. Please try again.";
-            }
-        }
-        catch
-        {
-            errorMessage = "An unexpected error occurred. Please try again later.";
-        }
-        finally
-        {
-            isSubmitting = false;
-        }
-    }
-
-    private void ResetBooking()
-    {
-        bookingForm = new BookingFormModel();
-        selectedDate = null;
-        selectedTime = null;
-        displayMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        currentStep = Step.SelectDateTime;
-        errorMessage = null;
-        selectedTimeZoneId = TimeZoneInfo.Local.Id;
-        timeZoneLabel = GetLocalTimeZoneLabel();
-        isTimeZoneDropdownOpen = false;
-        timeZoneSearch = string.Empty;
-    }
-
-    // ── Formatting helpers ───────────────────────────────────────────────
-
-    /// <summary>Formats the selected slot as a 30-min range, e.g. "12:30 PM - 01:00 PM".</summary>
-    private string FormatSelectedSlotRange()
-    {
-        if (selectedTime is null) return string.Empty;
-
-        if (DateTime.TryParseExact(selectedTime, "hh:mm tt", CultureInfo.InvariantCulture, DateTimeStyles.None, out var start))
-        {
-            var end = start.AddMinutes(30);
-            return $"{start:hh:mm tt} - {end:hh:mm tt}";
-        }
-
-        return selectedTime;
-    }
-
-    private static string GetLocalTimeZoneLabel()
-    {
-        return FormatTimeZoneOption(TimeZoneInfo.Local);
-    }
-
-    private static string FormatTimeZoneOption(TimeZoneInfo tz)
-    {
-        var utcOffset = tz.BaseUtcOffset;
-        var sign = utcOffset >= TimeSpan.Zero ? "+" : "-";
-        return $"GMT{sign}{Math.Abs(utcOffset.Hours):00}:{Math.Abs(utcOffset.Minutes):00} {tz.Id} ({tz.StandardName})";
-    }
-
-    private void ToggleTimeZoneDropdown()
-    {
-        isTimeZoneDropdownOpen = !isTimeZoneDropdownOpen;
-        if (isTimeZoneDropdownOpen)
-            timeZoneSearch = string.Empty;
-    }
-
-    private void SelectTimeZone(TimeZoneInfo tz)
-    {
-        selectedTimeZoneId = tz.Id;
-        timeZoneLabel = FormatTimeZoneOption(tz);
-        isTimeZoneDropdownOpen = false;
-        timeZoneSearch = string.Empty;
-    }
-
-    private void CloseTimeZoneDropdown()
-    {
-        isTimeZoneDropdownOpen = false;
-        timeZoneSearch = string.Empty;
-    }
-
-    // ── CSS helpers ──────────────────────────────────────────────────────
-
-    private string GetDayCss(bool isAvailable, bool isSelected, bool isToday)
-    {
-        const string baseClass = "w-9 h-9 mx-auto rounded-full text-sm flex items-center justify-center transition";
-
-        if (isSelected)
-            return $"{baseClass} bg-teal-cyan-aqua-400 text-white font-bold";
-        if (!isAvailable)
-            return $"{baseClass} text-gray-300 cursor-default";
-        if (isToday)
-            return $"{baseClass} border-2 border-teal-cyan-aqua-300 text-teal-cyan-aqua-500 font-semibold hover:bg-teal-cyan-aqua-50 cursor-pointer";
-
-        return $"{baseClass} text-teal-cyan-aqua-400 font-semibold hover:bg-teal-cyan-aqua-50 cursor-pointer";
-    }
-
-    private string GetTimeSlotCss(bool isSelected)
-    {
-        const string baseClass = "px-3 py-2 rounded-lg text-sm font-semibold border transition text-center";
-
-        return isSelected
-            ? $"{baseClass} bg-teal-cyan-aqua-500 text-white border-teal-cyan-aqua-500"
-            : $"{baseClass} border-teal-cyan-aqua-300 text-teal-cyan-aqua-500 hover:bg-teal-cyan-aqua-50";
-    }
-}

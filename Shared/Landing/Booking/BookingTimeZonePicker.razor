@@ -1,0 +1,36 @@
+@* BookingTimeZonePicker.razor — Searchable time zone dropdown. *@
+
+<div class="relative">
+    <span class="text-sm font-semibold text-gray-600">Time zone</span>
+    <button type="button" @onclick="ToggleDropdown" class="flex items-center gap-2 mt-1 text-sm text-gray-500 w-full cursor-pointer hover:text-teal-cyan-aqua-500 transition">
+        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        <span class="truncate">@TimeZoneLabel</span>
+        <svg class="w-3 h-3 ml-auto flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+    </button>
+
+    @if (isOpen)
+    {
+        <div class="fixed inset-0 z-40" @onclick="CloseDropdown"></div>
+        <div class="absolute bottom-full left-0 mb-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 flex flex-col">
+            <div class="p-2 border-b border-gray-100">
+                <input type="text"
+                       @bind="searchText"
+                       @bind:event="oninput"
+                       placeholder="Search time zones..."
+                       class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-teal-cyan-aqua-300 placeholder-gray-400" />
+            </div>
+            <div class="overflow-y-auto flex-1">
+                @foreach (var tz in FilteredTimeZones)
+                {
+                    var isSelected = tz.Id == selectedTimeZoneId;
+                    <button type="button"
+                            @onclick="() => SelectTimeZone(tz)"
+                            class="@(isSelected ? "bg-teal-cyan-aqua-50 text-teal-cyan-aqua-600" : "text-gray-600 hover:bg-gray-50") w-full text-left px-3 py-2 text-sm transition truncate">
+                        @BookingService.FormatTimeZoneOption(tz)
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
