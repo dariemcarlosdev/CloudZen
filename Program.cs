@@ -26,6 +26,7 @@ if (builder.HostEnvironment.IsDevelopment())
     const string functionsLocalUrl = "http://localhost:7257/api"; // update with your local Functions URL and port
     builder.Configuration["ChatbotService:ApiBaseUrl"] = functionsLocalUrl;
     builder.Configuration["EmailService:ApiBaseUrl"] = functionsLocalUrl;
+    builder.Configuration["BookingService:ApiBaseUrl"] = functionsLocalUrl;
 }
 
 // =============================================================================
@@ -54,6 +55,11 @@ builder.Services.AddOptions<BlobStorageOptions>()
 // Section: "ChatbotService"
 builder.Services.AddOptions<ChatbotOptions>()
     .BindConfiguration(ChatbotOptions.SectionName);
+
+// Configure Booking Service options from appsettings.json
+// Section: "BookingService"
+builder.Services.AddOptions<BookingServiceOptions>()
+    .BindConfiguration(BookingServiceOptions.SectionName);
 
 // =============================================================================
 // HTTP CLIENT REGISTRATION
@@ -84,6 +90,9 @@ builder.Services.AddScoped<IGoogleCalendarUrlService, GoogleCalendarUrlService>(
 
 // Register BookingService for calendar logic, date availability, and formatting
 builder.Services.AddScoped<IBookingService, BookingService>();
+
+// Register AppointmentService for n8n webhook appointment booking
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 
 // Register TicketService as the implementation for ITicketService
 builder.Services.AddScoped<ITicketService, TicketService>();

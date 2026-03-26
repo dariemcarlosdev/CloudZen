@@ -60,25 +60,25 @@ public static partial class InputValidator
     public static ValidationResult ValidateEmail(string? email)
     {
         if (string.IsNullOrWhiteSpace(email))
-            return ValidationResult.Invalid("Email is required.");
+            return ValidationResult.Invalid("Please provide an email address.");
 
         if (email.Length > 254)
-            return ValidationResult.Invalid("Email address is too long.");
+            return ValidationResult.Invalid("The email address is too long (max 254 characters).");
 
         if (ContainsDangerousContent(email))
-            return ValidationResult.Invalid("Invalid email format.");
+            return ValidationResult.Invalid("Please enter a valid email address.");
 
         try
         {
             var addr = new System.Net.Mail.MailAddress(email);
             if (addr.Address != email)
-                return ValidationResult.Invalid("Invalid email format.");
+                return ValidationResult.Invalid("Please enter a valid email address.");
 
             return ValidationResult.Valid();
         }
         catch
         {
-            return ValidationResult.Invalid("Invalid email format.");
+            return ValidationResult.Invalid("Please enter a valid email address.");
         }
     }
 
@@ -117,19 +117,19 @@ public static partial class InputValidator
         if (string.IsNullOrWhiteSpace(input))
         {
             return required
-                ? ValidationResult.Invalid($"{fieldName} is required.")
+                ? ValidationResult.Invalid($"Please enter your {fieldName.ToLowerInvariant()}.")
                 : ValidationResult.Valid();
         }
 
         if (input.Length > maxLength)
-            return ValidationResult.Invalid($"{fieldName} exceeds maximum length of {maxLength} characters.");
+            return ValidationResult.Invalid($"{fieldName} is too long (max {maxLength} characters).");
 
         if (ContainsDangerousContent(input))
-            return ValidationResult.Invalid($"{fieldName} contains invalid content.");
+            return ValidationResult.Invalid($"{fieldName} contains characters that aren't allowed.");
 
         // Check for SQL injection patterns
         if (ContainsSqlInjectionPatterns(input))
-            return ValidationResult.Invalid($"{fieldName} contains invalid content.");
+            return ValidationResult.Invalid($"{fieldName} contains characters that aren't allowed.");
 
         return ValidationResult.Valid();
     }

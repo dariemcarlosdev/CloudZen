@@ -17,7 +17,7 @@ public partial class BookingTimeSlots
         const string baseClass = "px-3 py-2 rounded-lg text-sm font-semibold border transition text-center";
 
         return isSelected
-            ? $"{baseClass} bg-teal-cyan-aqua-500 text-white border-teal-cyan-aqua-500"
-            : $"{baseClass} border-teal-cyan-aqua-300 text-teal-cyan-aqua-500 hover:bg-teal-cyan-aqua-50";
+            ? $"{baseClass} bg-teal-cyan-aqua-600 text-white border-teal-cyan-aqua-600"
+            : $"{baseClass} border-teal-cyan-aqua-600 text-teal-cyan-aqua-600 hover:bg-teal-cyan-aqua-50";
     }
 }

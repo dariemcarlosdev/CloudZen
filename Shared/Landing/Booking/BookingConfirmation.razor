@@ -12,6 +12,15 @@
     <p class="text-lg text-gray-600 mb-2">
         Thank you, <strong>@FullName</strong>!
     </p>
+
+    @if (!string.IsNullOrWhiteSpace(BookingId))
+    {
+        <div class="inline-flex items-center gap-2 px-4 py-2 bg-teal-cyan-aqua-50 border border-teal-cyan-aqua-200 rounded-lg mb-4">
+            <i class="bi bi-bookmark-check-fill text-teal-cyan-aqua-600"></i>
+            <span class="text-sm text-gray-700">Booking ID: <strong class="text-teal-cyan-aqua-700 font-mono">@BookingId</strong></span>
+        </div>
+    }
+
     <p class="text-gray-500 mb-8 max-w-md mx-auto">
         Your 30-minute CloudZen Virtual Meeting is booked for
         <strong>@TimeSlotRange</strong> on

@@ -32,12 +32,12 @@ public partial class BookingCalendar
         const string baseClass = "w-9 h-9 mx-auto rounded-full text-sm flex items-center justify-center transition";
 
         if (isSelected)
-            return $"{baseClass} bg-teal-cyan-aqua-400 text-white font-bold";
+            return $"{baseClass} bg-teal-cyan-aqua-600 text-white font-bold";
         if (!isAvailable)
             return $"{baseClass} text-gray-300 cursor-default";
         if (isToday)
-            return $"{baseClass} border-2 border-teal-cyan-aqua-300 text-teal-cyan-aqua-500 font-semibold hover:bg-teal-cyan-aqua-50 cursor-pointer";
+            return $"{baseClass} border-2 border-teal-cyan-aqua-600 text-teal-cyan-aqua-600 font-semibold hover:bg-teal-cyan-aqua-50 cursor-pointer";
 
-        return $"{baseClass} text-teal-cyan-aqua-400 font-semibold hover:bg-teal-cyan-aqua-50 cursor-pointer";
+        return $"{baseClass} text-teal-cyan-aqua-600 font-semibold hover:bg-teal-cyan-aqua-50 cursor-pointer";
     }
 }

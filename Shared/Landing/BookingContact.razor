@@ -60,6 +60,8 @@
                     <BookingDetailsForm FormModel="@bookingForm"
                                         IsSubmitting="@isSubmitting"
                                         ErrorMessage="@errorMessage"
+                                        IsSlotTaken="@isSlotTaken"
+                                        OnChooseDifferentTime="GoBackToCalendar"
                                         OnValidSubmit="HandleBookingSubmit" />
                 </div>
             }
@@ -71,6 +73,7 @@
                                      Email="@(bookingForm.Email ?? string.Empty)"
                                      TimeSlotRange="@BookingService.FormatSlotRange(selectedTime)"
                                      SelectedDate="@selectedDate!.Value"
+                                     BookingId="@confirmedBookingId"
                                      OnReset="ResetBooking" />
             }
         </div>

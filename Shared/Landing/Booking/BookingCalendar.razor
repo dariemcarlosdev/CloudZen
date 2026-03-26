@@ -7,13 +7,13 @@
 
     <!-- Month Navigation -->
     <div class="flex items-center justify-center gap-4 mb-4">
-        <button @onclick="PreviousMonth" class="text-gray-400 hover:text-teal-cyan-aqua-400 transition disabled:opacity-30" disabled="@BookingService.IsPreviousMonthDisabled(DisplayMonth)">
+        <button @onclick="PreviousMonth" class="text-gray-400 hover:text-teal-cyan-aqua-600 transition disabled:opacity-30" disabled="@BookingService.IsPreviousMonthDisabled(DisplayMonth)">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         </button>
         <span class="text-base font-semibold text-gray-700 min-w-[140px] text-center">
             @DisplayMonth.ToString("MMMM yyyy")
         </span>
-        <button @onclick="NextMonth" class="text-teal-cyan-aqua-400 hover:text-teal-cyan-aqua-600 transition">
+        <button @onclick="NextMonth" class="text-teal-cyan-aqua-600 hover:text-teal-cyan-aqua-600 transition">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </button>
     </div>

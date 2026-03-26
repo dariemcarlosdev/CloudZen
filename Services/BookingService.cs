@@ -8,6 +8,10 @@ namespace CloudZen.Services;
 /// </summary>
 public class BookingService : IBookingService
 {
+    /// <inheritdoc />
+    /// <remarks>
+    /// Slots are defined in 12-hour format and aligned to the US Eastern time zone business hours.
+    /// </remarks>
     public string[] AvailableTimeSlots { get; } =
     [
         "10:00 AM", "10:30 AM",
@@ -18,6 +22,7 @@ public class BookingService : IBookingService
         "05:00 PM"
     ];
 
+    /// <inheritdoc />
     public int?[] BuildCalendarCells(DateTime displayMonth)
     {
         var firstDay = new DateTime(displayMonth.Year, displayMonth.Month, 1);
@@ -35,6 +40,7 @@ public class BookingService : IBookingService
         return cells;
     }
 
+    /// <inheritdoc />
     public bool IsDateAvailable(DateTime date)
     {
         return date >= DateTime.Today
@@ -42,11 +48,13 @@ public class BookingService : IBookingService
             && date.DayOfWeek != DayOfWeek.Sunday;
     }
 
+    /// <inheritdoc />
     public bool IsPreviousMonthDisabled(DateTime displayMonth)
     {
         return displayMonth.Year == DateTime.Today.Year && displayMonth.Month == DateTime.Today.Month;
     }
 
+    /// <inheritdoc />
     public string FormatSlotRange(string? selectedTime)
     {
         if (selectedTime is null) return string.Empty;
@@ -60,6 +68,7 @@ public class BookingService : IBookingService
         return selectedTime;
     }
 
+    /// <inheritdoc />
     public string FormatTimeZoneOption(TimeZoneInfo tz)
     {
         var utcOffset = tz.BaseUtcOffset;
@@ -67,8 +76,33 @@ public class BookingService : IBookingService
         return $"GMT{sign}{Math.Abs(utcOffset.Hours):00}:{Math.Abs(utcOffset.Minutes):00} {tz.Id} ({tz.StandardName})";
     }
 
+    /// <inheritdoc />
     public string GetLocalTimeZoneLabel()
     {
         return FormatTimeZoneOption(TimeZoneInfo.Local);
+    }
+
+    /// <inheritdoc />
+    public string FormatTimeTo24Hour(string displayTime)
+    {
+        if (DateTime.TryParseExact(displayTime, "hh:mm tt",
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
+        {
+            return parsed.ToString("HH:mm", CultureInfo.InvariantCulture);
+        }
+
+        return displayTime;
+    }
+
+    /// <inheritdoc />
+    public string FormatEndTimeTo24Hour(string displayTime)
+    {
+        if (DateTime.TryParseExact(displayTime, "hh:mm tt",
+                CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
+        {
+            return parsed.AddMinutes(30).ToString("HH:mm", CultureInfo.InvariantCulture);
+        }
+
+        return displayTime;
     }
 }

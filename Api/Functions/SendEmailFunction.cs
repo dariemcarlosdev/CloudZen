@@ -129,14 +129,14 @@ public class SendEmailFunction(
             if (string.IsNullOrWhiteSpace(requestBody))
             {
                 _logger.LogWarning("Empty request body received.");
-                return new BadRequestObjectResult(new { error = "Request body is required." });
+                return new BadRequestObjectResult(new { error = "Please fill out all required fields and try again." });
             }
 
             // Limit request body size
             if (requestBody.Length > 10000)
             {
                 _logger.LogWarning("Request body too large: {Size} bytes", requestBody.Length);
-                return new BadRequestObjectResult(new { error = "Request body too large." });
+                return new BadRequestObjectResult(new { error = "Your message contains too much data. Please shorten your entries and try again." });
             }
 
             var emailRequest = JsonSerializer.Deserialize<EmailRequest>(requestBody, EmailRequestJsonOptions);
@@ -144,7 +144,7 @@ public class SendEmailFunction(
             if (emailRequest == null)
             {
                 _logger.LogWarning("Failed to deserialize email request.");
-                return new BadRequestObjectResult(new { error = "Invalid request format." });
+                return new BadRequestObjectResult(new { error = "We couldn't read your message details. Please try again." });
             }
 
             // Validate required fields with security checks
@@ -168,7 +168,7 @@ public class SendEmailFunction(
             if (string.IsNullOrEmpty(smtpLogin) || string.IsNullOrEmpty(smtpKey))
             {
                 _logger.LogError("Brevo SMTP credentials are not configured. Ensure BREVO_SMTP_LOGIN and BREVO_SMTP_KEY (or BREVO_API_KEY) are set.");
-                return new ObjectResult(new { error = "Email service is not configured properly." })
+                return new ObjectResult(new { error = "Our email service is temporarily unavailable. Please try again later." })
                 {
                     StatusCode = StatusCodes.Status500InternalServerError
                 };
@@ -189,7 +189,7 @@ public class SendEmailFunction(
         catch (SmtpCommandException ex)
         {
             _logger.LogError(ex, "SMTP command error: {Message}, StatusCode: {StatusCode}", ex.Message, ex.StatusCode);
-            return new ObjectResult(new { error = "Failed to send email. Please try again later." })
+            return new ObjectResult(new { error = "We were unable to send your message. Please try again later." })
             {
                 StatusCode = StatusCodes.Status500InternalServerError
             };
@@ -197,7 +197,7 @@ public class SendEmailFunction(
         catch (SmtpProtocolException ex)
         {
             _logger.LogError(ex, "SMTP protocol error: {Message}", ex.Message);
-            return new ObjectResult(new { error = "Failed to send email. Please try again later." })
+            return new ObjectResult(new { error = "We were unable to send your message. Please try again later." })
             {
                 StatusCode = StatusCodes.Status500InternalServerError
             };
@@ -205,7 +205,7 @@ public class SendEmailFunction(
         catch (System.Security.Authentication.AuthenticationException ex)
         {
             _logger.LogError(ex, "SMTP authentication error: {Message}", ex.Message);
-            return new ObjectResult(new { error = "Email service configuration error." })
+            return new ObjectResult(new { error = "Our email service is temporarily unavailable. Please try again later." })
             {
                 StatusCode = StatusCodes.Status500InternalServerError
             };
@@ -213,12 +213,12 @@ public class SendEmailFunction(
         catch (JsonException ex)
         {
             _logger.LogError(ex, "JSON parsing error: {Message}", ex.Message);
-            return new BadRequestObjectResult(new { error = "Invalid request format." });
+            return new BadRequestObjectResult(new { error = "We couldn't read your message details. Please try again." });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error sending email: {Message}", ex.Message);
-            return new ObjectResult(new { error = "An unexpected error occurred." })
+            return new ObjectResult(new { error = "Something went wrong. Please try again later." })
             {
                 StatusCode = StatusCodes.Status500InternalServerError
             };
