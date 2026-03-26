@@ -1,11 +1,12 @@
 using CloudZen.Models;
+using CloudZen.Services.Abstractions;
 
 namespace CloudZen.Services;
 
 /// <summary>
 /// Provides the list of tool/feature items displayed in the Tools Overview section.
 /// </summary>
-public class ToolService
+public class ToolService : IToolService
 {
     public List<ToolInfo> GetAllTools() => new()
     {

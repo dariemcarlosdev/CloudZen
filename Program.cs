@@ -80,7 +80,10 @@ builder.Services.AddScoped(sp => new HttpClient
 // =============================================================================
 
 // Register GoogleCalendarUrlService
-builder.Services.AddScoped<GoogleCalendarUrlService>();
+builder.Services.AddScoped<IGoogleCalendarUrlService, GoogleCalendarUrlService>();
+
+// Register BookingService for calendar logic, date availability, and formatting
+builder.Services.AddScoped<IBookingService, BookingService>();
 
 // Register TicketService as the implementation for ITicketService
 builder.Services.AddScoped<ITicketService, TicketService>();
@@ -99,18 +102,21 @@ builder.Services.AddScoped<IEmailService, ApiEmailService>();
 builder.Services.AddScoped<IChatbotService, ChatbotService>();
 
 // Register ProjectService for managing portfolio projects
-builder.Services.AddScoped<ProjectService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
 
 // Register PersonalService for managing service offerings
-builder.Services.AddScoped<PersonalService>();
+builder.Services.AddScoped<IPersonalService, PersonalService>();
 
 // Register ToolService for the Tools Overview section
-builder.Services.AddScoped<ToolService>();
+builder.Services.AddScoped<IToolService, ToolService>();
 
 // Register FeatureHighlightService for the Features Showcase section
-builder.Services.AddScoped<FeatureHighlightService>();
+builder.Services.AddScoped<IFeatureHighlightService, FeatureHighlightService>();
 
 // Register MissionService for the About Us / Mission / Standards section
-builder.Services.AddScoped<MissionService>();
+builder.Services.AddScoped<IMissionService, MissionService>();
+
+// Register CaseStudyService for case study text transformations
+builder.Services.AddScoped<ICaseStudyService, CaseStudyService>();
 
 await builder.Build().RunAsync();

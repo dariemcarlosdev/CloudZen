@@ -1,8 +1,9 @@
 using System;
+using CloudZen.Services.Abstractions;
 
 namespace CloudZen.Services
 {
-    public class GoogleCalendarUrlService
+    public class GoogleCalendarUrlService : IGoogleCalendarUrlService
     {
         public string CreateConsultationUrl(DateTime? startTime = null, int durationHours = 1)
         {

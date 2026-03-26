@@ -1,11 +1,12 @@
 using CloudZen.Models;
+using CloudZen.Services.Abstractions;
 
 namespace CloudZen.Services;
 
 /// <summary>
 /// Provides CloudZen's mission data and company standards/values.
 /// </summary>
-public class MissionService
+public class MissionService : IMissionService
 {
     /// <summary>
     /// Returns the list of capabilities CloudZen helps businesses with.

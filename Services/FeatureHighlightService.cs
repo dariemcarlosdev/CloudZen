@@ -1,11 +1,12 @@
 using CloudZen.Models;
+using CloudZen.Services.Abstractions;
 
 namespace CloudZen.Services;
 
 /// <summary>
 /// Provides the list of feature highlights displayed in the Features Showcase section.
 /// </summary>
-public class FeatureHighlightService
+public class FeatureHighlightService : IFeatureHighlightService
 {
     public List<FeatureHighlight> GetAllFeatures() => new()
     {

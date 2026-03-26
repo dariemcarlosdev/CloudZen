@@ -1,4 +1,5 @@
 using CloudZen.Models;
+using CloudZen.Services.Abstractions;
 
 namespace CloudZen.Services;
 
@@ -6,7 +7,7 @@ namespace CloudZen.Services;
 /// Service for managing and retrieving project portfolio data.
 /// This service centralizes project data management and can be extended to load from external sources (API, database, JSON files, etc.).
 /// </summary>
-public class ProjectService
+public class ProjectService : IProjectService
 {
     /// <summary>
     /// Retrieves all projects in the portfolio, sorted by status (Completed, In Progress, Planning).

@@ -1,4 +1,5 @@
 using CloudZen.Models;
+using CloudZen.Services.Abstractions;
 
 namespace CloudZen.Services;
 
@@ -6,7 +7,7 @@ namespace CloudZen.Services;
 /// Service for managing and retrieving personal service offerings.
 /// This service centralizes service data management and can be extended to load from external sources (API, database, JSON files, etc.).
 /// </summary>
-public class PersonalService
+public class PersonalService : IPersonalService
 {
     /// <summary>
     /// Retrieves all professional services offered.
