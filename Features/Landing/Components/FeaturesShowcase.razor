@@ -1,0 +1,9 @@
+
+@* Section: Feature highlights with alternating text/image layout. *@
+
+<section id="features" class="py-12 md:py-16 bg-gray-50">
+    @for (int i = 0; i < _features.Count; i++)
+    {
+        <FeatureHighlightCard Feature="@_features[i]" IsReversed="@(i % 2 != 0)" />
+    }
+</section>

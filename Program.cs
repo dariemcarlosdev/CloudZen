@@ -1,9 +1,18 @@
 using CloudZen;
-using CloudZen.Models.Options;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using CloudZen.Services;
-using CloudZen.Services.Abstractions;
+// Feature service registrations
+using CloudZen.Features.Booking;
+using CloudZen.Features.Booking.Services;
+using CloudZen.Features.Contact;
+using CloudZen.Features.Contact.Services;
+using CloudZen.Features.Chat;
+using CloudZen.Features.Chat.Services;
+using CloudZen.Features.Landing.Services;
+using CloudZen.Features.Profile.Services;
+using CloudZen.Features.Projects.Services;
+using CloudZen.Features.Tickets.Services;
+using CloudZen.Common.Options;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
