@@ -113,6 +113,8 @@ public class BookAppointmentFunction(
             // ── Parse & validate ─────────────────────────────────────────
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
 
+            _logger.LogInformation("Received request body: {Body}", requestBody);
+
             if (string.IsNullOrWhiteSpace(requestBody))
             {
                 return new BadRequestObjectResult(new { success = false, message = "Please fill out all required fields and try again." });
@@ -129,7 +131,15 @@ public class BookAppointmentFunction(
                 return new BadRequestObjectResult(new { success = false, message = "We couldn't read your booking details. Please try again." });
             }
 
-            var validationError = ValidateBookingRequest(bookingRequest);
+            _logger.LogInformation(
+                "Parsed request - Action: {Action}, Name: {Name}, Email: {Email}, Date: {Date}, Time: {Time}",
+                bookingRequest.Action,
+                bookingRequest.Name,
+                bookingRequest.Email,
+                bookingRequest.Date,
+                bookingRequest.Time);
+
+            var validationError = ValidateRequest(bookingRequest);
             if (validationError is not null)
             {
                 _logger.LogWarning("Validation failed: {Error}", validationError);
@@ -137,6 +147,8 @@ public class BookAppointmentFunction(
             }
 
             // ── Forward to n8n webhook ───────────────────────────────────
+            // N8N's "Prepare Base Data" node handles field transformation internally,
+            // so we send the original request payload directly.
             var webhookUrl = _config["N8N_WEBHOOK_URL"]
                           ?? Environment.GetEnvironmentVariable("N8N_WEBHOOK_URL");
 
@@ -151,15 +163,15 @@ public class BookAppointmentFunction(
 
             var httpClient = _httpClientFactory.CreateClient("SecureClient");
 
+            // Send original request body - N8N JavaScript handles the transformation
             var jsonContent = new StringContent(
-                JsonSerializer.Serialize(bookingRequest),
+                requestBody,
                 Encoding.UTF8,
                 "application/json");
 
-            _logger.LogInformation("Forwarding booking to n8n for {Name} on {Date} at {Time}",
-                InputValidator.SanitizeForLogging(bookingRequest.Name),
-                bookingRequest.Date,
-                bookingRequest.Time);
+            _logger.LogInformation("Forwarding {Action} request to n8n for {Email}",
+                bookingRequest.Action,
+                InputValidator.SanitizeForLogging(bookingRequest.Email));
 
             var n8nResponse = await httpClient.PostAsync(webhookUrl, jsonContent);
             var n8nBody = await n8nResponse.Content.ReadAsStringAsync();
@@ -212,16 +224,38 @@ public class BookAppointmentFunction(
     }
 
     /// <summary>
-    /// Validates all fields of the booking request.
+    /// Validates request fields based on the action type.
     /// </summary>
     /// <returns>An error message string, or <c>null</c> if valid.</returns>
-    private static string? ValidateBookingRequest(BookAppointmentRequest request)
+    private static string? ValidateRequest(BookAppointmentRequest request)
+    {
+        // Validate action
+        var validActions = new[] { "book", "cancel", "reschedule" };
+        if (!validActions.Contains(request.Action.ToLowerInvariant()))
+        {
+            return "Invalid action. Must be 'book', 'cancel', or 'reschedule'.";
+        }
+
+        // Email is always required
+        var emailResult = InputValidator.ValidateEmail(request.Email);
+        if (!emailResult.IsValid) return emailResult.ErrorMessage;
+
+        return request.Action.ToLowerInvariant() switch
+        {
+            "book" => ValidateBookAction(request),
+            "cancel" => ValidateCancelAction(request),
+            "reschedule" => ValidateRescheduleAction(request),
+            _ => "Invalid action."
+        };
+    }
+
+    /// <summary>
+    /// Validates fields required for the "book" action.
+    /// </summary>
+    private static string? ValidateBookAction(BookAppointmentRequest request)
     {
         var nameResult = InputValidator.ValidateTextInput(request.Name, "Name", maxLength: 100);
         if (!nameResult.IsValid) return nameResult.ErrorMessage;
-
-        var emailResult = InputValidator.ValidateEmail(request.Email);
-        if (!emailResult.IsValid) return emailResult.ErrorMessage;
 
         var phoneResult = InputValidator.ValidateTextInput(request.Phone, "Phone", maxLength: 20);
         if (!phoneResult.IsValid) return phoneResult.ErrorMessage;
@@ -252,6 +286,52 @@ public class BookAppointmentFunction(
         // Validate phone starts with +
         if (!request.Phone.StartsWith('+'))
             return "Please enter a valid phone number with country code.";
+
+        return null;
+    }
+
+    /// <summary>
+    /// Validates fields required for the "cancel" action.
+    /// </summary>
+    private static string? ValidateCancelAction(BookAppointmentRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.BookingId))
+            return "Booking ID is required to cancel an appointment.";
+
+        // BookingId format: APT-XXXXXXXX-XXXX
+        if (!request.BookingId.StartsWith("APT-") || request.BookingId.Length < 10)
+            return "Please enter a valid booking ID (e.g., APT-MN7O3825-TMVP).";
+
+        return null;
+    }
+
+    /// <summary>
+    /// Validates fields required for the "reschedule" action.
+    /// </summary>
+    private static string? ValidateRescheduleAction(BookAppointmentRequest request)
+    {
+        // First validate cancel fields (bookingId)
+        var cancelValidation = ValidateCancelAction(request);
+        if (cancelValidation is not null) return cancelValidation;
+
+        // Then validate new date/time
+        if (string.IsNullOrWhiteSpace(request.NewDate))
+            return "New date is required for rescheduling.";
+
+        if (string.IsNullOrWhiteSpace(request.NewTime))
+            return "New time is required for rescheduling.";
+
+        if (string.IsNullOrWhiteSpace(request.NewEndTime))
+            return "New end time is required for rescheduling.";
+
+        if (!DateOnly.TryParseExact(request.NewDate, "yyyy-MM-dd", out _))
+            return "Please select a valid new date.";
+
+        if (!TimeOnly.TryParseExact(request.NewTime, "HH:mm", out _))
+            return "Please select a valid new time slot.";
+
+        if (!TimeOnly.TryParseExact(request.NewEndTime, "HH:mm", out _))
+            return "Please select a valid new time slot.";
 
         return null;
     }
