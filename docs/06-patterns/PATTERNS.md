@@ -10,6 +10,7 @@ This folder documents the recurring design patterns used across the CloudZen sol
 |---|---------|-------|------|
 | 01 | Azure Functions Proxy | API / Frontend | [01_azure_functions_proxy_api.md](01_azure_functions_proxy_api.md) |
 | 02 | UI Color & Design System | Frontend | [02_ui_color_design_system.md](02_ui_color_design_system.md) |
+| 03 | Request/Response — Resource Awareness | API / Frontend | [03_request_response_token_awareness.md](03_request_response_token_awareness.md) |
 
 ---
 

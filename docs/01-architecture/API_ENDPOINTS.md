@@ -20,24 +20,44 @@ All endpoints also accept `OPTIONS` for CORS preflight (returns `204`).
 
 ## 1. Send Email — `/api/send-email`
 
-**File:** `Api/Functions/SendEmailFunction.cs`
+**File:** `Api/Features/Contact/SendEmailFunction.cs`
 **Flow:** Browser → Azure Function → Brevo SMTP (`smtp-relay.brevo.com:587`)
 
 ### Request
 
 ```json
 {
-  "subject":   "string — required, max 200 chars",
-  "message":   "string — required, max 5000 chars",
-  "fromName":  "string — required, max 100 chars",
-  "fromEmail": "string — required, valid email"
+  "subject":   "Project Inquiry",
+  "message":   "Hi, I'm interested in your cloud consulting services...",
+  "fromName":  "John Doe",
+  "fromEmail": "john@example.com"
 }
 ```
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| `subject` | string | Yes | Max 200 chars |
+| `message` | string | Yes | Max 5000 chars |
+| `fromName` | string | Yes | Max 100 chars |
+| `fromEmail` | string | Yes | Valid email, max 254 chars |
 
 ### Success Response (200)
 
 ```json
-{ "success": true, "message": "Email sent successfully.", "messageId": "guid@cloudzen.com" }
+{
+  "success": true,
+  "message": "Email sent successfully.",
+  "messageId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890@cloudzen.com"
+}
+```
+
+### Validation Error Response (400)
+
+```json
+{
+  "success": false,
+  "message": "Please provide a valid email address."
+}
 ```
 
 ### Email Delivery Details
@@ -59,7 +79,7 @@ All endpoints also accept `OPTIONS` for CORS preflight (returns `204`).
 
 ## 2. Chat — `/api/chat`
 
-**File:** `Api/Functions/ChatFunction.cs`
+**File:** `Api/Features/Chat/ChatFunction.cs`
 **Flow:** Browser → Azure Function → Anthropic API (`https://api.anthropic.com/v1/messages`)
 
 ### Request
@@ -67,10 +87,18 @@ All endpoints also accept `OPTIONS` for CORS preflight (returns `204`).
 ```json
 {
   "messages": [
-    { "role": "user|assistant", "content": "string — max 500 chars for user" }
+    { "role": "user", "content": "What services does CloudZen offer?" },
+    { "role": "assistant", "content": "CloudZen specializes in cloud consulting..." },
+    { "role": "user", "content": "Tell me more about Azure migrations." }
   ]
 }
 ```
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| `messages` | array | Yes | Max 10 messages |
+| `messages[].role` | string | Yes | Must be `"user"` or `"assistant"` |
+| `messages[].content` | string | Yes | Max 500 chars for user messages |
 
 - **Max messages:** 10 per request
 - **History sent to API:** Last 6 messages only (token cost control)
@@ -78,7 +106,28 @@ All endpoints also accept `OPTIONS` for CORS preflight (returns `204`).
 ### Success Response (200)
 
 ```json
-{ "success": true, "reply": "string — max 500 chars, truncated at sentence boundary" }
+{
+  "success": true,
+  "reply": "Azure migrations involve assessing your current infrastructure, planning the migration strategy, and executing the move to Azure cloud services. CloudZen offers end-to-end support including..."
+}
+```
+
+### Validation Error Response (400)
+
+```json
+{
+  "success": false,
+  "message": "Messages cannot be empty."
+}
+```
+
+### Rate Limit Response (429)
+
+```json
+{
+  "success": false,
+  "message": "Too many requests. Please wait a moment before trying again."
+}
 ```
 
 ### Anthropic Configuration
@@ -104,30 +153,168 @@ Embedded server-side (~800 lines). Contains brand identity, services, pricing, c
 
 ## 3. Book Appointment — `/api/book-appointment`
 
-**File:** `Api/Functions/BookAppointmentFunction.cs`
+**File:** `Api/Features/Booking/BookAppointmentFunction.cs`
 **Flow:** Browser → Azure Function → n8n Webhook
 
-### Request
+This single endpoint handles three actions via the `action` field: **book**, **cancel**, and **reschedule**.
+
+---
+
+### 3.1 Book Action
+
+Creates a new appointment.
+
+#### Request
 
 ```json
 {
-  "name":         "string — required, max 100 chars",
-  "email":        "string — required, valid email",
-  "phone":        "string — required, max 20 chars, must start with +",
-  "businessName": "string — required, max 200 chars",
-  "date":         "string — required, YYYY-MM-DD",
-  "time":         "string — required, HH:mm (24h)",
-  "endTime":      "string — required, HH:mm (24h)",
-  "action":       "string — defaults to 'book'",
-  "reason":       "string — defaults to 'CloudZen Virtual Meeting'"
+  "action":       "book",
+  "name":         "John Doe",
+  "email":        "john@example.com",
+  "phone":        "+15551234567",
+  "businessName": "Acme Corp",
+  "date":         "2025-02-15",
+  "time":         "14:00",
+  "endTime":      "14:30",
+  "reason":       "CloudZen Virtual Meeting"
 }
 ```
 
-### Success Response (200)
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| `action` | string | Yes | Must be `"book"` |
+| `name` | string | Yes | Max 100 chars |
+| `email` | string | Yes | Valid email, max 254 chars |
+| `phone` | string | Yes | Max 20 chars, must start with `+` (E.164) |
+| `businessName` | string | Yes | Max 200 chars |
+| `date` | string | Yes | `YYYY-MM-DD` format |
+| `time` | string | Yes | `HH:mm` 24-hour format |
+| `endTime` | string | Yes | `HH:mm` 24-hour format |
+| `reason` | string | No | Defaults to `"CloudZen Virtual Meeting"` |
+
+#### Success Response (200)
 
 ```json
-{ "success": true, "bookingId": "string", "message": "string" }
+{
+  "success": true,
+  "action": "book",
+  "bookingId": "APT-MN7O3825-TMVP",
+  "message": "Your appointment has been confirmed."
+}
 ```
+
+#### Slot Taken Response (200)
+
+```json
+{
+  "success": false,
+  "action": "book",
+  "message": "This time slot is no longer available. Please select another time."
+}
+```
+
+---
+
+### 3.2 Cancel Action
+
+Cancels an existing appointment.
+
+#### Request
+
+```json
+{
+  "action":    "cancel",
+  "bookingId": "APT-MN7O3825-TMVP",
+  "email":     "john@example.com"
+}
+```
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| `action` | string | Yes | Must be `"cancel"` |
+| `bookingId` | string | Yes | Existing booking ID (e.g., `APT-XXXXXXXX-XXXX`) |
+| `email` | string | Yes | Must match original booking email |
+
+#### Success Response (200)
+
+```json
+{
+  "success": true,
+  "action": "cancel",
+  "message": "Your appointment has been cancelled."
+}
+```
+
+#### Not Found Response (200)
+
+```json
+{
+  "success": false,
+  "action": "cancel",
+  "message": "No appointment found with that booking ID and email."
+}
+```
+
+---
+
+### 3.3 Reschedule Action
+
+Moves an existing appointment to a new date/time.
+
+#### Request
+
+```json
+{
+  "action":     "reschedule",
+  "bookingId":  "APT-MN7O3825-TMVP",
+  "email":      "john@example.com",
+  "newDate":    "2025-02-20",
+  "newTime":    "10:00",
+  "newEndTime": "10:30"
+}
+```
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| `action` | string | Yes | Must be `"reschedule"` |
+| `bookingId` | string | Yes | Existing booking ID |
+| `email` | string | Yes | Must match original booking email |
+| `newDate` | string | Yes | `YYYY-MM-DD` format |
+| `newTime` | string | Yes | `HH:mm` 24-hour format |
+| `newEndTime` | string | Yes | `HH:mm` 24-hour format |
+
+#### Success Response (200)
+
+```json
+{
+  "success": true,
+  "action": "reschedule",
+  "bookingId": "APT-MN7O3825-TMVP",
+  "message": "Your appointment has been rescheduled."
+}
+```
+
+#### Not Found Response (200)
+
+```json
+{
+  "success": false,
+  "action": "reschedule",
+  "message": "No appointment found with that booking ID and email."
+}
+```
+
+#### Slot Taken Response (200)
+
+```json
+{
+  "success": false,
+  "action": "reschedule",
+  "message": "The new time slot is no longer available. Please select another time."
+}
+```
+
+---
 
 ### Secrets
 

@@ -1,5 +1,7 @@
 # Cancel & Reschedule Appointment — Implementation Plan
 
+## Status: ✅ Implemented
+
 ## Problem
 
 The booking feature only supports `action: "book"`. Users need **cancel** and **reschedule** capabilities. The N8N workflow already has a Switch node that routes by `action`, but the WASM frontend and Azure Function only send `"book"`.
@@ -85,35 +87,38 @@ All 3 actions use the **same JSON shape** — unused fields are empty strings:
 
 ## Implementation Tasks
 
-### 1. Align API Model with N8N Schema
-- Create `N8nAppointmentPayload` class in `Api/Features/Booking/` matching N8N JSON exactly
-- Update `BookAppointmentRequest` to add `bookingId` field
-- Add WASM→N8N transformation in `BookAppointmentFunction`
-- Compute `startDateTime`/`endDateTime` from `date` + `time`/`endTime`
-- Conditional validation per `action` value
+### 1. ✅ Align API Model with N8N Schema
+- Created `N8nAppointmentPayload` class in `Api/Features/Booking/` matching N8N JSON exactly
+- Updated `BookAppointmentRequest` to add `bookingId`, `newDate`, `newTime`, `newEndTime` fields
+- Added WASM→N8N transformation in `BookAppointmentFunction` via `TransformToN8nPayload()`
+- Compute `startDateTime`/`endDateTime` from `date` + `time`/`endTime` in factory methods
+- Conditional validation per `action` value via `ValidateRequest()` with action-specific validators
 
-### 2. WASM Request Model Updates
-- Add `bookingId`, `newDate`, `newTime`, `newEndTime` to `BookingAppointmentRequest`
-- Extend `BookingResult` for cancel/reschedule responses
+### 2. ✅ WASM Request Model Updates
+- Added `bookingId`, `newDate`, `newTime`, `newEndTime` to `BookingAppointmentRequest`
+- Extended `BookingResult` with `IsNotFound` flag and `NotFound()`, `Ok()` factory methods
 
-### 3. WASM Service Layer
-- Add `CancelAppointmentAsync` + `RescheduleAppointmentAsync` to `IAppointmentService`
-- Same endpoint, different `action` values
+### 3. ✅ WASM Service Layer
+- Added `CancelAppointmentAsync()` + `RescheduleAppointmentAsync()` to `IAppointmentService`
+- Same endpoint, different `action` values — implemented in `AppointmentService.SendRequestAsync()`
 
-### 4. Cancel UI — `BookingCancel.razor`
+### 4. ✅ Cancel UI — `ManageAppointmentCancel.razor`
 - Simple form: email + bookingId → confirm
 - Error states: not found, already cancelled, network error
+- Success confirmation with booking ID display
 
-### 5. Reschedule UI — `BookingReschedule.razor`
-- 2-step: enter email+bookingId → select new date/time (reuse Calendar + TimeSlots)
-- Show old → new time on confirmation
+### 5. ✅ Reschedule UI — `ManageAppointmentReschedule.razor`
+- 2-step: enter email+bookingId → select new date/time (reuses `BookingCalendar` + `BookingTimeSlots`)
+- Shows old → new time on confirmation
 
-### 6. Routing & Navigation
-- Add route for cancel/reschedule (e.g., `/manage-appointment`)
-- Link from `BookingConfirmation` ("Manage your appointment")
+### 6. ✅ Routing & Navigation
+- Added route `/manage-appointment` in `Pages/ManageAppointment.razor`
+- Added "Manage Appointment" link from `BookingConfirmation`
+- Tab navigation between Cancel and Reschedule flows
 
 ### 7. Documentation Updates
-- Update `API_ENDPOINTS.md`, `01_azure_functions_proxy_api.md`, `VERTICAL_SLICE_ARCHITECTURE.md`
+- Updated this file with implementation status
+- TODO: Update `API_ENDPOINTS.md`, `01_azure_functions_proxy_api.md`, `VERTICAL_SLICE_ARCHITECTURE.md`
 
 ## Architecture Notes
 

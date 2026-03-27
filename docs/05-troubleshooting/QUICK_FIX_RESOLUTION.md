@@ -18,6 +18,8 @@ This document indexes common issues encountered in the CloudZen project. Each is
 | 08 | Azurite Storage Emulator Not Running | Infrastructure | [08_azurite_emulator_infrastructure.md](08_azurite_emulator_infrastructure.md) |
 | 09 | Azure Functions "0 Functions Found" | Deployment | [09_zero_functions_found_deployment.md](09_zero_functions_found_deployment.md) |
 | 10 | CSP Blocks CDN Resources on First Load (Service Worker) | Frontend | [10_csp_blocks_cdn_frontend.md](10_csp_blocks_cdn_frontend.md) |
+| 11 | CORS Error — N8N Booking Workflow | Frontend | [11_cors_n8n_booking_frontend.md](11_cors_n8n_booking_frontend.md) |
+| 12 | Blazor Component Parameter Mismatch | Frontend | [12_component_parameter_mismatch_frontend.md](12_component_parameter_mismatch_frontend.md) |
 
 ---
 
