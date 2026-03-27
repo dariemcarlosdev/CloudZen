@@ -1,48 +1,30 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using CloudZen.Features.Booking.Models;
-using CloudZen.Features.Booking;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace CloudZen.Features.Booking.Services;
 
 /// <summary>
-/// Sends appointment booking requests through the Azure Functions proxy endpoint.
-/// Follows the same HttpClient / IOptions / ILogger pattern as <see cref="ApiEmailService"/>.
+/// Sends appointment requests (book, cancel, reschedule) through the Azure Functions proxy endpoint.
 /// </summary>
 /// <remarks>
 /// The WASM client cannot call the n8n webhook directly due to CORS restrictions.
-/// Instead, requests are sent to <c>/api/book-appointment</c> (Azure Functions),
+/// Requests are sent to <c>/api/book-appointment</c> (Azure Functions),
 /// which forwards them to n8n server-to-server.
 /// </remarks>
 public class AppointmentService : IAppointmentService
 {
-    /// <summary>HTTP client used to POST booking requests to the Azure Functions proxy.</summary>
     private readonly HttpClient _httpClient;
-
-    /// <summary>Strongly-typed configuration for the API endpoint URL and timeout.</summary>
     private readonly BookingServiceOptions _options;
-
-    /// <summary>Logger for diagnostic and error output.</summary>
     private readonly ILogger<AppointmentService> _logger;
 
-    /// <summary>Shared JSON serializer options with case-insensitive property matching.</summary>
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true
     };
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="AppointmentService"/> class.
-    /// </summary>
-    /// <param name="httpClient">The HTTP client used to communicate with the API backend.</param>
-    /// <param name="options">The booking service configuration options.</param>
-    /// <param name="logger">The logger instance for diagnostic output.</param>
-    /// <exception cref="ArgumentNullException">
-    /// Thrown when <paramref name="httpClient"/>, <paramref name="options"/>,
-    /// or <paramref name="logger"/> is <c>null</c>.
-    /// </exception>
     public AppointmentService(
         HttpClient httpClient,
         IOptions<BookingServiceOptions> options,
@@ -56,82 +38,114 @@ public class AppointmentService : IAppointmentService
     }
 
     /// <inheritdoc />
-    public async Task<BookingResult> BookAppointmentAsync(BookingAppointmentRequest request)
+    public async Task<AppointmentResponse> BookAsync(BookAppointmentRequest request)
+    {
+        _logger.LogInformation("Booking appointment for {Email} on {Date} at {Time}",
+            request.Email, request.Date, request.Time);
+
+        return await SendAsync(request, "book");
+    }
+
+    /// <inheritdoc />
+    public async Task<AppointmentResponse> CancelAsync(CancelAppointmentRequest request)
+    {
+        _logger.LogInformation("Cancelling appointment {BookingId} for {Email}",
+            request.BookingId, request.Email);
+
+        return await SendAsync(request, "cancel");
+    }
+
+    /// <inheritdoc />
+    public async Task<AppointmentResponse> RescheduleAsync(RescheduleAppointmentRequest request)
+    {
+        _logger.LogInformation("Rescheduling appointment {BookingId} to {NewDate} at {NewTime}",
+            request.BookingId, request.NewDate, request.NewTime);
+
+        return await SendAsync(request, "reschedule");
+    }
+
+    /// <summary>
+    /// Sends a request to the API and maps the response.
+    /// </summary>
+    private async Task<AppointmentResponse> SendAsync<TRequest>(TRequest request, string action)
+        where TRequest : class
     {
         try
         {
             var endpoint = _options.BookAppointmentUrl;
-            _logger.LogInformation(
-                "Booking appointment for {Name} on {Date} at {Time} via {Endpoint}",
-                request.Name, request.Date, request.Time, endpoint);
-
             var response = await _httpClient.PostAsJsonAsync(endpoint, request);
+            var statusCode = (int)response.StatusCode;
             var body = await response.Content.ReadAsStringAsync();
 
-            _logger.LogDebug("Booking API response {StatusCode}: {Body}", response.StatusCode, body);
+            _logger.LogDebug("{Action} API response {StatusCode}: {Body}", action, statusCode, body);
 
-            // The Azure Function proxies the n8n JSON payload on 200.
-            // On 4xx/5xx, the body also contains { success, message }.
-            var apiResponse = JsonSerializer.Deserialize<BookingApiResponse>(body, JsonOptions);
+            // Handle empty response body
+            if (string.IsNullOrWhiteSpace(body))
+            {
+                _logger.LogWarning("{Action} received empty response with status {StatusCode}", action, statusCode);
+
+                if (response.IsSuccessStatusCode && action != "book")
+                {
+                    return AppointmentResponse.Ok(statusCode, action, "Operation completed successfully.");
+                }
+
+                return AppointmentResponse.Fail(statusCode, "We received an empty response from the server.");
+            }
+
+            var apiResponse = JsonSerializer.Deserialize<N8nBookingApiResponse>(body, JsonOptions);
 
             if (apiResponse is null)
             {
-                return BookingResult.Fail("We received an unexpected response. Please try again.");
+                return AppointmentResponse.Fail(statusCode, "We received an unexpected response format.");
             }
 
-            if (apiResponse.Success)
-            {
-                _logger.LogInformation("Appointment confirmed. BookingId: {BookingId}", apiResponse.BookingId);
-                return BookingResult.Confirmed(
-                    apiResponse.BookingId ?? "N/A",
-                    apiResponse.Message);
-            }
-            else
-            {
-                // Slot taken, validation error, or upstream failure
-                _logger.LogWarning("Booking not confirmed: {Message}", apiResponse.Message);
-                return BookingResult.SlotTaken(
-                    apiResponse.Message ?? "This time slot is already booked. Please choose a different time.");
-            }
+            return MapToAppointmentResponse(apiResponse, statusCode, action);
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogError(ex, "Network error booking appointment: {Message}", ex.Message);
-            return BookingResult.Fail(
+            _logger.LogError(ex, "Network error during {Action}: {Message}", action, ex.Message);
+            return AppointmentResponse.NetworkError(
                 "Our booking system is temporarily unreachable. Please try again in a moment.");
         }
         catch (TaskCanceledException ex)
             when (ex.InnerException is TimeoutException || !ex.CancellationToken.IsCancellationRequested)
         {
-            _logger.LogError(ex, "Timeout booking appointment after {Seconds}s", _options.TimeoutSeconds);
-            return BookingResult.Fail("The request took too long. Please try again.");
+            _logger.LogError(ex, "Timeout during {Action} after {Seconds}s", action, _options.TimeoutSeconds);
+            return AppointmentResponse.NetworkError("The request took too long. Please try again.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error booking appointment: {Message}", ex.Message);
-            return BookingResult.Fail("Something went wrong. Please try again later.");
+            _logger.LogError(ex, "Unexpected error during {Action}: {Message}", action, ex.Message);
+            return AppointmentResponse.Fail(500, "Something went wrong. Please try again later.");
         }
     }
 
     /// <summary>
-    /// Maps the JSON response from the booking API (Azure Functions proxy).
+    /// Maps the API response to an <see cref="AppointmentResponse"/>.
     /// </summary>
-    /// <remarks>
-    /// On success the Azure Function passes through the n8n response as-is.
-    /// On failure the Function or n8n returns <c>{ success: false, message: "..." }</c>.
-    /// </remarks>
-    private sealed class BookingApiResponse
+    private static AppointmentResponse MapToAppointmentResponse(N8nBookingApiResponse api, int statusCode, string action)
     {
-        /// <summary>Whether the booking was successfully created.</summary>
-        public bool Success { get; set; }
+        if (api.Success)
+        {
+            return action == "book"
+                ? AppointmentResponse.Confirmed(statusCode, api.BookingId ?? "N/A", api.Message)
+                : AppointmentResponse.Ok(statusCode, action, api.Message);
+        }
 
-        /// <summary>The workflow action echoed back (e.g. <c>"book"</c>).</summary>
-        public string? Action { get; set; }
+        var error = api.Message ?? "The operation could not be completed.";
 
-        /// <summary>The unique booking confirmation ID (e.g. <c>"APT-MN7O3825-TMVP"</c>).</summary>
-        public string? BookingId { get; set; }
+        if (error.Contains("not found", StringComparison.OrdinalIgnoreCase) ||
+            error.Contains("does not exist", StringComparison.OrdinalIgnoreCase))
+        {
+            return AppointmentResponse.NotFound(statusCode, error);
+        }
 
-        /// <summary>Human-readable message from the workflow or API.</summary>
-        public string? Message { get; set; }
+        if (error.Contains("already booked", StringComparison.OrdinalIgnoreCase) ||
+            error.Contains("slot", StringComparison.OrdinalIgnoreCase))
+        {
+            return AppointmentResponse.SlotTaken(statusCode, error);
+        }
+
+        return AppointmentResponse.Fail(statusCode, error);
     }
 }

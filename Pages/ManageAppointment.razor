@@ -1,0 +1,65 @@
+@page "/manage-appointment"
+@using CloudZen.Features.Booking.Components
+
+<PageTitle>Manage Appointment - CloudZen</PageTitle>
+
+<section class="min-h-screen bg-gradient-to-br from-gray-50 via-white to-teal-cyan-aqua-50 py-16 md:py-24">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-ibm-plex">
+                Manage Your Appointment
+            </h1>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                Need to cancel or reschedule? Enter your booking details below.
+            </p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="max-w-2xl mx-auto mb-8">
+            <div class="flex rounded-xl bg-gray-100 p-1">
+                <button @onclick="() => SetActiveTab(TabType.Cancel)"
+                        class="@GetTabClass(TabType.Cancel) flex-1 py-3 px-6 rounded-lg font-semibold text-sm transition-all duration-200">
+                    <i class="bi bi-x-circle mr-2"></i>Cancel Appointment
+                </button>
+                <button @onclick="() => SetActiveTab(TabType.Reschedule)"
+                        class="@GetTabClass(TabType.Reschedule) flex-1 py-3 px-6 rounded-lg font-semibold text-sm transition-all duration-200">
+                    <i class="bi bi-calendar2-week mr-2"></i>Reschedule Appointment
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="max-w-4xl mx-auto">
+            @if (activeTab == TabType.Cancel)
+            {
+                <ManageAppointmentCancel />
+            }
+            else
+            {
+                <ManageAppointmentReschedule />
+            }
+        </div>
+
+        <!-- Back Link -->
+        <div class="text-center mt-12">
+            <a href="/#booking"
+               class="inline-flex items-center text-teal-cyan-aqua-600 hover:text-teal-cyan-aqua-700 font-medium transition-colors">
+                <i class="bi bi-arrow-left mr-2"></i>
+                Back to Book New Appointment
+            </a>
+        </div>
+    </div>
+</section>
+
+@code {
+    private enum TabType { Cancel, Reschedule }
+    private TabType activeTab = TabType.Cancel;
+
+    private void SetActiveTab(TabType tab) => activeTab = tab;
+
+    private string GetTabClass(TabType tab) =>
+        activeTab == tab
+            ? "bg-white text-teal-cyan-aqua-700 shadow-sm"
+            : "text-gray-600 hover:text-gray-800";
+}

@@ -115,7 +115,7 @@ public partial class BookingContact
     // ── Form submission ──────────────────────────────────────────────────
 
     /// <summary>
-    /// Builds a <see cref="BookingAppointmentRequest"/> from the current form state
+    /// Builds a <see cref="BookAppointmentRequest"/> from the current form state
     /// and sends it to the n8n webhook via <see cref="IAppointmentService"/>.
     /// On success, transitions to Step 3 (confirmation).
     /// On slot-taken or failure, displays an error and keeps the user on Step 2.
@@ -128,7 +128,7 @@ public partial class BookingContact
 
         try
         {
-            var request = new BookingAppointmentRequest
+            var request = new BookAppointmentRequest
             {
                 Name = bookingForm.FullName!,
                 Email = bookingForm.Email!,
@@ -142,7 +142,7 @@ public partial class BookingContact
                     : bookingForm.Reason
             };
 
-            var result = await AppointmentService.BookAppointmentAsync(request);
+            var result = await AppointmentService.BookAsync(request);
 
             if (result.Success)
             {

@@ -1,0 +1,280 @@
+@using CloudZen.Features.Booking.Models
+@using CloudZen.Features.Booking.Services
+
+<div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+    @if (isConfirmed)
+    {
+        <!-- Success State -->
+        <div class="p-12 md:p-16 text-center">
+            <div class="relative inline-block mb-8">
+                <div class="absolute inset-0 bg-teal-cyan-aqua-200 rounded-full animate-ping opacity-25"></div>
+                <div class="relative w-20 h-20 bg-gradient-to-br from-teal-cyan-aqua-300 to-teal-cyan-aqua-500 rounded-full flex items-center justify-center shadow-lg">
+                    <i class="bi bi-check-lg text-white text-4xl"></i>
+                </div>
+            </div>
+
+            <h3 class="text-3xl font-bold text-gray-800 mb-3">Appointment Rescheduled!</h3>
+            <p class="text-gray-500 mb-4 max-w-md mx-auto">
+                Your appointment <strong class="text-gray-700 font-mono">@rescheduleForm.BookingId</strong> has been rescheduled.
+            </p>
+            <p class="text-gray-600 mb-8">
+                New time: <strong>@FormatSlotRange(selectedTime)</strong> on <strong>@selectedDate?.ToString("dddd, MMMM dd, yyyy")</strong>
+            </p>
+
+            <button @onclick="Reset"
+                    class="inline-flex items-center px-6 py-3 bg-white border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:border-teal-cyan-aqua-300 hover:text-teal-cyan-aqua-500 transition-all duration-200">
+                <i class="bi bi-arrow-repeat mr-2"></i>
+                Manage Another Appointment
+            </button>
+        </div>
+    }
+    else if (currentStep == Step.EnterDetails)
+    {
+        <!-- Step 1: Enter Booking Details -->
+        <div class="p-8 md:p-12">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 bg-teal-cyan-aqua-100 rounded-full flex items-center justify-center">
+                    <i class="bi bi-calendar2-week text-teal-cyan-aqua-600 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Reschedule Appointment</h3>
+                    <p class="text-gray-500 text-sm">Step 1: Enter your booking details</p>
+                </div>
+            </div>
+
+            <EditForm Model="@rescheduleForm" OnValidSubmit="GoToSelectDateTime">
+                <DataAnnotationsValidator />
+
+                <!-- Booking ID -->
+                <div class="mb-5">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">
+                        <i class="bi bi-bookmark mr-2 text-teal-cyan-aqua-600"></i>Booking ID
+                    </label>
+                    <InputText @bind-Value="rescheduleForm.BookingId"
+                               placeholder="APT-MN7O3825-TMVP"
+                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-cyan-aqua-600 focus:border-transparent transition duration-200 font-mono" />
+                    <ValidationMessage For="@(() => rescheduleForm.BookingId)" class="text-red-500 text-xs mt-1" />
+                    <p class="text-xs text-gray-400 mt-1">You can find this in your confirmation email</p>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">
+                        <i class="bi bi-envelope mr-2 text-teal-cyan-aqua-600"></i>Email Address
+                    </label>
+                    <InputText @bind-Value="rescheduleForm.Email"
+                               type="email"
+                               placeholder="john@example.com"
+                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-teal-cyan-aqua-600 focus:border-transparent transition duration-200" />
+                    <ValidationMessage For="@(() => rescheduleForm.Email)" class="text-red-500 text-xs mt-1" />
+                </div>
+
+                <!-- Submit -->
+                <button type="submit"
+                        class="w-full px-8 py-4 bg-teal-cyan-aqua-600 text-white font-semibold rounded-full hover:bg-teal-cyan-aqua-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-cyan-aqua-300 transition-all duration-300 shadow-lg">
+                    <span class="flex items-center justify-center">
+                        Continue to Select New Time
+                        <i class="bi bi-arrow-right ml-2"></i>
+                    </span>
+                </button>
+            </EditForm>
+        </div>
+    }
+    else
+    {
+        <!-- Step 2: Select New Date/Time -->
+        <div class="flex flex-col lg:flex-row">
+            <!-- Sidebar -->
+            <div class="lg:w-80 bg-gradient-to-br from-cloudzen-steel to-cloudzen-steel/90 p-6 lg:p-8 text-white">
+                <div class="mb-6">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full text-xs font-medium text-teal-cyan-aqua-200 mb-4">
+                        <i class="bi bi-calendar2-week"></i> Rescheduling
+                    </span>
+                    <h3 class="text-2xl font-bold mb-2">Select New Time</h3>
+                    <p class="text-gray-300 text-sm">Booking: <span class="font-mono">@rescheduleForm.BookingId</span></p>
+                </div>
+
+                @if (selectedDate.HasValue)
+                {
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-center gap-3">
+                            <i class="bi bi-calendar-event text-teal-cyan-aqua-300"></i>
+                            <span>@selectedDate.Value.ToString("dddd, MMMM dd, yyyy")</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(selectedTime))
+                        {
+                            <div class="flex items-center gap-3">
+                                <i class="bi bi-clock text-teal-cyan-aqua-300"></i>
+                                <span>@FormatSlotRange(selectedTime)</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 p-6 md:p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <button @onclick="GoBackToDetails"
+                            class="inline-flex items-center text-gray-500 hover:text-teal-cyan-aqua-600 transition-colors">
+                        <i class="bi bi-arrow-left mr-2"></i>
+                        Back
+                    </button>
+                    <span class="text-sm text-gray-500">Step 2 of 2</span>
+                </div>
+
+                <!-- Calendar -->
+                <BookingCalendar DisplayMonth="@displayMonth"
+                                 SelectedDate="@selectedDate"
+                                 OnDateSelected="@SelectDate"
+                                 OnDisplayMonthChanged="@SetDisplayMonth" />
+
+                <!-- Time Slots -->
+                @if (selectedDate.HasValue)
+                {
+                    <div class="mt-6">
+                        <BookingTimeSlots TimeSlots="@BookingService.AvailableTimeSlots"
+                                          SelectedTime="@selectedTime"
+                                          OnTimeSelected="@SelectTime" />
+                    </div>
+                }
+
+                <!-- Error Message -->
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div role="alert" class="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                        <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                            <i class="bi bi-exclamation-triangle text-red-600"></i>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-red-800">Unable to reschedule</p>
+                            <p class="text-sm text-red-600 mt-1">@errorMessage</p>
+                        </div>
+                    </div>
+                }
+
+                <!-- Confirm Button -->
+                @if (selectedDate.HasValue && !string.IsNullOrEmpty(selectedTime))
+                {
+                    <div class="mt-8">
+                        <button @onclick="HandleReschedule"
+                                class="w-full px-8 py-4 bg-teal-cyan-aqua-600 text-white font-semibold rounded-full hover:bg-teal-cyan-aqua-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-cyan-aqua-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg"
+                                disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <span class="flex items-center justify-center">
+                                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    Rescheduling...
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="flex items-center justify-center">
+                                    <i class="bi bi-calendar-check mr-2"></i>
+                                    Confirm New Time
+                                </span>
+                            }
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Inject] private IAppointmentService AppointmentService { get; set; } = default!;
+    [Inject] private IBookingService BookingService { get; set; } = default!;
+
+    private enum Step { EnterDetails, SelectDateTime }
+    private Step currentStep = Step.EnterDetails;
+
+    private RescheduleFormModel rescheduleForm = new();
+    private DateTime displayMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private DateTime? selectedDate;
+    private string? selectedTime;
+    private bool isSubmitting;
+    private bool isConfirmed;
+    private string? errorMessage;
+
+    private void GoToSelectDateTime()
+    {
+        errorMessage = null;
+        currentStep = Step.SelectDateTime;
+    }
+
+    private void GoBackToDetails()
+    {
+        errorMessage = null;
+        currentStep = Step.EnterDetails;
+    }
+
+    private void SelectDate(DateTime date)
+    {
+        selectedDate = date;
+        selectedTime = null;
+    }
+
+    private void SelectTime(string time) => selectedTime = time;
+
+    private void SetDisplayMonth(DateTime month) => displayMonth = month;
+
+    private string FormatSlotRange(string? time)
+    {
+        return BookingService.FormatSlotRange(time);
+    }
+
+    private async Task HandleReschedule()
+    {
+        if (!selectedDate.HasValue || string.IsNullOrEmpty(selectedTime))
+            return;
+
+        isSubmitting = true;
+        errorMessage = null;
+
+        try
+        {
+            var request = new RescheduleAppointmentRequest
+            {
+                BookingId = rescheduleForm.BookingId!,
+                Email = rescheduleForm.Email!,
+                NewDate = selectedDate.Value.ToString("yyyy-MM-dd"),
+                NewTime = BookingService.FormatTimeTo24Hour(selectedTime),
+                NewEndTime = BookingService.FormatEndTimeTo24Hour(selectedTime)
+            };
+
+            var result = await AppointmentService.RescheduleAsync(request);
+
+            if (result.Success)
+            {
+                isConfirmed = true;
+            }
+            else
+            {
+                errorMessage = result.Error ?? "We couldn't reschedule your appointment. Please try again.";
+            }
+        }
+        catch
+        {
+            errorMessage = "Something went wrong. Please try again later.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    private void Reset()
+    {
+        rescheduleForm = new RescheduleFormModel();
+        selectedDate = null;
+        selectedTime = null;
+        displayMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        currentStep = Step.EnterDetails;
+        isConfirmed = false;
+        errorMessage = null;
+    }
+}
