@@ -125,6 +125,26 @@ Most files only reference their own feature's namespaces. Known cross-feature de
 
 ---
 
+## Cross-Project Model Duplication
+
+Full-stack features (Booking, Contact, Chat) have **request models in both projects**:
+
+| WASM Model | API Model | Why Both Exist |
+|------------|-----------|----------------|
+| `BookingAppointmentRequest` | `BookAppointmentRequest` | Same data, separate assemblies |
+| `EmailApiRequest` | `EmailRequest` | Same pattern |
+| *(inline anonymous object)* | `ChatRequest` | Chat builds payload inline |
+
+**Why they can't be shared:**
+
+- WASM compiles to **WebAssembly** (`net8.0-browser`), API runs on **.NET server** (`net8.0`). They are separate .NET projects with incompatible target frameworks — one cannot reference the other.
+- A **shared class library** (`CloudZen.Shared`) targeting `netstandard2.1` or `net8.0` could hold DTOs both projects reference. This is the standard .NET solution but adds a third project to maintain.
+- Current approach: each project owns its copy of the request model. The duplication is small (< 50 lines per model) and keeps each project self-contained.
+
+**Important**: WASM models use user-friendly field names (`name`, `email`, `date`). External services (e.g., N8N) may expect different names (`userName`, `userEmail`, `appointmentDate`). The **Azure Function proxy is responsible for transforming** WASM field names to the external service's expected schema. See [Proxy Pattern — Model Ownership](../06-patterns/01_azure_functions_proxy_api.md#model-ownership--transformation).
+
+---
+
 ## Rules
 
 - **Feature isolation**: A feature should not depend on another feature's services. Use `Common/` for shared concerns. Profile→Projects and Landing→Projects are documented exceptions.

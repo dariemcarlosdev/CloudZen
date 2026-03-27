@@ -250,6 +250,45 @@ public async Task<IActionResult> Run(
 
 ---
 
+## Model Ownership & Transformation
+
+Each layer owns its own request model. Data flows through **three schemas**:
+
+```
+WASM Model              Azure Function (Proxy)         External Service
+(user-friendly names)   (validates + transforms)       (service-specific schema)
+───────────────────     ────────────────────────       ──────────────────────
+name            ──→     Validate                 ──→   userName
+email           ──→     Validate                 ──→   userEmail
+date + time     ──→     Validate + Compute       ──→   startDateTime (ISO 8601)
+businessName    ──→     Validate                 ──→   (dropped — not needed by N8N)
+```
+
+### Why Models Are Duplicated Across WASM and API
+
+The WASM project (`net8.0-browser`) and API project (`net8.0` server) are **separate .NET assemblies** that cannot reference each other. Each owns a copy of the request DTO:
+
+| Layer | Model | Responsibility |
+|-------|-------|----------------|
+| **WASM** | `BookingAppointmentRequest` | Matches what the UI form collects and `HttpClient` sends |
+| **API** | `BookAppointmentRequest` | Matches what the Azure Function deserializes from the WASM POST |
+| **API** | `N8nAppointmentPayload` *(planned)* | Matches what N8N Switch node expects — Function builds this from the API model |
+
+> A shared class library is the standard .NET fix for DTO duplication, but the current duplication is small (< 50 lines per model) and keeps each project self-contained.
+
+### Transformation Responsibility
+
+The **Azure Function proxy** owns the translation between WASM field names and external service field names. The WASM client never needs to know what N8N, Brevo, or Anthropic expect — it sends a clean, user-friendly payload and the proxy adapts it.
+
+This is especially important for the booking endpoint where:
+- WASM sends: `{ name, email, date, time, endTime, action }`
+- N8N expects: `{ userName, userEmail, appointmentDate, startDateTime, endDateTime, action }`
+- The Function computes composite fields (`startDateTime` from `date` + `time`)
+
+See [Vertical Slice Architecture — Cross-Project Model Duplication](../01-architecture/VERTICAL_SLICE_ARCHITECTURE.md#cross-project-model-duplication) for the structural reason behind the duplication.
+
+---
+
 ## Configuration Pattern
 
 ### Frontend Options (URL construction)
