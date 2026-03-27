@@ -8,43 +8,23 @@ CloudZen is a Blazor WebAssembly app using a component-based architecture. Paren
 
 ## Directory Structure
 
+> For the full folder layout, see [Vertical Slice Architecture](VERTICAL_SLICE_ARCHITECTURE.md).
+
+Code is organized by feature — each feature owns its components, models, and services:
+
 ```
-CloudZen/
-├── Pages/                          # Thin page orchestrators
-│   ├── Index.razor                 # Landing page (/)
-│   └── Contact.razor               # Contact page (/contact)
-│
-├── Shared/                         # Components by feature
-│   ├── Common/                     # Reusable across features
-│   ├── Landing/                    # Landing page sections
-│   │   └── Booking/                # Booking flow components
-│   ├── Profile/                    # Profile components
-│   │   ├── ProfileHeader.razor     # Avatar, name, social links
-│   │   ├── ProfileApproach.razor   # Professional methodology
-│   │   └── ProfileHighlights.razor # Achievements, resume button
-│   ├── Projects/
-│   │   ├── ProjectCard.razor       # Individual project card
-│   │   └── ProjectFilter.razor     # Status/type filter
-│   └── Chatbot/
-│       └── CloudZenChatbot.razor   # AI chatbot FAB + chat panel
-│
-├── Services/                       # Client-side services (DI)
-│   ├── Abstractions/               # Interfaces (I<Domain>Service.cs)
-│   ├── ApiEmailService.cs          # HTTP → /api/send-email
-│   ├── ChatbotService.cs           # HTTP → /api/chat
-│   ├── AppointmentService.cs       # HTTP → /api/book-appointment
-│   ├── ProjectService.cs           # In-memory project data
-│   ├── PersonalService.cs          # In-memory personal data
-│   └── ToolService.cs              # In-memory tool data
-│
-├── Models/
-│   ├── Options/                    # IOptions<T> config classes
-│   ├── ChatMessage.cs              # Record with factory methods
-│   ├── ProjectInfo.cs              # Project data model
-│   ├── ContactFormModel.cs         # Form with DataAnnotations
-│   └── BookingFormModel.cs         # Booking form with validation
-│
-└── Program.cs                      # DI registration + config
+Features/
+├── Booking/Components/        # Calendar, form, confirmation flow
+├── Contact/Components/        # ContactForm
+├── Chat/Components/           # CloudZenChatbot (FAB + panel)
+├── Landing/Components/        # Hero, CTA, Services, Mission, CaseStudies, etc.
+├── Profile/Components/        # ProfileHeader, ProfileApproach, ProfileHighlights
+├── Projects/Components/       # ProjectCard, ProjectFilter
+└── Tickets/Components/        # Tickets overview
+
+Common/Components/             # AnimatedCounterCircle, ScrollToTopButton
+Layout/                        # MainLayout, Header, Footer
+Pages/                         # Thin orchestrators: Index.razor, Contact.razor
 ```
 
 ---
@@ -196,8 +176,8 @@ public class ChatMessage
 |----------|---------|---------|
 | Components | `<Feature><Role>.razor` | `ProfileHeader`, `ProjectCard`, `BookingCalendar` |
 | Services | `<Domain>Service.cs` | `ApiEmailService`, `ProjectService` |
-| Interfaces | `I<Domain>Service.cs` in `Services/Abstractions/` | `IEmailService`, `IChatbotService` |
-| Options | `<Service>Options.cs` in `Models/Options/` | `EmailServiceOptions`, `ChatbotOptions` |
+| Interfaces | `I<Domain>Service.cs` in feature's `Services/` | `IEmailService`, `IChatbotService` |
+| Options | `<Service>Options.cs` at feature root | `EmailServiceOptions`, `ChatbotOptions` |
 | Parameters | PascalCase | `AvatarUrl`, `OnFilterChange` |
 | CSS | Tailwind utility classes (kebab-case) | `bg-cloudzen-teal`, `font-ibm-plex` |
 
@@ -211,6 +191,8 @@ public class ChatMessage
 - **Bootstrap Icons** via CDN
 - Component-scoped CSS via `.razor.css` files where needed
 
+> For the full color system, button hierarchy, and component styling patterns, see [UI Color & Design System](../06-patterns/02_ui_color_design_system.md).
+
 ---
 
 ## Component Guidelines
@@ -221,6 +203,17 @@ public class ChatMessage
 4. **Keep pages thin** — pages are orchestrators, not implementors
 5. **Services for data** — inject services for data access, not inline `@code`
 6. **Responsive first** — mobile-first Tailwind classes
+
+---
+
+## Related Docs
+
+- [Vertical Slice Architecture](VERTICAL_SLICE_ARCHITECTURE.md) — Feature folder structure and namespace conventions
+- [Configuration](CONFIGURATION.md) — IOptions pattern, secrets strategy, local dev override
+- [API Endpoints](API_ENDPOINTS.md) — Backend endpoints that services call
+- [Azure Functions](AZURE_FUNCTIONS.md) — API backend architecture
+- [UI Color & Design System](../06-patterns/02_ui_color_design_system.md) — Color palette, button hierarchy, styling patterns
+- [Azure Functions Proxy Pattern](../06-patterns/01_azure_functions_proxy_api.md) — How WASM ↔ API communication works
 
 ---
 

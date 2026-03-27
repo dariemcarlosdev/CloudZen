@@ -174,4 +174,13 @@ public class SendEmailFunction
 
 ---
 
+## Related Docs
+
+- [API Endpoints](API_ENDPOINTS.md) — All 3 endpoint specs (routes, request/response, validation, error codes)
+- [Configuration](CONFIGURATION.md) — IOptions binding, Key Vault integration, secrets strategy
+- [Vertical Slice Architecture](VERTICAL_SLICE_ARCHITECTURE.md) — API folder structure (`Api/Features/`, `Api/Shared/`)
+- [Azure Functions Proxy Pattern](../06-patterns/01_azure_functions_proxy_api.md) — Full proxy pattern with code examples
+
+---
+
 *Last Updated: March 2026*

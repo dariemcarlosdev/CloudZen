@@ -131,3 +131,13 @@ Most files only reference their own feature's namespaces. Known cross-feature de
 - **Options at feature root**: Each feature's `*Options.cs` lives at the feature folder root (not in a subfolder), since there's typically one per feature.
 - **Layout/Pages stay at root**: Blazor routing requires `Pages/` and `Layout/` at the project root.
 - **API mirrors WASM slices**: The 3 full-stack features use identical slice names in both projects for navigability.
+
+---
+
+## Related Docs
+
+- [Component Architecture](COMPONENT_ARCHITECTURE.md) — Communication patterns, service layer, data models, naming conventions
+- [Configuration](CONFIGURATION.md) — IOptions pattern, secrets strategy, options class inventory with file locations
+- [API Endpoints](API_ENDPOINTS.md) — Full specs for the 3 API endpoints (Booking, Contact, Chat)
+- [Azure Functions](AZURE_FUNCTIONS.md) — Hosting model, Program.cs setup, troubleshooting
+- [Azure Functions Proxy Pattern](../06-patterns/01_azure_functions_proxy_api.md) — How full-stack features communicate (WASM → API → external service)

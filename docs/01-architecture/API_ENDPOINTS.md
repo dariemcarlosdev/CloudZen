@@ -208,3 +208,12 @@ All endpoints follow consistent error shapes:
 | `502` | External service unavailable | Endpoint-specific gateway error |
 | `503` | Anthropic billing/quota | Chat only |
 | `504` | External service timeout | Endpoint-specific timeout message |
+
+---
+
+## Related Docs
+
+- [Azure Functions](AZURE_FUNCTIONS.md) — Hosting model, Program.cs setup, Key Vault integration
+- [Configuration](CONFIGURATION.md) — Secrets strategy, IOptions pattern, options class inventory
+- [Vertical Slice Architecture](VERTICAL_SLICE_ARCHITECTURE.md) — Where function files live (`Api/Features/{Feature}/`)
+- [Azure Functions Proxy Pattern](../06-patterns/01_azure_functions_proxy_api.md) — Architecture diagram and "add new endpoint" guide

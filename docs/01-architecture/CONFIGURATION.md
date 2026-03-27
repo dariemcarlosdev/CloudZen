@@ -230,19 +230,19 @@ In production, the default `/api` works because Azure Static Web Apps proxies `/
 
 ### Frontend (Blazor WASM)
 
-| Class | Section | Key Properties |
-|-------|---------|----------------|
-| `EmailServiceOptions` | `EmailService` | `ApiBaseUrl`, `TimeoutSeconds`, `MaxRetries`, `SendEmailUrl` (computed) |
-| `ChatbotOptions` | `ChatbotService` | `ApiBaseUrl`, `TimeoutSeconds`, `ChatUrl` (computed) |
-| `BookingServiceOptions` | `BookingService` | `ApiBaseUrl`, `TimeoutSeconds`, `BookAppointmentUrl` (computed) |
-| `BlobStorageOptions` | `BlobStorage` | `ResumeUrl`, `ContainerName` |
+| Class | Location | Section | Key Properties |
+|-------|----------|---------|----------------|
+| `EmailServiceOptions` | `Features/Contact/` | `EmailService` | `ApiBaseUrl`, `TimeoutSeconds`, `MaxRetries`, `SendEmailUrl` (computed) |
+| `ChatbotOptions` | `Features/Chat/` | `ChatbotService` | `ApiBaseUrl`, `TimeoutSeconds`, `ChatUrl` (computed) |
+| `BookingServiceOptions` | `Features/Booking/` | `BookingService` | `ApiBaseUrl`, `TimeoutSeconds`, `BookAppointmentUrl` (computed) |
+| `BlobStorageOptions` | `Common/Options/` | `BlobStorage` | `ResumeUrl`, `ContainerName` |
 
 ### Backend (Azure Functions)
 
-| Class | Section | Key Properties |
-|-------|---------|----------------|
-| `RateLimitOptions` | `RateLimiting` | `PermitLimit`, `WindowSeconds`, `QueueLimit`, `EnableCircuitBreaker` |
-| `EmailSettings` | `EmailSettings` | `FromEmail`, `CcEmail`, `ToEmail`, `FromName` |
+| Class | Location | Section | Key Properties |
+|-------|----------|---------|----------------|
+| `RateLimitOptions` | `Api/Shared/Models/` | `RateLimiting` | `PermitLimit`, `WindowSeconds`, `QueueLimit`, `EnableCircuitBreaker` |
+| `EmailSettings` | `Api/Features/Contact/` | `EmailSettings` | `FromEmail`, `CcEmail`, `ToEmail`, `FromName` |
 
 ---
 
@@ -255,6 +255,15 @@ In production, the default `/api` works because Azure Static Web Apps proxies `/
 | Setting is null in Functions | Not in Azure Portal | Add to Configuration → App settings |
 | Works locally, fails in Azure | `local.settings.json` not deployed | Add settings to Azure Portal |
 | Settings not taking effect | Function not restarted | Restart the Function App after config changes |
+
+---
+
+## Related Docs
+
+- [Vertical Slice Architecture](VERTICAL_SLICE_ARCHITECTURE.md) — Where options classes live per feature
+- [API Endpoints](API_ENDPOINTS.md) — Endpoints that consume these config values
+- [Azure Functions](AZURE_FUNCTIONS.md) — API Program.cs config binding and Key Vault setup
+- [Component Architecture](COMPONENT_ARCHITECTURE.md) — How services inject IOptions in components
 
 ---
 
