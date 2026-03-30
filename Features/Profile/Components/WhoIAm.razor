@@ -44,15 +44,21 @@
             <!-- Project Filter Component -->
             <ProjectFilter OnFilterChange="HandleFilterChange" />
 
-            <!-- Projects List -->
+            <!-- Projects List (paginated) -->
             @if (FilteredProjects.Any())
             {
                 <div class="flex flex-col gap-6 md:gap-8">
-                    @foreach (var project in FilteredProjects)
+                    @foreach (var project in PagedProjects)
                     {
                         <ProjectCard Project="@project" />
                     }
                 </div>
+
+                <!-- Pagination -->
+                <Pagination TotalItems="FilteredProjects.Count"
+                            PageSize="@PageSize"
+                            CurrentPage="@_currentPage"
+                            OnPageChanged="HandlePageChanged" />
             }
             else
             {
