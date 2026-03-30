@@ -19,13 +19,8 @@ public partial class CaseStudies
 
     protected override void OnInitialized()
     {
-        var allProjects = ProjectService.GetAllProjects();
-
-        _caseStudyProjects = allProjects
-            .Where(p => (p.Status == "Completed" || p.Status == "In Progress") &&
-                       (p.ProjectType.Contains("Customer") ||
-                        p.Name.Contains("FILE PROCESSOR") ||
-                        p.Name.Contains("Smart Menu")))
+        _caseStudyProjects = ProjectService
+            .GetProjectsByCategory(ProjectCategory.AiAutomation)
             .Take(3)
             .ToList();
     }

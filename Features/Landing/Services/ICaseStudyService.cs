@@ -1,3 +1,5 @@
+using CloudZen.Features.Projects.Models;
+
 namespace CloudZen.Features.Landing.Services;
 
 /// <summary>
@@ -7,6 +9,7 @@ namespace CloudZen.Features.Landing.Services;
 public interface ICaseStudyService
 {
     string GetProjectCategory(string projectType);
+    string GetProjectCategory(ProjectCategory category);
     string GetShortTitle(string title);
     string GetCustomerFriendlyDescription(string description);
     string GetSimplifiedResult(string result);

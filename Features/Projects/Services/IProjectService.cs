@@ -10,4 +10,5 @@ public interface IProjectService
     List<ProjectInfo> GetAllProjects();
     List<ProjectInfo> GetProjectsByStatus(string status);
     List<ProjectInfo> GetProjectsByType(string projectType);
+    List<ProjectInfo> GetProjectsByCategory(ProjectCategory category);
 }

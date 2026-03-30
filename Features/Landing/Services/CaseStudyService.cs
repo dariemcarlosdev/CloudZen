@@ -1,4 +1,6 @@
 
+using CloudZen.Features.Projects.Models;
+
 namespace CloudZen.Features.Landing.Services;
 
 /// <summary>
@@ -8,16 +10,27 @@ namespace CloudZen.Features.Landing.Services;
 public class CaseStudyService : ICaseStudyService
 {
     /// <summary>
-    /// Determines the display category badge for a project based on its type.
+    /// Determines the display category badge for a project based on its type string.
     /// </summary>
     public string GetProjectCategory(string projectType)
     {
         if (projectType.Contains("Customer"))
-        {
             return "Customer Success";
-        }
+        if (projectType.Contains("AI Automation"))
+            return "AI Automation";
         return "Innovation Project";
     }
+
+    /// <summary>
+    /// Determines the display category badge from a <see cref="ProjectCategory"/> enum value.
+    /// </summary>
+    public string GetProjectCategory(ProjectCategory category) => category switch
+    {
+        ProjectCategory.CustomerWork => "Customer Success",
+        ProjectCategory.AiAutomation => "AI Automation",
+        ProjectCategory.SideProject => "Innovation Project",
+        _ => "Project"
+    };
 
     /// <summary>
     /// Converts long project titles into shorter, more display-friendly versions.
@@ -32,6 +45,12 @@ public class CaseStudyService : ICaseStudyService
             return "File Processing Automation";
         if (title.Contains("Smart Menu"))
             return "AI Menu Optimization";
+        if (title.Contains("AI Chatbot"))
+            return "AI Chatbot Assistance";
+        if (title.Contains("Booking Appointments"))
+            return "Smart Appointment Booking";
+        if (title.Contains("Customer-Facing Web"))
+            return "Custom Web Application";
 
         return title.Length > 50 ? title.Substring(0, 47) + "..." : title;
     }

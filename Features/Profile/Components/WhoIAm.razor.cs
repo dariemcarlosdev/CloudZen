@@ -21,6 +21,16 @@ public partial class WhoIAm
     private List<ProjectInfo> Projects = new();
     private List<ProjectInfo> FilteredProjects = new();
 
+    // ── Pagination State ─────────────────────────────────────────────────
+    private const int PageSize = 5;
+    private int _currentPage = 1;
+
+    /// <summary>Current page slice of filtered projects.</summary>
+    private List<ProjectInfo> PagedProjects => FilteredProjects
+        .Skip((_currentPage - 1) * PageSize)
+        .Take(PageSize)
+        .ToList();
+
     protected override void OnInitialized()
     {
         Projects = ProjectService.GetAllProjects();
@@ -29,16 +39,34 @@ public partial class WhoIAm
 
     /// <summary>
     /// Handles filter changes from the ProjectFilter component.
+    /// Resets to page 1 whenever filters change.
     /// </summary>
     private void HandleFilterChange((string Status, string ProjectType) filters)
     {
         FilteredProjects = Projects
             .Where(p => string.IsNullOrEmpty(filters.Status) || p.Status == filters.Status)
-            .Where(p => string.IsNullOrEmpty(filters.ProjectType) ||
-                        (filters.ProjectType == "Customer"
-                            ? p.ProjectType.StartsWith("Customer:")
-                            : p.ProjectType == filters.ProjectType))
+            .Where(p => string.IsNullOrEmpty(filters.ProjectType) || MatchesProjectTypeFilter(p, filters.ProjectType))
             .ToList();
+
+        _currentPage = 1;
+    }
+
+    private static bool MatchesProjectTypeFilter(ProjectInfo project, string filterValue) => filterValue switch
+    {
+        "Customer" => project.Category == ProjectCategory.CustomerWork,
+        "AI Automation" => project.Category == ProjectCategory.AiAutomation,
+        "Side Project" => project.Category == ProjectCategory.SideProject,
+        _ => project.ProjectType == filterValue
+    };
+
+    /// <summary>
+    /// Handles page navigation from the Pagination component.
+    /// Scrolls to the projects section for smooth UX.
+    /// </summary>
+    private async Task HandlePageChanged(int page)
+    {
+        _currentPage = page;
+        await JS.InvokeVoidAsync("scrollToElementById", "highlighted-projects");
     }
 
     /// <summary>

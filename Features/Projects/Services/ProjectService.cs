@@ -42,6 +42,20 @@ public class ProjectService : IProjectService
     }
 
     /// <summary>
+    /// Retrieves projects filtered by <see cref="ProjectCategory"/>.
+    /// </summary>
+    /// <param name="category">The category to filter by.</param>
+    /// <returns>A list of projects in the specified category, sorted by status.</returns>
+    public List<ProjectInfo> GetProjectsByCategory(ProjectCategory category)
+    {
+        var statusOrder = new List<string> { "Completed", "In Progress", "Planning" };
+        return GetProjectsData()
+            .Where(p => p.Category == category)
+            .OrderBy(p => statusOrder.IndexOf(p.Status))
+            .ToList();
+    }
+
+    /// <summary>
     /// Gets featured/highlighted projects (typically completed projects with high impact).
     /// </summary>
     /// <returns>A list of featured projects.</returns>
@@ -198,7 +212,8 @@ public class ProjectService : IProjectService
                     "Architecting for deployment on Azure App Services."
                 },
                 GithubUrl = "https://github.com/dariemcarlosdev/CleanArchitecture.ApiTemplate",
-                ProjectType = "Side Project"
+                ProjectType = "Side Project",
+                Category = ProjectCategory.SideProject
             },
             new ProjectInfo
             {
@@ -234,7 +249,8 @@ public class ProjectService : IProjectService
                     "Applying Clean Architecture principles for maintainability."
                 },
                 GithubUrl = "https://github.com/dariemcarlosdev/OrderProcessing-RabbitMQ-Microservices",
-                ProjectType = "Side Project"
+                ProjectType = "Side Project",
+                Category = ProjectCategory.SideProject
             },
             new ProjectInfo
             {
@@ -263,7 +279,8 @@ public class ProjectService : IProjectService
                     "Ensuring data integrity and traceability during platform transition.",
                     "Redesigning UI/UX for modern accessibility and scalability."
                 },
-                ProjectType = "Customer: MDCPS"
+                ProjectType = "Customer: MDCPS",
+                Category = ProjectCategory.CustomerWork
             },
             new ProjectInfo
             {
@@ -291,7 +308,8 @@ public class ProjectService : IProjectService
                     "Optimizing ETL for large-scale, high-volume data loads.",
                     "Ensuring audit compliance and traceability in ETL workflows."
                 },
-                ProjectType = "Customer: MDCPS"
+                ProjectType = "Customer: MDCPS",
+                Category = ProjectCategory.CustomerWork
             },
             new ProjectInfo
             {
@@ -336,7 +354,8 @@ public class ProjectService : IProjectService
                     "Automating data ingestion and dashboard reporting."
                 },
                 GithubUrl = "https://github.com/dariemcarlosdev/SmartMenuOptim",
-                ProjectType = "Side Project"
+                ProjectType = "Side Project",
+                Category = ProjectCategory.SideProject
             },
             new ProjectInfo
             {
@@ -383,7 +402,8 @@ public class ProjectService : IProjectService
                     "Ensuring security and scalability for sensitive data processing."
                 },
                 GithubUrl = "https://github.com/dariemcarlosdev/VPKFILEPROCESSORAPP",
-                ProjectType = "Customer: MDCPS"
+                ProjectType = "Customer: MDCPS",
+                Category = ProjectCategory.CustomerWork
             },
             new ProjectInfo
             {
@@ -424,7 +444,8 @@ public class ProjectService : IProjectService
                     "Automating campaign management and analytics reporting."
                 },
                 GithubUrl = "https://github.com/dariemcarlosdev/DineJoyApp",
-                ProjectType = "Side Project"
+                ProjectType = "Side Project",
+                Category = ProjectCategory.SideProject
             },
             new ProjectInfo
             {
@@ -455,7 +476,168 @@ public class ProjectService : IProjectService
                     "Designing a responsive and user-friendly UI."
                 },
                 GithubUrl = "https://github.com/dariemcarlosdev/BlazorTicketmasterApiIntegration",
-                ProjectType = "Side Project"
+                ProjectType = "Side Project",
+                Category = ProjectCategory.SideProject
+            },
+            new ProjectInfo
+            {
+                Name = "AI Chatbot Assistance - Intelligent Customer Support",
+                Status = "Completed",
+                Description = "A smart chatbot that lives on your website and answers customer questions instantly — day or night. It handles the repetitive stuff so your team can focus on what matters, and hands off tricky conversations to a real person when needed.",
+                TechStack = new[] {
+                    "Blazor WebAssembly",
+                    "Azure Functions (Isolated Worker)",
+                    "Anthropic Claude API",
+                    "MailKit / Brevo SMTP",
+                    ".NET 8.0 SDK",
+                    "C#",
+                    "Azure Static Web Apps",
+                    "Azure Key Vault",
+                    "Polly Rate Limiting",
+                    "Tailwind CSS v4"
+                },
+                Progress = 100,
+                Results = new List<string>
+                {
+                    "Instant AI-generated responses to customer inquiries, eliminating wait times.",
+                    "Reduced support ticket volume by handling common questions automatically.",
+                    "24/7 availability without scaling headcount or support shifts.",
+                    "Secure backend architecture with API keys stored in Azure Key Vault.",
+                    "Per-client rate limiting to prevent abuse and ensure fair usage."
+                },
+                Participants = new[]
+                {
+                    new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.png" }
+                },
+                Role = "Principal Consultant / AI Solution Architect",
+                Challenges = new List<string>
+                {
+                    "Integrating Anthropic Claude API with server-side proxy to protect secrets.",
+                    "Designing conversational UX for non-technical end users.",
+                    "Implementing rate limiting and input validation to prevent misuse."
+                },
+                ProjectType = "AI Automation",
+                Category = ProjectCategory.AiAutomation,
+                AutomationDetails = new AiAutomationDetails
+                {
+                    TargetAudience = "Small-to-medium businesses needing 24/7 customer support without scaling headcount.",
+                    ProblemSolved = "Customers wait too long for answers and support teams are overwhelmed with repetitive questions, causing churn and lost revenue.",
+                    CustomerBenefits = new List<string>
+                    {
+                        "Instant response times that keep customers engaged.",
+                        "Reduced support costs by automating repetitive inquiries.",
+                        "Consistent brand voice across every interaction.",
+                        "Available around the clock without overtime or extra hires.",
+                        "Seamless escalation to human agents for complex issues."
+                    }
+                }
+            },
+            new ProjectInfo
+            {
+                Name = "Booking Appointments - Automated Scheduling System",
+                Status = "Completed",
+                Description = "An online booking system that lets your clients pick a time, confirm their appointment, and get it added to your calendar — all without a single phone call or email. Reschedules and cancellations are handled automatically too.",
+                TechStack = new[] {
+                    "Blazor WebAssembly",
+                    "Azure Functions (Isolated Worker)",
+                    "n8n Workflows",
+                    "Google Calendar API",
+                    ".NET 8.0 SDK",
+                    "C#",
+                    "Azure Static Web Apps",
+                    "Azure Key Vault",
+                    "Tailwind CSS v4"
+                },
+                Progress = 100,
+                Results = new List<string>
+                {
+                    "Zero manual scheduling effort — clients book directly from the website.",
+                    "Automated email confirmations and calendar invites on every booking.",
+                    "Real-time availability prevents double-bookings entirely.",
+                    "Self-service rescheduling and cancellation reduce admin overhead.",
+                    "Seamless Google Calendar sync keeps schedules up to date."
+                },
+                Participants = new[]
+                {
+                    new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.png" }
+                },
+                Role = "Principal Consultant / Automation Architect",
+                Challenges = new List<string>
+                {
+                    "Orchestrating n8n workflows with Azure Functions for reliable appointment processing.",
+                    "Building a responsive calendar UI with timezone-aware slot selection.",
+                    "Ensuring conflict-free scheduling with real-time availability checks."
+                },
+                ProjectType = "AI Automation",
+                Category = ProjectCategory.AiAutomation,
+                AutomationDetails = new AiAutomationDetails
+                {
+                    TargetAudience = "Service-based businesses (consultants, agencies, freelancers) that lose leads to slow or manual booking processes.",
+                    ProblemSolved = "Manual back-and-forth scheduling wastes time, creates friction for potential clients, and leads to missed appointments and lost revenue.",
+                    CustomerBenefits = new List<string>
+                    {
+                        "Self-service scheduling that converts visitors into booked appointments.",
+                        "Automated confirmations and reminders reduce no-shows.",
+                        "Zero double-bookings with real-time calendar sync.",
+                        "Clients can reschedule or cancel without calling or emailing.",
+                        "Professional booking experience that builds trust and credibility."
+                    }
+                }
+            },
+            new ProjectInfo
+            {
+                Name = "Custom Customer-Facing Web Application",
+                Status = "Completed",
+                Description = "A fully custom website designed to make your business look great and work hard for you. It greets visitors with an AI chatbot, lets them book appointments on the spot, and captures every lead through a secure contact form — all running on its own with no maintenance needed from you.",
+                TechStack = new[] {
+                    "Blazor WebAssembly",
+                    "Azure Static Web Apps",
+                    "Azure Functions (Isolated Worker)",
+                    "Anthropic Claude API",
+                    "n8n Workflows",
+                    "Google Calendar API",
+                    "MailKit / Brevo SMTP",
+                    ".NET 8.0 SDK",
+                    "C#",
+                    "Tailwind CSS v4",
+                    "Azure Key Vault",
+                    "Polly Rate Limiting"
+                },
+                Progress = 100,
+                Results = new List<string>
+                {
+                    "Delivered a professional, mobile-responsive web presence with modern UI.",
+                    "Integrated AI chatbot for instant visitor engagement and lead qualification.",
+                    "Automated appointment booking eliminates manual scheduling overhead.",
+                    "Secure contact form with SMTP delivery and input validation.",
+                    "Fully serverless architecture with zero infrastructure management."
+                },
+                Participants = new[]
+                {
+                    new ProjectParticipant { Name = "Dariem C. Macias", ImageUrl = "/images/dariem-avatar.png" }
+                },
+                Role = "Principal Consultant / Full-Stack Architect",
+                Challenges = new List<string>
+                {
+                    "Unifying chatbot, booking, and contact features into a cohesive single-page experience.",
+                    "Ensuring fast load times with Blazor WASM while keeping rich interactivity.",
+                    "Securing API keys and secrets with Azure Key Vault across multiple integrations."
+                },
+                ProjectType = "AI Automation",
+                Category = ProjectCategory.AiAutomation,
+                AutomationDetails = new AiAutomationDetails
+                {
+                    TargetAudience = "Small businesses and professionals who need a polished online presence with built-in automation to convert visitors into clients.",
+                    ProblemSolved = "Generic website templates lack intelligent engagement — visitors leave without taking action because there is no instant support, easy booking, or personalized experience.",
+                    CustomerBenefits = new List<string>
+                    {
+                        "A branded, professional web app that makes a strong first impression.",
+                        "AI-powered chatbot engages visitors instantly and answers questions 24/7.",
+                        "Built-in appointment scheduling turns interest into booked meetings.",
+                        "Secure contact form ensures no lead is lost.",
+                        "Fully managed cloud hosting with no servers to maintain."
+                    }
+                }
             }
         };
     }

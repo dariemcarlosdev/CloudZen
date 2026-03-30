@@ -59,4 +59,14 @@ public class ProjectInfo
     /// Type of project: "Side Project", "Client Work", or "Customer: {Name}".
     /// </summary>
     public string ProjectType { get; set; } = string.Empty;
+
+    /// <summary>
+    /// The business category this project belongs to (type-safe replacement for <see cref="ProjectType"/> filtering).
+    /// </summary>
+    public ProjectCategory Category { get; set; } = ProjectCategory.SideProject;
+
+    /// <summary>
+    /// AI-automation-specific metadata. Populated only for <see cref="ProjectCategory.AiAutomation"/> projects.
+    /// </summary>
+    public AiAutomationDetails? AutomationDetails { get; set; }
 }
