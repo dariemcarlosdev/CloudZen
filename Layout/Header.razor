@@ -51,7 +51,7 @@
         <a href="/#cases" @onclick='() => SetActive("#cases")' class="@GetNavClass("#cases")">Our Work</a>
         <NavLink href="/mission" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">About</NavLink>
         <NavLink href="/whoiam" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">Who I Am</NavLink>
-        <NavLink href="/contact" class="px-4 py-2 bg-orange-400 text-white rounded-full hover:bg-orange-500 transition" ActiveClass="ring-2">Contact</NavLink>
+        <NavLink href="/contact" class="px-4 py-2 bg-orange-400 text-white rounded-full hover:bg-orange-500 transition" ActiveClass="ring-2">Let's Talk</NavLink>
     </nav>
     <!-- Mobile nav -->
     @if (isMobileMenuOpen)
@@ -61,7 +61,7 @@
             <a href="/#cases" @onclick='() => OnMobileNavClick("#cases")' class="@GetNavClass("#cases")">Our Work</a>
             <NavLink href="/mission" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>About</NavLink>
             <NavLink href="/whoiam" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>Who I Am</NavLink>
-            <NavLink href="/contact" class="px-4 py-2 bg-orange-400 text-white rounded-full hover:bg-orange-500 transition" ActiveClass="ring-2" @onclick='CloseMobileMenu'>Contact</NavLink>
+            <NavLink href="/contact" class="px-4 py-2 bg-orange-400 text-white rounded-full hover:bg-orange-500 transition" ActiveClass="ring-2" @onclick='CloseMobileMenu'>Let's Talk</NavLink>
         </nav>
     }
     </div>
