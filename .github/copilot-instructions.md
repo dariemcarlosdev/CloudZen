@@ -97,3 +97,7 @@ NuGet package versions are managed centrally in `Directory.Packages.props` (Cent
 ### Security (API Layer)
 
 The Functions backend applies input validation (XSS pattern detection via `InputValidator`), per-client rate limiting (Polly fixed-window, 10 req/60s default), CORS origin checks, and security headers on all responses.
+
+### Documentation (AI-Model-Ready)
+
+All documentation in `docs/` follows the AI-Model-Ready pattern defined in `.github/skills/ai-ready-docs/SKILL.md`. Key rules: metadata block at top, table of contents, quick reference table, scope boundaries, no emoji in headings, ASCII-safe characters, tables for structured data. Use the `ai-ready-docs` skill when creating or reviewing documentation.
