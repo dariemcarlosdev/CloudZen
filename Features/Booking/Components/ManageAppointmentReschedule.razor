@@ -85,13 +85,13 @@
         <!-- Step 2: Select New Date/Time -->
         <div class="flex flex-col lg:flex-row">
             <!-- Sidebar -->
-            <div class="lg:w-80 bg-gradient-to-br from-cloudzen-steel to-cloudzen-steel/90 p-6 lg:p-8 text-white">
+            <div class="lg:w-80 bg-gradient-to-br from-teal-cyan-aqua-900 to-teal-cyan-aqua-800 p-6 lg:p-8 text-white">
                 <div class="mb-6">
                     <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full text-xs font-medium text-teal-cyan-aqua-200 mb-4">
                         <i class="bi bi-calendar2-week"></i> Rescheduling
                     </span>
                     <h3 class="text-2xl font-bold mb-2">Select New Time</h3>
-                    <p class="text-gray-300 text-sm">Booking: <span class="font-mono">@rescheduleForm.BookingId</span></p>
+                    <p class="text-teal-cyan-aqua-100 text-sm">Booking: <span class="font-mono">@rescheduleForm.BookingId</span></p>
                 </div>
 
                 @if (selectedDate.HasValue)
@@ -123,21 +123,28 @@
                     <span class="text-sm text-gray-500">Step 2 of 2</span>
                 </div>
 
-                <!-- Calendar -->
-                <BookingCalendar DisplayMonth="@displayMonth"
-                                 SelectedDate="@selectedDate"
-                                 OnDateSelected="@SelectDate"
-                                 OnDisplayMonthChanged="@SetDisplayMonth" />
-
-                <!-- Time Slots -->
-                @if (selectedDate.HasValue)
-                {
-                    <div class="mt-6">
-                        <BookingTimeSlots TimeSlots="@BookingService.AvailableTimeSlots"
-                                          SelectedTime="@selectedTime"
-                                          OnTimeSelected="@SelectTime" />
+                <!-- Calendar and Time Slots Side by Side -->
+                <div class="flex flex-col md:flex-row gap-6 md:justify-center md:items-start">
+                    <!-- Calendar -->
+                    <div class="flex-shrink-0">
+                        <BookingCalendar DisplayMonth="@displayMonth"
+                                         SelectedDate="@selectedDate"
+                                         TimeZoneLabel="@timeZoneLabel"
+                                         OnDateSelected="@SelectDate"
+                                         OnDisplayMonthChanged="@SetDisplayMonth"
+                                         OnTimeZoneChanged="@HandleTimeZoneChanged" />
                     </div>
-                }
+
+                    <!-- Time Slots (appears beside calendar when date selected) -->
+                    @if (selectedDate.HasValue)
+                    {
+                        <div class="flex-shrink-0 md:self-center">
+                            <BookingTimeSlots TimeSlots="@BookingService.AvailableTimeSlots"
+                                              SelectedTime="@selectedTime"
+                                              OnTimeSelected="@SelectTime" />
+                        </div>
+                    }
+                </div>
 
                 <!-- Error Message -->
                 @if (!string.IsNullOrEmpty(errorMessage))
@@ -184,97 +191,3 @@
         </div>
     }
 </div>
-
-@code {
-    [Inject] private IAppointmentService AppointmentService { get; set; } = default!;
-    [Inject] private IBookingService BookingService { get; set; } = default!;
-
-    private enum Step { EnterDetails, SelectDateTime }
-    private Step currentStep = Step.EnterDetails;
-
-    private RescheduleFormModel rescheduleForm = new();
-    private DateTime displayMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
-    private DateTime? selectedDate;
-    private string? selectedTime;
-    private bool isSubmitting;
-    private bool isConfirmed;
-    private string? errorMessage;
-
-    private void GoToSelectDateTime()
-    {
-        errorMessage = null;
-        currentStep = Step.SelectDateTime;
-    }
-
-    private void GoBackToDetails()
-    {
-        errorMessage = null;
-        currentStep = Step.EnterDetails;
-    }
-
-    private void SelectDate(DateTime date)
-    {
-        selectedDate = date;
-        selectedTime = null;
-    }
-
-    private void SelectTime(string time) => selectedTime = time;
-
-    private void SetDisplayMonth(DateTime month) => displayMonth = month;
-
-    private string FormatSlotRange(string? time)
-    {
-        return BookingService.FormatSlotRange(time);
-    }
-
-    private async Task HandleReschedule()
-    {
-        if (!selectedDate.HasValue || string.IsNullOrEmpty(selectedTime))
-            return;
-
-        isSubmitting = true;
-        errorMessage = null;
-
-        try
-        {
-            var request = new RescheduleAppointmentRequest
-            {
-                BookingId = rescheduleForm.BookingId!,
-                Email = rescheduleForm.Email!,
-                NewDate = selectedDate.Value.ToString("yyyy-MM-dd"),
-                NewTime = BookingService.FormatTimeTo24Hour(selectedTime),
-                NewEndTime = BookingService.FormatEndTimeTo24Hour(selectedTime)
-            };
-
-            var result = await AppointmentService.RescheduleAsync(request);
-
-            if (result.Success)
-            {
-                isConfirmed = true;
-            }
-            else
-            {
-                errorMessage = result.Error ?? "We couldn't reschedule your appointment. Please try again.";
-            }
-        }
-        catch
-        {
-            errorMessage = "Something went wrong. Please try again later.";
-        }
-        finally
-        {
-            isSubmitting = false;
-        }
-    }
-
-    private void Reset()
-    {
-        rescheduleForm = new RescheduleFormModel();
-        selectedDate = null;
-        selectedTime = null;
-        displayMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        currentStep = Step.EnterDetails;
-        isConfirmed = false;
-        errorMessage = null;
-    }
-}

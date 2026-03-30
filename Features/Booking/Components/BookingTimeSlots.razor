@@ -1,22 +1,20 @@
 @* BookingTimeSlots.razor — Time slot selection panel. *@
 
-<div class="md:w-[220px] border-t md:border-t-0 md:border-l border-gray-200 p-4 flex flex-col gap-2 overflow-y-auto max-h-[480px]">
+<div class="w-full md:w-52 lg:w-60 border-t md:border-t-0 md:border-l border-gray-200 p-4 flex flex-col items-center gap-2 overflow-y-auto max-h-[480px]">
     @foreach (var slot in TimeSlots)
     {
         var isSelectedSlot = SelectedTime == slot;
-        <div class="flex gap-2">
-            <button @onclick="() => OnTimeSelected.InvokeAsync(slot)"
-                    class="@GetTimeSlotCss(isSelectedSlot) flex-1 whitespace-nowrap">
-                @slot
+        <button @onclick="() => OnTimeSelected.InvokeAsync(slot)"
+                class="@GetTimeSlotCss(isSelectedSlot) whitespace-nowrap w-full">
+            @slot
+        </button>
+        @if (isSelectedSlot && OnConfirmed.HasDelegate)
+        {
+            <button @onclick="OnConfirmed"
+                    class="px-4 py-2 rounded-lg bg-teal-cyan-aqua-600 text-white text-sm font-semibold hover:bg-teal-cyan-aqua-700 transition whitespace-nowrap w-full">
+                Select
             </button>
-            @if (isSelectedSlot)
-            {
-                <button @onclick="OnConfirmed"
-                        class="px-4 py-2 rounded-lg bg-teal-cyan-aqua-600 text-white text-sm font-semibold hover:bg-teal-cyan-aqua-700 transition whitespace-nowrap">
-                    Select
-                </button>
-            }
-        </div>
+        }
     }
 </div>
 
