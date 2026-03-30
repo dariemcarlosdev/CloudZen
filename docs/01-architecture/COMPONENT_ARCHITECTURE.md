@@ -10,188 +10,95 @@ CloudZen is a Blazor WebAssembly app using a component-based architecture. Paren
 
 > For the full folder layout, see [Vertical Slice Architecture](VERTICAL_SLICE_ARCHITECTURE.md).
 
-Code is organized by feature — each feature owns its components, models, and services:
-
-```
-Features/
-├── Booking/Components/        # Calendar, form, confirmation flow
-├── Contact/Components/        # ContactForm
-├── Chat/Components/           # CloudZenChatbot (FAB + panel)
-├── Landing/Components/        # Hero, CTA, Services, Mission, CaseStudies, etc.
-├── Profile/Components/        # ProfileHeader, ProfileApproach, ProfileHighlights
-├── Projects/Components/       # ProjectCard, ProjectFilter
-└── Tickets/Components/        # Tickets overview
-
-Common/Components/             # AnimatedCounterCircle, ScrollToTopButton
-Layout/                        # MainLayout, Header, Footer
-Pages/                         # Thin orchestrators: Index.razor, Contact.razor
-```
+| Directory | Purpose |
+|-----------|---------|
+| `Features/Booking/Components/` | Calendar, form, confirmation, cancel/reschedule flows |
+| `Features/Contact/Components/` | ContactForm |
+| `Features/Chat/Components/` | CloudZenChatbot (FAB + panel) |
+| `Features/Landing/Components/` | Hero, CTA, Services, Mission, CaseStudies, etc. |
+| `Features/Profile/Components/` | ProfileHeader, ProfileApproach, ProfileHighlights |
+| `Features/Projects/Components/` | ProjectCard, ProjectFilter |
+| `Features/Tickets/Components/` | Tickets overview |
+| `Common/Components/` | AnimatedCounterCircle, ScrollToTopButton |
+| `Layout/` | MainLayout, Header, Footer |
+| `Pages/` | Thin orchestrators: Index.razor, Contact.razor |
 
 ---
 
 ## Component Communication
 
-### Parent → Child: `[Parameter]`
+| Pattern | Direction | Usage |
+|---------|-----------|-------|
+| `[Parameter]` | Parent → Child | Pass data down (immutable props) |
+| `EventCallback<T>` | Child → Parent | Notify parent of events (child doesn't know parent implementation) |
+| Shared service | Sibling ↔ Sibling | Use injected service when siblings need to communicate |
 
-```razor
-<!-- Parent passes data down -->
-<ProfileHeader Title="Who I Am" AvatarUrl="/images/avatar.png" />
-```
-
-```csharp
-// Child declares parameters
-[Parameter] public string Title { get; set; } = string.Empty;
-[Parameter] public string AvatarUrl { get; set; } = string.Empty;
-```
-
-### Child → Parent: `EventCallback<T>`
-
-```razor
-<!-- Parent binds handler -->
-<ProjectFilter OnFilterChange="HandleFilterChange" />
-
-@code {
-    private void HandleFilterChange((string Status, string ProjectType) filters)
-    {
-        FilteredProjects = Projects
-            .Where(p => string.IsNullOrEmpty(filters.Status) || p.Status == filters.Status)
-            .Where(p => string.IsNullOrEmpty(filters.ProjectType) || p.ProjectType == filters.ProjectType)
-            .ToList();
-    }
-}
-```
-
-```csharp
-// Child invokes callback
-[Parameter] public EventCallback<(string Status, string ProjectType)> OnFilterChange { get; set; }
-
-private async Task OnFilterChanged()
-{
-    await OnFilterChange.InvokeAsync((SelectedStatus, SelectedProjectType));
-}
-```
-
-### Key Principles
-- **Type safety**: Compile-time checking via generic `EventCallback<T>`
-- **Loose coupling**: Child doesn't know parent's implementation
-- **No shared state service** needed for parent/child communication
-- **Sibling communication**: Use a shared injected service when needed
+**Key Principles:** Type safety via generics, loose coupling, parent owns state.
 
 ---
 
 ## Service Layer
-
-### Two Types of Services
 
 | Type | Examples | Pattern |
 |------|----------|---------|
 | **Backend-calling** (async) | `ApiEmailService`, `ChatbotService`, `AppointmentService` | `HttpClient` + `IOptions<T>` → returns result type with `Ok()`/`Fail()` |
 | **Data-only** (sync) | `ProjectService`, `PersonalService`, `ToolService` | In-memory data, synchronous methods, no HTTP |
 
-### Backend-Calling Service Pattern
-
-```csharp
-public class ApiEmailService : IEmailService
-{
-    private readonly HttpClient _httpClient;
-    private readonly EmailServiceOptions _options;
-    private readonly ILogger<ApiEmailService> _logger;
-
-    public ApiEmailService(HttpClient httpClient, IOptions<EmailServiceOptions> options,
-        ILogger<ApiEmailService> logger)
-    {
-        _httpClient = httpClient;
-        _options = options.Value;
-        _logger = logger;
-    }
-
-    public async Task<EmailResult> SendEmailAsync(string subject, string message, string fromName, string fromEmail)
-    {
-        try
-        {
-            var response = await _httpClient.PostAsJsonAsync(_options.SendEmailUrl, request);
-            return response.IsSuccessStatusCode
-                ? EmailResult.Ok("Email sent successfully.")
-                : EmailResult.Fail(errorMessage);
-        }
-        catch (HttpRequestException) { return EmailResult.Fail("Network error."); }
-        catch (TaskCanceledException) { return EmailResult.Fail("Request timed out."); }
-    }
-}
-```
-
-### DI Registration (Program.cs)
-
-```csharp
-// Backend-calling services (scoped — new per circuit)
-builder.Services.AddScoped<IEmailService, ApiEmailService>();
-builder.Services.AddScoped<IChatbotService, ChatbotService>();
-builder.Services.AddScoped<IAppointmentService, AppointmentService>();
-
-// Data-only services
-builder.Services.AddScoped<ProjectService>();
-builder.Services.AddSingleton<PersonalService>();
-```
+**DI Registration:** Backend-calling services use `AddScoped<>`, data-only services use `AddScoped<>` or `AddSingleton<>`.
 
 ---
 
 ## Data Models
 
-### Records for Immutable Data
-
-```csharp
-public record ServiceInfo(string Title, string Description, string Icon);
-public record ToolInfo(string Name, string Category, string IconClass);
-```
-
-### Classes with Validation for Forms
-
-```csharp
-public class ContactFormModel
-{
-    [Required, StringLength(100)] public string Name { get; set; }
-    [Required, EmailAddress] public string Email { get; set; }
-    [Required, StringLength(5000)] public string Message { get; set; }
-}
-```
-
-### Factory Methods on Message Types
-
-```csharp
-public class ChatMessage
-{
-    public string Role { get; set; }
-    public string Content { get; set; }
-
-    public static ChatMessage User(string content) => new() { Role = "user", Content = content };
-    public static ChatMessage Assistant(string content) => new() { Role = "assistant", Content = content };
-}
-```
+| Pattern | When to Use |
+|---------|-------------|
+| `record` | Immutable data (e.g., `ServiceInfo`, `ToolInfo`) |
+| `class` with `[Required]` | Form models with validation (e.g., `ContactFormModel`) |
+| Factory methods | Message types with role-based creation (e.g., `ChatMessage.User()`) |
 
 ---
 
 ## Naming Conventions
 
 | Category | Pattern | Examples |
-|----------|---------|---------|
-| Components | `<Feature><Role>.razor` | `ProfileHeader`, `ProjectCard`, `BookingCalendar` |
+|----------|---------|----------|
+| Components | `<Feature><Role>.razor` | `ProfileHeader`, `BookingCalendar` |
+| Code-behind | `<Component>.razor.cs` | `BookingCalendar.razor.cs` |
+| Scoped CSS | `<Component>.razor.css` | `BookingCalendar.razor.css` |
 | Services | `<Domain>Service.cs` | `ApiEmailService`, `ProjectService` |
-| Interfaces | `I<Domain>Service.cs` in feature's `Services/` | `IEmailService`, `IChatbotService` |
-| Options | `<Service>Options.cs` at feature root | `EmailServiceOptions`, `ChatbotOptions` |
+| Interfaces | `I<Domain>Service.cs` | `IEmailService`, `IChatbotService` |
+| Options | `<Service>Options.cs` | `EmailServiceOptions`, `ChatbotOptions` |
 | Parameters | PascalCase | `AvatarUrl`, `OnFilterChange` |
-| CSS | Tailwind utility classes (kebab-case) | `bg-cloudzen-teal`, `font-ibm-plex` |
 
 ---
 
 ## Styling
 
-- **Tailwind CSS v4** via CDN (no build pipeline)
-- Brand colors: `cloudzen-teal` (#61C2C8), `cloudzen-blue` (#1b6ec2), `cloudzen-steel` (#2c194d)
-- Custom fonts: `font-ibm-plex` (headings), `font-helvetica` (body)
-- **Bootstrap Icons** via CDN
-- Component-scoped CSS via `.razor.css` files where needed
+| Approach | Description |
+|----------|-------------|
+| **Tailwind CSS v4** | Primary styling via CDN (utility-first, no build pipeline) |
+| **Bootstrap Icons** | Iconography via CDN |
+| **Component-scoped CSS** | Use `.razor.css` for component-specific overrides (see below) |
 
-> For the full color system, button hierarchy, and component styling patterns, see [UI Color & Design System](../06-patterns/02_ui_color_design_system.md).
+> For full color system and patterns, see [UI Color & Design System](../06-patterns/02_ui_color_design_system.md).
+
+### Component-Scoped CSS (`.razor.css`)
+
+| File Pattern | Scope | When to Use |
+|--------------|-------|-------------|
+| `ComponentName.razor.css` | Isolated to that component only | Complex animations, pseudo-elements, Tailwind can't express |
+
+**Rules:**
+- Blazor auto-generates unique `b-{hash}` attributes for CSS isolation
+- Prefer Tailwind utilities in markup; use `.razor.css` only when necessary
+- Use `::deep` combinator to style child component elements
+
+**Current components with scoped CSS:**
+
+| Component | CSS File | Purpose |
+|-----------|----------|---------|
+| `CloudZenChatbot` | `CloudZenChatbot.razor.css` | Chat panel animations, scrollbar styling |
+| `Header` | `Header.razor.css` | Scroll transition effects |
 
 ---
 
@@ -201,20 +108,82 @@ public class ChatMessage
 2. **Parameters for data** — accept via `[Parameter]`, don't fetch internally
 3. **EventCallback for events** — child notifies parent, parent owns state
 4. **Keep pages thin** — pages are orchestrators, not implementors
-5. **Services for data** — inject services for data access, not inline `@code`
+5. **Services for data** — inject services for data access
 6. **Responsive first** — mobile-first Tailwind classes
+
+---
+
+## Razor Component Best Practices (SOLID Alignment)
+
+### Code-Behind Pattern (Required)
+
+**Always** separate C# logic from markup:
+
+| File | Contains |
+|------|----------|
+| `ComponentName.razor` | Markup only (HTML + Razor syntax) |
+| `ComponentName.razor.cs` | Logic (state, handlers, DI, lifecycle) |
+
+**Benefits:** Separation of concerns, testability, better IntelliSense, SOLID compliance.
+
+### Code-Behind Structure (Section Order)
+
+1. **Dependencies** — `[Inject]` properties (interfaces only)
+2. **Parameters** — `[Parameter]` properties with `[EditorRequired]` for mandatory
+3. **State** — Private fields grouped by purpose (Form Data, UI Feedback)
+4. **Lifecycle** — `OnInitialized`, `OnParametersSet`, etc.
+5. **Event Handlers** — Methods invoked from markup
+6. **Helper Methods** — Private utilities, CSS builders
+
+### SOLID Principles Summary
+
+| Principle | Blazor Application |
+|-----------|-------------------|
+| **S** — Single Responsibility | One component = one purpose. Split "god components" into parent/child composition. Max ~200 lines. |
+| **O** — Open/Closed | Extend via `[Parameter]`, `RenderFragment`, `EventCallback`. Use enums for behavior variants. |
+| **L** — Liskov Substitution | Consistent callback signatures across similar components (e.g., `OnSelected`, `OnDateSelected`). |
+| **I** — Interface Segregation | Focused parameters. Use `[EditorRequired]` for mandatory, nullable for optional. No "kitchen sink" option objects. |
+| **D** — Dependency Inversion | Inject `IService` interfaces, never concrete types. |
+
+### Documentation Standards
+
+All code-behind files must include:
+- `<summary>` describing component purpose
+- `<remarks>` noting which SOLID principles are applied
+- XML docs on injected services explaining their role
+
+### State Management Patterns
+
+| Pattern | Implementation |
+|---------|---------------|
+| **Wizard flows** | `enum Step { ... }` + `currentStep` variable |
+| **Form state** | Group fields: Form Data section, UI Feedback section |
+| **Reset** | Provide `Reset()` method for reusable components |
+
+---
+
+## Component File Checklist
+
+When creating a new component:
+
+- [ ] `ComponentName.razor` — markup only, no `@code` block
+- [ ] `ComponentName.razor.cs` — all C# logic with XML docs
+- [ ] `ComponentName.razor.css` — only if Tailwind insufficient (optional)
+- [ ] Sections ordered: Dependencies → Parameters → State → Lifecycle → Handlers → Helpers
+- [ ] `[EditorRequired]` on mandatory parameters
+- [ ] Inject interfaces only (Dependency Inversion)
+- [ ] Keep under 200 lines; split if larger
 
 ---
 
 ## Related Docs
 
-- [Vertical Slice Architecture](VERTICAL_SLICE_ARCHITECTURE.md) — Feature folder structure and namespace conventions
-- [Configuration](CONFIGURATION.md) — IOptions pattern, secrets strategy, local dev override
+- [Vertical Slice Architecture](VERTICAL_SLICE_ARCHITECTURE.md) — Feature folder structure
+- [Configuration](CONFIGURATION.md) — IOptions pattern, secrets strategy
 - [API Endpoints](API_ENDPOINTS.md) — Backend endpoints that services call
 - [Azure Functions](AZURE_FUNCTIONS.md) — API backend architecture
-- [UI Color & Design System](../06-patterns/02_ui_color_design_system.md) — Color palette, button hierarchy, styling patterns
-- [Azure Functions Proxy Pattern](../06-patterns/01_azure_functions_proxy_api.md) — How WASM ↔ API communication works
+- [UI Color & Design System](../06-patterns/02_ui_color_design_system.md) — Colors, buttons, styling patterns
 
 ---
 
-*Last Updated: March 2026*
+*Last Updated: January 2025*

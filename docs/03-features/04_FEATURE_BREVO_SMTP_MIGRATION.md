@@ -1,4 +1,41 @@
-﻿# Brevo Email Integration - SMTP Migration Guide
+> **Document**: Brevo SMTP Migration Guide
+> **Scope**: Migration from Brevo REST API to SMTP -- problem, solution, implementation, deployment
+> **Audience**: AI assistants, developers
+> **Last Updated**: March 2026
+
+> For the contact form feature overview, see [`01_FEATURE_CONTACT_FORM.md`](./01_FEATURE_CONTACT_FORM.md).
+
+---
+
+## Table of Contents
+
+1. [Quick Reference](#quick-reference)
+2. [Overview](#overview)
+3. [Problem Statement](#problem-statement)
+4. [Solution: Switch to SMTP](#solution-switch-to-smtp)
+5. [Implementation Changes](#implementation-changes)
+6. [SSL Certificate Issue (Development Environment)](#ssl-certificate-issue-development-environment)
+7. [Configuration Architecture](#configuration-architecture)
+8. [File Changes Summary](#file-changes-summary)
+9. [Testing](#testing)
+10. [Production Deployment (Azure)](#production-deployment-azure)
+11. [Troubleshooting](#troubleshooting)
+12. [References](#references)
+13. [Version History](#version-history)
+
+---
+
+## Quick Reference
+
+| Item | Value |
+|------|-------|
+| **SMTP Host** | `smtp-relay.brevo.com` |
+| **Port** | `587` (STARTTLS) |
+| **Library** | MailKit + MimeKit |
+| **Required Secrets** | `BREVO_SMTP_LOGIN`, `BREVO_SMTP_KEY` |
+| **Related Feature** | Contact Form ([`01_FEATURE_CONTACT_FORM.md`](./01_FEATURE_CONTACT_FORM.md)) |
+
+---
 
 ## Overview
 
@@ -31,7 +68,7 @@ Error: sib_api_v3_sdk.Client.ApiException: Error calling SendTransacEmail:
 
 **Cause**: Azure Functions on the **Consumption plan** use a pool of shared outbound IP addresses (38+ IPs in our case) that can change dynamically. Unlike dedicated App Service plans, there's no single static outbound IP.
 
-### Why IP Whitelisting Doesn't Work for Consumption Plan
+### Why IP Whitelisting Does Not Work for Consumption Plan
 
 Azure Functions Consumption plan characteristics:
 - **Dynamic IP allocation**: Azure assigns outbound IPs from a shared pool
@@ -57,10 +94,10 @@ Brevo's SMTP relay (`smtp-relay.brevo.com`) **does not enforce IP restrictions**
 
 | Feature | REST API | SMTP |
 |---------|----------|------|
-| IP Whitelisting Required | ✅ Yes | ❌ No |
-| Works with Consumption Plan | ❌ Unreliable | ✅ Yes |
-| Works with Dynamic IPs | ❌ No | ✅ Yes |
-| TLS Encryption | ✅ Yes | ✅ Yes (STARTTLS) |
+| IP Whitelisting Required | Yes | No |
+| Works with Consumption Plan | Unreliable | Yes |
+| Works with Dynamic IPs | No | Yes |
+| TLS Encryption | Yes | Yes (STARTTLS) |
 | Authentication | API Key | SMTP Credentials |
 
 ---
@@ -153,12 +190,12 @@ private async Task<string> SendEmailViaSmtpAsync(EmailRequest emailRequest, stri
 }
 ```
 
-> ⚠️ **Security Note**: Never commit `local.settings.json` with real credentials to source control. This file should be in `.gitignore`.
+> **Security Note**: Never commit `local.settings.json` with real credentials to source control. This file should be in `.gitignore`.
 
 #### Getting SMTP Credentials from Brevo
 
 1. Log into https://app.brevo.com
-2. Navigate to **SMTP & API** → **SMTP**
+2. Navigate to **SMTP & API** then **SMTP**
 3. Copy the following:
    - **SMTP Server**: `smtp-relay.brevo.com` (hardcoded in code)
    - **Port**: `587` (hardcoded in code)
@@ -178,8 +215,8 @@ MailKit.Security.SslHandshakeException: An error occurred while attempting
 to establish an SSL or TLS connection.
 
 The server's SSL certificate could not be validated for the following reasons:
-• The revocation function was unable to check revocation for the certificate.
-• The revocation function was unable to check revocation because the 
+- The revocation function was unable to check revocation for the certificate.
+- The revocation function was unable to check revocation because the 
   revocation server was offline.
 ```
 
@@ -231,11 +268,11 @@ This approach is acceptable because:
 
 | Security Feature | Status |
 |-----------------|--------|
-| TLS Encryption | ✅ Enabled (STARTTLS) |
-| Server Authentication | ✅ Certificate validated |
-| Certificate Chain | ✅ Verified |
-| Revocation Check | ⚠️ Skipped (unreachable servers) |
-| SMTP Authentication | ✅ Username/password required |
+| TLS Encryption | Enabled (STARTTLS) |
+| Server Authentication | Certificate validated |
+| Certificate Chain | Verified |
+| Revocation Check | Skipped (unreachable servers) |
+| SMTP Authentication | Username/password required |
 
 ---
 
@@ -246,38 +283,38 @@ This approach is acceptable because:
 This project has a **two-tier architecture**: a Blazor WebAssembly frontend and an Azure Functions backend. Each tier has different configuration requirements.
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    BLAZOR APP (Frontend)                        │
-│   Configuration: wwwroot/appsettings.*.json                     │
-│                                                                 │
-│   Files:                                                        │
-│   ├── wwwroot/appsettings.json           (base settings)       │
-│   ├── wwwroot/appsettings.Development.json (local dev)         │
-│   └── wwwroot/appsettings.Production.json  (production)        │
-│                                                                 │
-│   ✅ NO Azure Portal config needed                              │
-│   These files are static assets bundled with the app            │
-│   and automatically loaded based on environment.                │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              │ HTTP POST to ApiBaseUrl
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                 AZURE FUNCTION (Backend)                        │
-│   Configuration: Azure Portal + local.settings.json             │
-│                                                                 │
-│   Local Development:                                            │
-│   └── Api/local.settings.json                                   │
-│                                                                 │
-│   Production (Azure Portal):                                    │
-│   └── Function App → Configuration → Application settings       │
-│                                                                 │
-│   ✅ REQUIRES Azure Portal configuration for:                   │
-│      - BREVO_SMTP_LOGIN                                         │
-│      - BREVO_SMTP_KEY                                           │
-│      - EmailSettings:FromEmail                                  │
-│      - EmailSettings:CcEmail                                    │
-└─────────────────────────────────────────────────────────────────┘
++------------------------------------------------------------------+
+|                    BLAZOR APP (Frontend)                          |
+|   Configuration: wwwroot/appsettings.*.json                      |
+|                                                                  |
+|   Files:                                                         |
+|   - wwwroot/appsettings.json            (base settings)          |
+|   - wwwroot/appsettings.Development.json (local dev)             |
+|   - wwwroot/appsettings.Production.json  (production)            |
+|                                                                  |
+|   NO Azure Portal config needed.                                 |
+|   These files are static assets bundled with the app             |
+|   and automatically loaded based on environment.                 |
++------------------------------------------------------------------+
+                              |
+                              | HTTP POST to ApiBaseUrl
+                              v
++------------------------------------------------------------------+
+|                 AZURE FUNCTION (Backend)                          |
+|   Configuration: Azure Portal + local.settings.json              |
+|                                                                  |
+|   Local Development:                                             |
+|   - Api/local.settings.json                                      |
+|                                                                  |
+|   Production (Azure Portal):                                     |
+|   - Function App > Configuration > Application settings          |
+|                                                                  |
+|   REQUIRES Azure Portal configuration for:                       |
+|      - BREVO_SMTP_LOGIN                                          |
+|      - BREVO_SMTP_KEY                                            |
+|      - EmailSettings:FromEmail                                   |
+|      - EmailSettings:CcEmail                                     |
++------------------------------------------------------------------+
 ```
 
 ### Blazor App Configuration (No Azure Config Needed)
@@ -306,12 +343,12 @@ The Azure Function backend requires secrets that **must** be configured in Azure
 
 | Setting | Where to Configure | Why |
 |---------|-------------------|-----|
-| `BREVO_SMTP_LOGIN` | Azure Portal → Configuration | Secret credential |
-| `BREVO_SMTP_KEY` | Azure Portal → Configuration | Secret credential |
-| `EmailSettings:FromEmail` | Azure Portal → Configuration | Runtime config |
-| `EmailSettings:CcEmail` | Azure Portal → Configuration | Runtime config |
+| `BREVO_SMTP_LOGIN` | Azure Portal > Configuration | Secret credential |
+| `BREVO_SMTP_KEY` | Azure Portal > Configuration | Secret credential |
+| `EmailSettings:FromEmail` | Azure Portal > Configuration | Runtime config |
+| `EmailSettings:CcEmail` | Azure Portal > Configuration | Runtime config |
 
-**Why Azure Portal config?** 
+**Why Azure Portal config?**
 - Secrets should never be in source code
 - Azure Function runs server-side with access to secure configuration
 - `local.settings.json` is only for local development (gitignored)
@@ -389,13 +426,13 @@ func azure functionapp publish <your-function-app-name>
 
 ### Step 2: Configure Azure Function Settings
 
-Add these Application Settings in **Azure Portal → Function App → Configuration**:
+Add these Application Settings in **Azure Portal > Function App > Configuration**:
 
 | Setting | Value | Required |
 |---------|-------|----------|
-| `BREVO_SMTP_LOGIN` | `<your-smtp-login>@smtp-brevo.com` | ✅ Yes |
-| `BREVO_SMTP_KEY` | `xsmtpsib-<your-key>` | ✅ Yes |
-| `EmailSettings:FromEmail` | `your-email@example.com` | ✅ Yes |
+| `BREVO_SMTP_LOGIN` | `<your-smtp-login>@smtp-brevo.com` | Yes |
+| `BREVO_SMTP_KEY` | `xsmtpsib-<your-key>` | Yes |
+| `EmailSettings:FromEmail` | `your-email@example.com` | Yes |
 | `EmailSettings:CcEmail` | `cc-email@example.com` | Optional |
 
 Then click **Save** and **Restart** the function app.
@@ -419,7 +456,7 @@ GitHub Actions will automatically deploy to Azure Static Web Apps.
 3. Submit a test message
 4. Check if the email is received
 
-> 💡 **Tip**: Store sensitive credentials in Azure Key Vault and reference them using Key Vault references for enhanced security.
+> **Tip**: Store sensitive credentials in Azure Key Vault and reference them using Key Vault references for enhanced security.
 
 ---
 

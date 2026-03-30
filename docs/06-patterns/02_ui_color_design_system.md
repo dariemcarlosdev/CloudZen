@@ -16,8 +16,8 @@ Reference for building consistent components. All styling uses **Tailwind CSS v4
 | `cloudzen-blue` | `#1b6ec2` | Secondary blue, legacy buttons |
 | `cloudzen-blue-dark` | `#1861ac` | Borders, shadows |
 | `cloudzen-blue-focus` | `#258cfb` | Focus rings |
-| `cloudzen-steel` | `#2c194d` | Deep brand purple (reserved) |
-| `cloudzen-steel-hover` | `#4a3270` | Steel hover state (reserved) |
+| `cloudzen-steel` | `#2c194d` | ⚠️ Legacy purple — **avoid for new components** (use `teal-cyan-aqua-900` instead) |
+| `cloudzen-steel-hover` | `#4a3270` | ⚠️ Legacy — reserved for backward compatibility |
 
 ### Teal-Cyan-Aqua Scale (Primary UI Scale)
 
@@ -68,6 +68,33 @@ This is the **main working palette** for component styling.
 | Gradient section | `bg-gradient-to-br from-gray-50 via-white to-teal-50` |
 | Dark section | `bg-gray-700` (mid), `bg-gray-900` (footer) |
 | Decorative blob | `bg-teal-200 rounded-full opacity-20 blur-2xl` |
+
+### Sidebars (Dark Surfaces)
+
+For dark sidebars in multi-step flows (booking, wizards, dashboards), use the **dark teal gradient** instead of `cloudzen-steel` (purple).
+
+| Option | Classes | Hex Range | Recommendation |
+|--------|---------|-----------|----------------|
+| **Dark Teal** ✅ | `bg-gradient-to-br from-teal-cyan-aqua-900 to-teal-cyan-aqua-800` | `#0F1E1F` → `#1F3638` | **Recommended** — maintains brand cohesion |
+| Slate Blue-Gray | `bg-slate-800` | `#1e293b` | Neutral alternative |
+| Deep Ocean Teal | `bg-teal-900` | `#134e4a` | Tailwind default teal |
+| Purple (legacy) | `bg-cloudzen-steel` | `#2c194d` | **Avoid** — clashes with teal/orange palette |
+
+#### Why Dark Teal?
+
+- **Brand cohesion:** The sidebar feels part of the same visual family as teal accents
+- **Color harmony:** Purple sits opposite orange on the color wheel, creating tension rather than unity
+- **Accent visibility:** `teal-cyan-aqua-200/300` accent text has natural kinship with the dark teal background
+
+#### Sidebar Text Hierarchy (on dark teal)
+
+| Role | Class | Example |
+|------|-------|---------|
+| Heading | `text-white` | Section titles |
+| Secondary info | `text-teal-cyan-aqua-100` | Metadata, IDs |
+| Badge/label | `text-teal-cyan-aqua-200` | Status indicators |
+| Icons | `text-teal-cyan-aqua-300` | Decorative icons |
+| Badge background | `bg-white/10` | Semi-transparent pills |
 
 ---
 
