@@ -1,0 +1,127 @@
+@namespace CloudZen.Common.Components
+
+<!--
+    AutomationProgressCard Component
+    Displays an animated floating card with:
+    - Progress bar with animated fill
+    - Stat cards with counter animations
+    - Terminal log with staggered text entrance
+
+    See AutomationProgressCard.razor.cs for parameters and logic.
+    See AutomationProgressCard.razor.css for scoped styles.
+
+    USAGE EXAMPLES:
+    ===============
+
+    1) Basic — renders with all default values (title, stats, progress, built-in terminal messages):
+
+        <AutomationProgressCard />
+
+
+    2) Basic with tweaks — override a few visual props while keeping the rest as defaults:
+
+        <AutomationProgressCard 
+            Title="deploy-pipeline.ai"
+            ProgressLabel="Deploy Progress"
+            Loop="false" />
+
+
+    3) Custom configuration — fully customised stats, progress target, loop timing,
+       and a bespoke set of terminal messages:
+
+        <AutomationProgressCard 
+            Title="my-project.ai"
+            ProgressLabel="Migration Progress"
+            TargetProgress="75"
+            TasksCount="1200"
+            HoursCount="340"
+            WorkflowsCount="42"
+            Loop="true"
+            LoopDelayMs="3000"
+            TerminalMessageDelayMs="600"
+            TerminalMessages="@customMessages" />
+
+        @code {
+            private List<AutomationProgressCard.TerminalMessage> customMessages =
+            [
+                new("Initializing workflow engine", false),
+                new("Connected to cloud services", true),
+                new("Processing batch operations", false),
+                new("Optimizing data pipeline", false),
+                new("All tasks completed successfully", true)
+            ];
+        }
+-->
+
+<div class="automation-card-wrapper">
+    <div class="@CardCssClass">
+        <!-- Window Chrome (macOS-style title bar) -->
+        <div class="window-chrome">
+            <div class="window-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+            </div>
+            <span class="window-title">@Title</span>
+        </div>
+
+        <!-- Card Content -->
+        <div class="card-content">
+            <!-- Progress Section -->
+            <div class="progress-section">
+                <div class="progress-header">
+                    <span class="progress-label">@ProgressLabel</span>
+                    <span class="progress-value">@_currentProgress%</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width: @(_currentProgress)%"></div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="@GetStatCardCssClass(1)">
+                    <div class="stat-icon stat-icon-tasks">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                    </div>
+                    <div class="stat-value">@_currentTasks</div>
+                    <div class="stat-label">Tasks</div>
+                </div>
+                <div class="@GetStatCardCssClass(2)">
+                    <div class="stat-icon stat-icon-hours">
+                        <i class="bi bi-bar-chart-fill"></i>
+                    </div>
+                    <div class="stat-value">@_currentHours</div>
+                    <div class="stat-label">Hours</div>
+                </div>
+                <div class="@GetStatCardCssClass(3)">
+                    <div class="stat-icon stat-icon-workflows">
+                        <i class="bi bi-code-slash"></i>
+                    </div>
+                    <div class="stat-value">@_currentWorkflows</div>
+                    <div class="stat-label">Workflows</div>
+                </div>
+            </div>
+
+            <!-- Terminal Section -->
+            <div class="terminal-section">
+                <div class="terminal-content">
+                    @for (var i = 0; i < _visibleMessages.Count; i++)
+                    {
+                        var message = _visibleMessages[i];
+                        var delay = i * 0.15;
+                        <div class="terminal-line @(message.IsHighlight ? "highlight" : "") message-enter"
+                             style="animation-delay: @(delay)s">
+                            <span class="terminal-prefix">@(message.IsHighlight ? "+" : ">")</span>
+                            <span class="terminal-text">@message.Text</span>
+                        </div>
+                    }
+                    @if (_showCursor)
+                    {
+                        <div class="terminal-cursor"></div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
