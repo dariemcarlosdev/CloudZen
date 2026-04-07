@@ -1,0 +1,294 @@
+/* ══════════════════════════════════════════════════════════════
+   TealGradient Component Styles
+   Animated workflow nodes with bezier connectors
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Right Panel Background ── */
+.right-panel-bg {
+    background: 
+        /* Main teal gradient from left edge fading to white */
+        linear-gradient(
+            100deg,
+            rgba(200, 235, 235, 0.5) 0%,
+            rgba(210, 240, 238, 0.35) 15%,
+            rgba(225, 245, 244, 0.2) 30%,
+            rgba(240, 250, 250, 0.1) 50%,
+            rgba(255, 255, 255, 1) 80%
+        ),
+        /* Subtle vertical gradient for depth */
+        linear-gradient(
+            180deg,
+            rgba(245, 253, 252, 0.8) 0%,
+            rgba(255, 255, 255, 0.95) 100%
+        );
+}
+
+/* ── Bezier Connector Paths ── */
+.connector-path {
+    fill: none;
+    stroke: #c8dfe0;
+    stroke-width: 1.5;
+    stroke-dasharray: 6, 4;
+    opacity: 0.7;
+}
+
+.connector-subtle {
+    stroke: #dbeced;
+    stroke-width: 1;
+    stroke-dasharray: 4, 4;
+    opacity: 0.5;
+}
+
+.connector-animated {
+    stroke: #61C2C8;
+    stroke-width: 2;
+    stroke-dasharray: 10, 300;
+    stroke-dashoffset: 0;
+    animation: flowAnimation 4s ease-in-out infinite;
+    opacity: 0;
+}
+
+.connector-animated-orange {
+    fill: none;
+    stroke: #f97316;
+    stroke-width: 2;
+    stroke-dasharray: 10, 300;
+    stroke-dashoffset: 0;
+    animation: flowAnimation 4s ease-in-out infinite;
+    opacity: 0;
+}
+
+/* Animation delays for staggered flow effect */
+.connector-animated.delay-1,
+.connector-animated-orange.delay-1 { animation-delay: 0.4s; }
+.connector-animated.delay-2,
+.connector-animated-orange.delay-2 { animation-delay: 0.8s; }
+.connector-animated.delay-3,
+.connector-animated-orange.delay-3 { animation-delay: 1.2s; }
+.connector-animated.delay-4,
+.connector-animated-orange.delay-4 { animation-delay: 1.6s; }
+.connector-animated.delay-5,
+.connector-animated-orange.delay-5 { animation-delay: 2.0s; }
+.connector-animated.delay-6,
+.connector-animated-orange.delay-6 { animation-delay: 2.4s; }
+.connector-animated.delay-7,
+.connector-animated-orange.delay-7 { animation-delay: 2.8s; }
+.connector-animated.delay-8,
+.connector-animated-orange.delay-8 { animation-delay: 3.2s; }
+
+@keyframes flowAnimation {
+    0% {
+        stroke-dashoffset: 300;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        stroke-dashoffset: -300;
+        opacity: 0;
+    }
+}
+
+/* ── Workflow Node Cards ── */
+.workflow-node {
+    z-index: 10;
+}
+
+.node-card {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.85rem;
+    background: white;
+    border-radius: 0.625rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid #f0f0f0;
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.node-card:hover {
+    box-shadow: 0 6px 24px rgba(97, 194, 200, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+}
+
+.node-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.node-content {
+    min-width: 0;
+}
+
+.node-title {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #1f2937;
+    white-space: nowrap;
+    line-height: 1.3;
+}
+
+.node-subtitle {
+    font-size: 0.7rem;
+    color: #9ca3af;
+    white-space: nowrap;
+    line-height: 1.3;
+}
+
+/* Status dots on cards */
+.node-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    animation: pulse-dot 2.5s ease-in-out infinite;
+}
+
+.node-dot.right-dot {
+    top: 50%;
+    right: -6px;
+    transform: translateY(-50%);
+}
+
+.node-dot-teal {
+    background: #61C2C8;
+}
+
+.node-dot-orange {
+    background: #f97316;
+}
+
+.node-dot-green {
+    background: #22c55e;
+}
+
+@keyframes pulse-dot {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 0.85;
+    }
+}
+
+@keyframes pulse-dot-right {
+    0%, 100% {
+        transform: translateY(-50%) scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-50%) scale(1.15);
+        opacity: 0.85;
+    }
+}
+
+.node-dot.right-dot {
+    animation: pulse-dot-right 2.5s ease-in-out infinite;
+}
+
+/* Node labels with color variants */
+.node-label {
+    display: inline-block;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    border-radius: 9999px;
+    text-transform: uppercase;
+}
+
+.node-label-teal {
+    color: #61C2C8;
+    background: rgba(97, 194, 200, 0.1);
+    border: 1px solid rgba(97, 194, 200, 0.25);
+}
+
+.node-label-orange {
+    color: #f97316;
+    background: rgba(249, 115, 22, 0.1);
+    border: 1px solid rgba(249, 115, 22, 0.25);
+}
+
+.node-label-green {
+    color: #22c55e;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.node-label-gray {
+    color: #6b7280;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+/* ── Floating Animation for Nodes ── */
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+    will-change: transform;
+}
+
+.animate-float.delay-1 { animation-delay: 0.5s; }
+.animate-float.delay-2 { animation-delay: 1s; }
+.animate-float.delay-3 { animation-delay: 1.5s; }
+.animate-float.delay-4 { animation-delay: 2s; }
+.animate-float.delay-5 { animation-delay: 2.5s; }
+.animate-float.delay-6 { animation-delay: 3s; }
+.animate-float.delay-7 { animation-delay: 3.5s; }
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+/* ── Responsive Adjustments ── */
+@media (max-width: 1280px) {
+    .node-card {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .node-icon {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.9rem;
+    }
+    
+    .node-title {
+        font-size: 0.8rem;
+    }
+    
+    .node-subtitle {
+        font-size: 0.7rem;
+    }
+}
+
+/* ── Accessibility: reduce motion ── */
+@media (prefers-reduced-motion: reduce) {
+    .animate-float,
+    .connector-animated,
+    .connector-animated-orange,
+    .node-dot {
+        animation: none;
+    }
+    .animate-float {
+        will-change: auto;
+    }
+}

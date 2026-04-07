@@ -1,0 +1,81 @@
+@* ══════════════════════════════════════════════════════════════
+   WarmTealWash Component — Hero section with white left side,
+   animated workflow nodes on warm cream/beige right side with dashed connectors.
+   ══════════════════════════════════════════════════════════════ *@
+
+<section class="warm-teal-wash relative min-h-[85vh] flex overflow-hidden">
+    @* ── Left Side: White/Light Background ── *@
+    <div class="flex-1 flex flex-col justify-center px-8 lg:pl-36 lg:pr-16 xl:pl-44 xl:pr-20 py-10 relative">
+        <div class="relative z-10 max-w-lg">
+            @* Badge *@
+            <span class="inline-flex items-center gap-2 px-4 py-2 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-600 text-sm font-medium rounded-full mb-8 border border-teal-cyan-aqua-200">
+                <span class="w-2 h-2 bg-orange-400 rounded-full"></span>
+                Build &amp; Grow Model
+            </span>
+
+            @* Headline *@
+            <h1 class="text-4xl lg:text-5xl xl:text-6xl leading-tight mb-6">
+                <span class="font-bold text-teal-cyan-aqua-700">Every piece</span>
+                <span class="block text-teal-cyan-aqua-500 font-light italic">fits together.</span>
+                <span class="block font-bold text-gray-800">Finally, yours.</span>
+            </h1>
+
+            @* Subtext *@
+            <p class="text-lg lg:text-xl text-gray-500 leading-relaxed mb-10">
+                Custom systems built around your exact workflow — no
+                generic templates, no one-size-fits-all boxes. Technology
+                shaped for your business.
+            </p>
+
+            @* CTA Buttons *@
+            <div class="flex flex-col sm:flex-row gap-4 mb-12">
+                <a href="/contact" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-orange-400 text-white font-semibold rounded-full shadow-lg hover:bg-orange-500 transition-all duration-300 hover:scale-105">
+                    <i class="bi bi-calendar-check"></i>
+                    Book Free Consultation
+                </a>
+                <a href="/services" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-gray-700 font-light rounded-full border border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all duration-300">
+                    Explore Services →
+                </a>
+            </div>
+
+            @* Stats Row *@
+            <div class="flex items-center gap-8 pt-8 border-t border-gray-200">
+                <div>
+                    <div class="text-3xl lg:text-4xl font-bold">
+                        <span class="text-teal-cyan-aqua-500">12h</span><span class="text-orange-400 text-lg font-normal">/wk</span>
+                    </div>
+                    <div class="text-xs uppercase tracking-wider text-orange-400 font-medium">Time Saved</div>
+                </div>
+                <div class="w-px h-12 bg-gray-200"></div>
+                <div>
+                    <div class="text-3xl lg:text-4xl font-bold text-gray-800">
+                        <span class="text-gray-400">1</span> Fee
+                    </div>
+                    <div class="text-xs uppercase tracking-wider text-gray-400 font-medium">Flat Build</div>
+                </div>
+                <div class="w-px h-12 bg-gray-200"></div>
+                <div>
+                    <div class="text-3xl lg:text-4xl font-bold text-gray-400">0</div>
+                    <div class="text-xs uppercase tracking-wider text-gray-400 font-medium">Jargon</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ── Right Side: Empty panel, lets section gradient show through ── *@
+    <div class="warm-panel flex-1 relative hidden lg:flex items-center justify-center overflow-hidden">
+    </div>
+
+    @* ── Mobile: Simplified View ── *@
+    <div class="lg:hidden absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-100 to-transparent p-6">
+        <div class="flex justify-center gap-6 text-gray-600 text-sm">
+            <span><i class="bi bi-check-circle text-teal-cyan-aqua-500 mr-1"></i> Custom Workflows</span>
+            <span><i class="bi bi-check-circle text-teal-cyan-aqua-500 mr-1"></i> AI-Powered</span>
+            <span><i class="bi bi-check-circle text-teal-cyan-aqua-500 mr-1"></i> Real-time Sync</span>
+        </div>
+    </div>
+</section>
+
+@code {
+    // Component is primarily visual/CSS-driven. No complex logic needed.
+}

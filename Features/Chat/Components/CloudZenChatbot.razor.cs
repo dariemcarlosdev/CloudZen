@@ -57,7 +57,13 @@ public partial class CloudZenChatbot
             if (match.Groups["url"].Success)
             {
                 var url = match.Value;
-                return $"""<a href="{url}" target="_blank" rel="noopener noreferrer" class="contact-highlight">🔗 {url}</a>""";
+                if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)
+                    || (uri.Scheme != "http" && uri.Scheme != "https"))
+                {
+                    return match.Value;
+                }
+                var safeHref = new Uri(url).AbsoluteUri;
+                return $"""<a href="{safeHref}" target="_blank" rel="noopener noreferrer" class="contact-highlight">🔗 {url}</a>""";
             }
             return match.Value;
         });

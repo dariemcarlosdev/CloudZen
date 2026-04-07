@@ -1,143 +1,49 @@
-﻿@* Summary:
-   In this Blazor WebAssembly WPA, WhoIAm.razor is treated as a standalone page. When the user navigates to it via the header, a styled arrow appears next to "CloudZen" in the header. Clicking the arrow navigates the user back to the Hero section (main page).
-*@
-@* Requirement:
-   Show a styled "Back to Home" button next to CloudZen in the header when the user is on the Who I Am page (/whoiam).
-   The button should navigate back to the home/hero section when clicked.
-
-   Problem:
-   The header does not automatically update when navigating between pages in Blazor WebAssembly.
-   The Back button only appears if the header is re-rendered manually (e.g., by clicking CloudZen), not when navigating to /whoiam.
-
-   Solution:
-   Subscribe to NavigationManager.LocationChanged to detect route changes and update the header state.
-   Unsubscribe in Dispose to avoid memory leaks.
-
-   Fix Plan:
-   1. Add a boolean isWhoIAmPage to track if the current route is /whoiam.
-   2. Subscribe to NavigationManager.LocationChanged in OnInitialized.
-   3. Update isWhoIAmPage and call StateHasChanged in the event handler.
-   4. Unsubscribe in Dispose.
-*@
-@inject NavigationManager NavigationManager
-@inject IJSRuntime JS
-
-<header class="fixed top-0 left-0 z-50 w-full h-24 bg-white">
+<header class="fixed top-0 left-0 z-50 w-full h-16 bg-white/95 backdrop-blur-sm">
     <div class="max-w-7xl mx-auto h-full flex justify-between items-center px-4 sm:px-6">
-    <div class="text-2xl font-semibold flex items-center gap-2 h-full">
-        <a href="" class="flex items-center gap-2 font-ibm-plex font-semibold text-gray-800 hover:text-teal-cyan-aqua-600 transition-colors"
-           @* @onclick='() => ScrollToHero()' *@>
-            <img src="/images/HeaderLogo.png" alt="CloudZen Logo" class="h-16 object-contain" width="160" height="64" />
-</a>
-    </div>
-@*     <!-- Hamburger for mobile -->
-    <button class="md:hidden text-white focus:outline-none" @onclick="ToggleMobileMenu" aria-label="Open menu">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-    </button> *@
-    <!-- Hamburger for mobile -->
-    <button class="md:hidden text-gray-800 focus:outline-none transition-transform duration-150 @(isHamburgerActive ? "hamburger-active" : "")"
-            @onclick="OnHamburgerClick"
-            aria-label="@(isMobileMenuOpen ? "Close menu" : "Open menu")"
-            aria-expanded="@isMobileMenuOpen.ToString().ToLower()">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-        </svg>
-    </button>
-    <!-- Desktop nav -->
-    <nav class="hidden md:flex items-center gap-6 text-base">
-        <NavLink href="/services" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">Services</NavLink>
-        <a href="/#cases" @onclick='() => SetActive("#cases")' class="@GetNavClass("#cases")">Our Work</a>
-        <NavLink href="/mission" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">About</NavLink>
-        <NavLink href="/whoiam" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold">Who I Am</NavLink>
-        <NavLink href="/contact" class="px-4 py-2 bg-orange-400 text-white rounded-full hover:bg-orange-500 transition" ActiveClass="ring-2">Let's Talk</NavLink>
-    </nav>
-    <!-- Mobile nav -->
-    @if (isMobileMenuOpen)
-    {
-        <nav class="absolute top-full left-0 w-full bg-white flex flex-col items-center gap-4 py-6 md:hidden shadow-lg z-50">
-            <NavLink href="/services" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>Services</NavLink>
-            <a href="/#cases" @onclick='() => OnMobileNavClick("#cases")' class="@GetNavClass("#cases")">Our Work</a>
-            <NavLink href="/mission" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>About</NavLink>
-            <NavLink href="/whoiam" class="text-gray-700 hover:text-teal-cyan-aqua-600 text-lg font-semibold" ActiveClass="text-teal-cyan-aqua-600 text-lg font-semibold" @onclick='CloseMobileMenu'>Who I Am</NavLink>
-            <NavLink href="/contact" class="px-4 py-2 bg-orange-400 text-white rounded-full hover:bg-orange-500 transition" ActiveClass="ring-2" @onclick='CloseMobileMenu'>Let's Talk</NavLink>
+
+        @* ── Logo ── *@
+        <a href="" class="flex items-center font-ibm-plex text-gray-800 hover:text-teal-cyan-aqua-600 transition-colors">
+            <img src="/images/HeaderLogo.png" alt="CloudZen Logo"
+                 class="h-10 object-contain" width="120" height="40" />
+        </a>
+
+        @* ── Hamburger (mobile) ── *@
+        <button class="md:hidden p-2 rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-cyan-aqua-400 @(_isMobileMenuOpen ? "hamburger-open" : "")"
+                @onclick="ToggleMobileMenu"
+                aria-label="@(_isMobileMenuOpen ? "Close menu" : "Open menu")"
+                aria-expanded="@_isMobileMenuOpen.ToString().ToLowerInvariant()">
+            <span class="flex flex-col justify-center items-center gap-[5px]">
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+                <span class="hamburger-bar"></span>
+            </span>
+        </button>
+
+        @* ── Desktop nav ── *@
+        <nav class="hidden md:flex items-center gap-7 text-sm" aria-label="Main navigation">
+            <NavLink href="/services" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active">Services</NavLink>
+            <a href="/#cases" @onclick='() => SetActive("#cases")' class="nav-link @GetNavClass("#cases") font-medium tracking-wide transition-colors">Our Work</a>
+            <NavLink href="/mission" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active">About</NavLink>
+            <NavLink href="/whoiam" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active">Who I Am</NavLink>
+            <NavLink href="/contact" class="cta-button px-5 py-2 bg-orange-400 text-white text-sm font-semibold rounded-full hover:bg-orange-500" ActiveClass="ring-2 ring-orange-300 ring-offset-1">Let's Talk</NavLink>
         </nav>
-    }
+
+        @* ── Mobile nav ── *@
+        @if (_isMobileMenuOpen)
+        {
+            <nav class="mobile-nav absolute top-full left-0 w-full bg-white/98 backdrop-blur-md flex flex-col items-center gap-5 py-8 md:hidden shadow-lg border-t border-gray-100 z-50"
+                 aria-label="Mobile navigation">
+                <NavLink href="/services" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active" @onclick="CloseMobileMenu">Services</NavLink>
+                <a href="/#cases" @onclick='() => OnMobileNavClick("#cases")' class="nav-link @GetNavClass("#cases") font-medium tracking-wide transition-colors">Our Work</a>
+                <NavLink href="/mission" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active" @onclick="CloseMobileMenu">About</NavLink>
+                <NavLink href="/whoiam" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active" @onclick="CloseMobileMenu">Who I Am</NavLink>
+                <NavLink href="/contact" class="cta-button px-5 py-2 bg-orange-400 text-white text-sm font-semibold rounded-full hover:bg-orange-500" ActiveClass="ring-2 ring-orange-300 ring-offset-1" @onclick="CloseMobileMenu">Let's Talk</NavLink>
+            </nav>
+        }
     </div>
 </header>
 
-@* Overlay: covers the viewport behind the mobile menu so clicking outside closes it *@
-@if (isMobileMenuOpen)
+@if (_isMobileMenuOpen)
 {
     <div class="mobile-overlay" @onclick="CloseMobileMenu"></div>
-}
-
-@code {
-    private string activeSection = "#hero";
-	private bool isMobileMenuOpen = false;
-	private bool isHamburgerActive = false;
-
-    // Handles the hamburger menu click animation and toggles the mobile menu.
-    private async void OnHamburgerClick()
-    {
-        isHamburgerActive = true;
-        ToggleMobileMenu();
-        await Task.Delay(150); // Match the CSS transition duration
-        isHamburgerActive = false;
-        StateHasChanged();
-    }
-
-	// Called when the component is initialized. Subscribes to location changes.
-	protected override void OnInitialized()
-	{
-		NavigationManager.LocationChanged += HandleLocationChanged;
-	}
-
-	// Handles route changes and updates the header state accordingly.
-	private void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
-	{
-		InvokeAsync(StateHasChanged);
-	}
-
-    // Unsubscribes from the location changed event to avoid memory leaks.
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= HandleLocationChanged;
-    }
-
-    // Sets the currently active section in the header.
-    private void SetActive(string section) => activeSection = section;
-    
-	// Toggles the mobile menu open or closed.
-    private void ToggleMobileMenu() => isMobileMenuOpen = !isMobileMenuOpen;
-    
-	// Closes the mobile menu.
-    private void CloseMobileMenu() => isMobileMenuOpen = false;
-    
-	// Sets the active section and closes the mobile menu when a mobile nav link is clicked.
-    private void OnMobileNavClick(string section)
-    {
-        SetActive(section);
-        CloseMobileMenu();
-    }
-
-    // NOTE: This method is currently unused. It scrolls smoothly to the #hero section using JS interop,
-    // sets the active section to "#hero", and closes the mobile menu.
-    private async Task ScrollToHero()
-    {
-        await JS.InvokeVoidAsync("scrollToHero");
-        SetActive("#hero");
-        CloseMobileMenu();
-    }
-
-    // Returns the CSS class for a navigation link based on the active section.
-    private string GetNavClass(string section) =>
-        activeSection == section
-            ? "text-teal-cyan-aqua-500"
-            : "text-gray-700 hover:text-teal-cyan-aqua-500";
-
-    // Returns the CSS class for the contact link, including highlighting if active.
-    private string GetContactClass() =>
-        $"px-4 py-2 bg-indigo-600 text-gray-50 rounded-lg hover:bg-indigo-700 transition {(activeSection == "#contact" ? "ring-2" : "")}";
 }

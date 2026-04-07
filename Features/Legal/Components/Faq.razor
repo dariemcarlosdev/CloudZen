@@ -1,0 +1,73 @@
+@page "/faq"
+
+<PageTitle>FAQ — CloudZen | Frequently Asked Questions</PageTitle>
+<HeadContent>
+    <meta name="description" content="Frequently asked questions about CloudZen's technology consulting services, pricing, process, and more." />
+</HeadContent>
+
+<div class="min-h-screen bg-gray-50">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+
+        @* ── Header ── *@
+        <header class="mb-10 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">Frequently Asked Questions</h1>
+            <p class="mt-3 text-gray-500 max-w-xl mx-auto">
+                Everything you need to know about working with CloudZen. Can't find what you're looking for?
+                <a href="/contact" class="faq-inline-link">Get in touch</a>.
+            </p>
+        </header>
+
+        @* ── Accordion ── *@
+        <div class="faq-list" role="list">
+            @for (var i = 0; i < _faqItems.Count; i++)
+            {
+                var index = i;
+                var item = _faqItems[index];
+                var isOpen = _openIndex == index;
+                var panelId = $"faq-panel-{index}";
+                var headingId = $"faq-heading-{index}";
+
+                <div class="faq-item @(isOpen ? "faq-item--open" : "")" role="listitem">
+                    <h2 id="@headingId">
+                        <button class="faq-trigger"
+                                type="button"
+                                aria-expanded="@isOpen.ToString().ToLowerInvariant()"
+                                aria-controls="@panelId"
+                                @onclick="() => Toggle(index)">
+                            <span class="faq-question">@item.Question</span>
+                            <svg class="faq-chevron @(isOpen ? "faq-chevron--open" : "")"
+                                 width="20" height="20" viewBox="0 0 20 20" fill="none"
+                                 stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                                <path d="M5 7.5L10 12.5L15 7.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </h2>
+                    @if (isOpen)
+                    {
+                        <div id="@panelId"
+                             role="region"
+                             aria-labelledby="@headingId"
+                             class="faq-panel">
+                            <div class="faq-answer">
+                                @item.Answer
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        @* ── CTA ── *@
+        <div class="faq-cta">
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Still have questions?</h2>
+            <p class="text-gray-500 text-sm mb-4">
+                We'd love to hear from you. Book a free consultation or drop us a message.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <a href="/contact" class="faq-cta-button faq-cta-button--primary">Book a Consultation</a>
+                <a href="mailto:info@cloud-zen.net" class="faq-cta-button faq-cta-button--secondary">Email Us</a>
+            </div>
+        </div>
+
+    </div>
+</div>

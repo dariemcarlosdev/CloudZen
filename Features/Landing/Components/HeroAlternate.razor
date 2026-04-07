@@ -1,0 +1,108 @@
+@namespace CloudZen.Features.Landing.Components
+
+<!--
+    HeroAlternate Component
+    Dark-themed hero section with:
+    - Badge/pill indicator
+    - Bold headline with accent colors
+    - Two CTA buttons
+    - Stats metrics row
+    
+    Usage:
+        <HeroAlternate />
+-->
+
+<section id="hero-alt" class="hero-alternate">
+    <!-- Animated gradient waves -->
+    <div class="wave-container" aria-hidden="true">
+        <div class="wave wave-1"></div>
+        <div class="wave wave-2"></div>
+        <div class="wave wave-3"></div>
+    </div>
+
+    <!-- Animated floating particles -->
+    <div class="particles-container" aria-hidden="true">
+        <span class="particle particle-1"></span>
+        <span class="particle particle-2"></span>
+        <span class="particle particle-3"></span>
+        <span class="particle particle-4"></span>
+        <span class="particle particle-5"></span>
+        <span class="particle particle-6"></span>
+        <span class="particle particle-7"></span>
+        <span class="particle particle-8"></span>
+    </div>
+
+    <!-- Floating geometric shapes -->
+    <div class="shapes-container" aria-hidden="true">
+        <div class="shape shape-circle"></div>
+        <div class="shape shape-ring"></div>
+        <div class="shape shape-square"></div>
+        <div class="shape shape-dot-cluster">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+
+    <!-- Light beam effect -->
+    <div class="light-beam" aria-hidden="true"></div>
+
+    <!-- Animated scan line -->
+    <div class="scan-line" aria-hidden="true"></div>
+
+    <div class="hero-content">
+        <!-- Badge with typing effect -->
+        <div class="hero-badge">
+            <span class="badge-indicator"></span>
+            <span class="badge-text">
+                <span class="typing-text">PRACTICAL AI · MEASURABLE OUTCOMES</span>
+                <span class="typing-cursor">|</span>
+            </span>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="hero-headline">
+            <span class="headline-line">Smart systems.</span>
+            <span class="headline-line"><span class="text-accent">Real</span> results.</span>
+            <span class="headline-line">Zero jargon.</span>
+        </h1>
+
+        <!-- Subtext -->
+        <p class="hero-subtext">
+            One partner, clear communication, outcomes you can measure. We build the tools — you focus on what actually makes you money.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="hero-cta">
+            <a href="/contact" class="btn-primary">
+                Book Free Consultation
+            </a>
+            <a href="/services" class="btn-outline">
+                Explore Services &rarr;
+            </a>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="hero-stats">
+            <div class="stat-item">
+                <div class="stat-value">
+                    <span class="stat-number">12h</span>
+                    <span class="stat-unit">/wk</span>
+                </div>
+                <div class="stat-label">Avg. Time Saved</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">
+                    <span class="stat-number">1</span>
+                    <span class="stat-unit">Fee</span>
+                </div>
+                <div class="stat-label">Flat Build Price</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">
+                    <span class="stat-number">0</span>
+                    <span class="stat-unit">Stress</span>
+                </div>
+                <div class="stat-label">Day-One Launch</div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -22,14 +22,14 @@
     - OnAfterRenderAsync: Initializes JS listener with retry logic for timing issues
     - UpdateVisibility: Called by JS when scroll position crosses threshold
     - ScrollToTop: Invoked on button click to trigger smooth scroll
-    - Dispose: Cleans up DotNetObjectReference to prevent memory leaks
+    - DisposeAsync: Removes JS scroll listener and cleans up DotNetObjectReference to prevent memory leaks
     
     USAGE:
     Add <ScrollToTopButton /> to MainLayout.razor or any page component.
     No parameters required - works out of the box.
 *@
 
-@implements IDisposable
+@implements IAsyncDisposable
 @inject IJSRuntime JSRuntime
 
 @* Scroll to Top Button - Modern floating action button *@
@@ -142,12 +142,20 @@
     }
 
     /// <summary>
-    /// Cleans up the DotNetObjectReference when component is destroyed.
-    /// Essential to prevent memory leaks in Blazor WebAssembly.
-    /// Called automatically by Blazor framework when component is removed.
+    /// Removes the JavaScript scroll listener and cleans up the DotNetObjectReference
+    /// when the component is destroyed. The JS listener must be removed first so it
+    /// cannot fire callbacks against the already-disposed .NET reference.
     /// </summary>
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("disposeScrollToTop");
+        }
+        catch (JSException)
+        {
+            // JS runtime may already be unavailable during hot-reload or shutdown
+        }
         _dotNetHelper?.Dispose();
     }
 }

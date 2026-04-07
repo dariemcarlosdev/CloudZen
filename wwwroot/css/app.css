@@ -3,6 +3,30 @@ html, body {
     overflow-x: hidden;
 }
 
+/* Spinner shown inside #app while Blazor WASM boots.
+   Blazor replaces #app innerHTML on mount, removing it automatically. */
+#wasm-loader {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+/*    background: linear-gradient(180deg, #fdfcfb 0%, #f9f7f4 30%, #fef9f3 60%, #fdf8f5 100%);*/
+}
+
+.loader-spinner {
+    width: 44px;
+    height: 44px;
+    border: 3px solid rgba(97, 194, 200, 0.2);
+    border-top-color: #61C2C8;
+    border-radius: 50%;
+    animation: wasm-spin 0.8s linear infinite;
+}
+
+@keyframes wasm-spin {
+    to { transform: rotate(360deg); }
+}
+
+
 h1:focus {
     outline: none;
 }

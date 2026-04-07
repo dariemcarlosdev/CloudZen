@@ -270,24 +270,9 @@ public class SendEmailFunction(
         // Send via SMTP
         using var client = new SmtpClient();
 
-        // IMPORTANT: Disable certificate revocation check BEFORE setting the callback
-        // This is required because revocation servers may be unreachable in some networks
+        // Disable revocation check only — revocation servers may be unreachable in
+        // restricted Azure networks, but full certificate chain validation is preserved.
         client.CheckCertificateRevocation = false;
-
-        // Configure certificate validation to accept Brevo's certificate
-        // This callback always returns true because:
-        // 1. We're connecting to a known, trusted server (smtp-relay.brevo.com)
-        // 2. The connection still uses TLS encryption
-        // 3. Revocation check failures are common in restricted networks
-        client.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
-        {
-            if (sslPolicyErrors != System.Net.Security.SslPolicyErrors.None)
-            {
-                _logger.LogWarning("SSL certificate validation bypassed for Brevo SMTP. Errors: {Errors}", sslPolicyErrors);
-            }
-            // Always accept for Brevo's trusted SMTP server
-            return true;
-        };
 
         // Connect with STARTTLS
         await client.ConnectAsync(BrevoSmtpHost, BrevoSmtpPort, SecureSocketOptions.StartTls);

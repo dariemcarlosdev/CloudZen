@@ -1,0 +1,72 @@
+/* ── Footer wrapper ── */
+.footer-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #0f172a 0%, #111827 100%);
+    border-top: 1px solid rgba(137, 214, 220, 0.12);
+}
+
+/* Subtle radial glow behind the brand column */
+.footer-glow {
+    position: absolute;
+    top: -40%;
+    left: -10%;
+    width: 50%;
+    height: 140%;
+    background: radial-gradient(ellipse at center, rgba(137, 214, 220, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* ── Navigation links ── */
+.footer-link {
+    color: #9ca3af; /* gray-400 */
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition: color 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+}
+
+.footer-link:hover {
+    color: #89D6DC; /* teal-cyan-aqua-200 */
+    transform: translateX(3px);
+}
+
+/* ── Social / connect links ── */
+.footer-social-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #9ca3af;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    transition: color 0.2s ease;
+    text-decoration: none;
+}
+
+.footer-social-link:hover {
+    color: #89D6DC;
+}
+
+.footer-social-link svg {
+    flex-shrink: 0;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.footer-social-link:hover svg {
+    transform: scale(1.15);
+}
+
+/* ── Logo hover glow ── */
+.footer-logo-link {
+    transition: filter 0.3s ease;
+}
+
+.footer-logo-link:hover {
+    filter: drop-shadow(0 0 8px rgba(137, 214, 220, 0.45));
+}
+
+/* ── Gradient divider ── */
+.footer-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(137, 214, 220, 0.25), transparent);
+}

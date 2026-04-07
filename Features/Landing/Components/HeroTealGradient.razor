@@ -1,0 +1,247 @@
+@* ══════════════════════════════════════════════════════════════
+   TealGradient Component — Hero section with teal gradient left,
+   animated workflow nodes on white right side with bezier connectors.
+   ══════════════════════════════════════════════════════════════ *@
+
+<section class="relative min-h-[85vh] flex overflow-hidden">
+    @* ── Left Side: Teal Gradient ── *@
+    <div class="flex-1 bg-gradient-to-br from-teal-cyan-aqua-600 via-teal-cyan-aqua-500 to-teal-cyan-aqua-400 text-white flex flex-col justify-center px-8 lg:px-16 py-16 relative">
+        @* Decorative background pattern — uses opacity instead of blur for performance *@
+        <div class="absolute inset-0" aria-hidden="true">
+            <div class="absolute top-20 left-10 w-32 h-32 rounded-full bg-white/10"></div>
+            <div class="absolute bottom-32 right-10 w-48 h-48 rounded-full bg-white/8"></div>
+        </div>
+
+        <div class="relative z-10 max-w-lg">
+            @* Badge *@
+            <span class="inline-flex items-center gap-2 px-4 py-2 bg-white/25 text-white text-sm font-medium rounded-full mb-8">
+                <span class="w-2 h-2 bg-teal-cyan-aqua-200 rounded-full animate-pulse"></span>
+                Workflow Automation
+            </span>
+
+            @* Headline *@
+            <h1 class="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-6">
+                Technology that works<span class="block text-orange-300 font-thin tracking-wide italic">exactly</span>
+                like you do.
+            </h1>
+
+            @* Subtext *@
+            <p class="text-lg lg:text-xl text-teal-cyan-aqua-100 leading-relaxed mb-10">
+                No middlemen, no runaround. You work directly with me —
+                honest conversations, practical solutions, outcomes you can measure.
+            </p>
+
+            @* CTA Buttons *@
+            <div class="flex flex-col sm:flex-row gap-4 mb-12">
+                <a href="/contact" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-orange-400 text-white font-semibold rounded-full shadow-lg hover:bg-orange-500 transition-all duration-300 hover:scale-105">
+                    <i class="bi bi-calendar-check"></i>
+                    Book Free Consultation
+                </a>
+                <a href="/services" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/15 text-white font-semibold rounded-full border border-white/30 hover:bg-white/20 transition-colors duration-300">
+                    See Our Work →
+                </a>
+            </div>
+
+            @* Stats Row *@
+            <div class="flex items-center gap-8 pt-8 border-t border-white/20">
+                <div class="text-center">
+                    <div class="text-3xl lg:text-4xl font-bold text-orange-300">12h</div>
+                    <div class="text-xs uppercase tracking-wider text-teal-cyan-aqua-200">Saved / Week</div>
+                </div>
+                <div class="w-px h-12 bg-white/20"></div>
+                <div class="text-center">
+                    <div class="text-3xl lg:text-4xl font-bold">1<span class="text-white">Fee</span></div>
+                    <div class="text-xs uppercase tracking-wider text-teal-cyan-aqua-200">Flat Build</div>
+                </div>
+                <div class="w-px h-12 bg-white/20"></div>
+                <div class="text-center">
+                    <div class="text-3xl lg:text-4xl font-bold">Day<span class="text-orange-300">1</span></div>
+                    <div class="text-xs uppercase tracking-wider text-teal-cyan-aqua-200">Zero Stress</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* ── Right Side: Animated Workflow Nodes with Teal Gradient Background ── *@
+    <div class="right-panel-bg flex-1 relative hidden lg:flex items-center justify-center p-6 overflow-hidden">
+
+        @* Background gradient handled by .right-panel-bg class — no extra layers needed *@
+
+        @* Corner Badge *@
+        <div class="absolute top-6 right-6 text-right z-20">
+            <div class="text-3xl font-bold text-teal-cyan-aqua-500">100%</div>
+            <div class="text-xs uppercase tracking-widest text-teal-cyan-aqua-400 font-medium">Jargon-Free</div>
+        </div>
+
+        @* SVG Container for Bezier Connectors *@
+        @* SVG Connectors — single path per connector (static dashed + animated stroke combined via CSS) *@
+        <svg class="absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 700 550" preserveAspectRatio="xMidYMid meet">
+            <path class="connector-path connector-animated" d="M150,90 L150,125 Q150,140 150,155 L150,195" />
+            <path class="connector-path connector-animated delay-1" d="M150,280 L150,320 Q150,345 150,370 L150,395" />
+            <path class="connector-path connector-animated delay-2" d="M210,70 Q300,45 370,55 Q430,65 470,75" />
+            <path class="connector-path connector-animated delay-3" d="M520,105 Q530,130 530,155" />
+            <path class="connector-path connector-animated delay-4" d="M210,250 Q290,235 360,255 Q420,275 470,265" />
+            <path class="connector-path connector-animated-orange delay-5" d="M555,120 Q590,145 620,175" />
+            <path class="connector-path connector-animated delay-6" d="M640,215 Q640,245 635,270" />
+            <path class="connector-path connector-animated delay-7" d="M545,305 Q580,355 615,395" />
+            <path class="connector-path connector-animated delay-8" d="M210,440 Q300,465 380,455 Q440,445 470,440" />
+            <path class="connector-path connector-subtle" d="M210,90 Q350,125 400,170" />
+            <path class="connector-path connector-subtle" d="M400,170 Q440,210 475,250" />
+        </svg>
+
+        @* Workflow Nodes Container *@
+        <div class="relative w-full h-full max-w-[640px] max-h-[520px] z-10">
+
+            @* ══════════════════════════════════════════════════════════════
+               LEFT COLUMN NODES
+               ══════════════════════════════════════════════════════════════ *@
+
+            @* Node: New Lead *@
+            <div class="workflow-node absolute top-[6%] left-[4%] animate-float">
+                <div class="node-card">
+                    <div class="node-icon bg-teal-700 text-white">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div class="node-content">
+                        <div class="node-title">New Lead</div>
+                        <div class="node-subtitle">Captured via form</div>
+                    </div>
+                    <div class="node-dot node-dot-teal right-dot"></div>
+                </div>
+                <div class="node-label node-label-teal mt-2">INPUT</div>
+            </div>
+
+            @* Node: AI Filter *@
+            <div class="workflow-node absolute top-[34%] left-[4%] animate-float delay-2">
+                <div class="node-card">
+                    <div class="node-icon bg-fuchsia-500 text-white">
+                        <i class="bi bi-robot"></i>
+                    </div>
+                    <div class="node-content">
+                        <div class="node-title">AI Filter</div>
+                        <div class="node-subtitle">Score & qualify</div>
+                    </div>
+                    <div class="node-dot node-dot-orange right-dot"></div>
+                </div>
+                <div class="node-label node-label-orange mt-2">AI</div>
+            </div>
+
+            @* Node: Qualified *@
+            <div class="workflow-node absolute top-[66%] left-[4%] animate-float delay-4">
+                <div class="node-card">
+                    <div class="node-icon bg-emerald-500 text-white">
+                        <i class="bi bi-check-square-fill"></i>
+                    </div>
+                    <div class="node-content">
+                        <div class="node-title">Qualified</div>
+                        <div class="node-subtitle">High-intent prospects</div>
+                    </div>
+                    <div class="node-dot node-dot-orange right-dot"></div>
+                </div>
+                <div class="node-label node-label-teal mt-2">PASS</div>
+            </div>
+
+            @* ══════════════════════════════════════════════════════════════
+               CENTER COLUMN NODES
+               ══════════════════════════════════════════════════════════════ *@
+
+            @* Node: Quote Build *@
+            <div class="workflow-node absolute top-[6%] left-[40%] animate-float delay-1">
+                <div class="node-card">
+                    <div class="node-icon bg-orange-400 text-white">
+                        <i class="bi bi-file-earmark-text-fill"></i>
+                    </div>
+                    <div class="node-content">
+                        <div class="node-title">Quote Build</div>
+                        <div class="node-subtitle">Your pricing rules</div>
+                    </div>
+                    <div class="node-dot node-dot-teal right-dot"></div>
+                </div>
+                <div class="node-label node-label-teal mt-2 ml-12">AUTO</div>
+            </div>
+
+            @* Node: Auto Send *@
+            <div class="workflow-node absolute top-[40%] left-[40%] animate-float delay-5">
+                <div class="node-card">
+                    <div class="node-icon bg-gray-400 text-white">
+                        <i class="bi bi-envelope-fill"></i>
+                    </div>
+                    <div class="node-content">
+                        <div class="node-title">Auto Send</div>
+                        <div class="node-subtitle">Personalised email</div>
+                    </div>
+                    <div class="node-dot node-dot-orange right-dot"></div>
+                </div>
+                <div class="node-label node-label-teal mt-2">INSTANT</div>
+            </div>
+
+            @* Node: Monitor *@
+            <div class="workflow-node absolute top-[72%] left-[40%] animate-float delay-6">
+                <div class="node-card">
+                    <div class="node-icon bg-pink-300 text-white">
+                        <i class="bi bi-phone-fill"></i>
+                    </div>
+                    <div class="node-content">
+                        <div class="node-title">Monitor</div>
+                        <div class="node-subtitle">Pipeline health</div>
+                    </div>
+                    <div class="node-dot node-dot-teal right-dot"></div>
+                </div>
+                <div class="node-label node-label-gray mt-2">24/7</div>
+            </div>
+
+            @* ══════════════════════════════════════════════════════════════
+               RIGHT COLUMN NODES
+               ══════════════════════════════════════════════════════════════ *@
+
+            @* Node: Smart Alert *@
+            <div class="workflow-node absolute top-[20%] right-[2%] animate-float delay-3">
+                <div class="node-card">
+                    <div class="node-icon bg-amber-400 text-white">
+                        <i class="bi bi-bell-fill"></i>
+                    </div>
+                    <div class="node-content">
+                        <div class="node-title">Smart Alert</div>
+                        <div class="node-subtitle">Owner notified</div>
+                    </div>
+                    <div class="node-dot node-dot-green right-dot"></div>
+                </div>
+                <div class="node-label node-label-teal mt-2">SMART</div>
+            </div>
+
+            @* Node: CRM Update *@
+            <div class="workflow-node absolute top-[56%] right-[2%] animate-float delay-7">
+                <div class="node-card">
+                    <div class="node-icon bg-indigo-400 text-white">
+                        <i class="bi bi-floppy-fill"></i>
+                    </div>
+                    <div class="node-content">
+                        <div class="node-title">CRM Update</div>
+                        <div class="node-subtitle">Record auto-sync</div>
+                    </div>
+                    <div class="node-dot node-dot-green right-dot"></div>
+                </div>
+                <div class="node-label node-label-green mt-2">DONE</div>
+            </div>
+
+            @* Bottom Right Badge *@
+            <div class="absolute bottom-2 right-2 text-right bg-white/95 rounded-lg px-4 py-2 shadow-sm border border-gray-100">
+                <div class="text-lg font-bold text-gray-800">Zero Stress</div>
+                <div class="text-xs uppercase tracking-widest text-teal-cyan-aqua-500 font-medium">Day-1 Launch</div>
+            </div>
+        </div>
+    </div>
+
+    @* ── Mobile: Simplified View ── *@
+    <div class="lg:hidden absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white/20 to-transparent p-6">
+        <div class="flex justify-center gap-6 text-white/80 text-sm">
+            <span><i class="bi bi-check-circle mr-1"></i> Automated Workflows</span>
+            <span><i class="bi bi-check-circle mr-1"></i> AI-Powered</span>
+            <span><i class="bi bi-check-circle mr-1"></i> Real-time Sync</span>
+        </div>
+    </div>
+</section>
+
+@code {
+    // Component is primarily visual/CSS-driven. No complex logic needed.
+}

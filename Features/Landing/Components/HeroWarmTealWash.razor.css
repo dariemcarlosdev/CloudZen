@@ -1,0 +1,691 @@
+/* ══════════════════════════════════════════════════════════════
+   WarmTealWash Component Styles — Warm cream/beige variant
+   with light workflow cards, dashed connectors, testimonials.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Section-wide gradient background ── */
+.warm-teal-wash {
+    background: linear-gradient(to right, #fce8de 0%, #fdf2ec 15%, #fefaf7 30%, #fefefe 50%, #f0f9f9 70%, #e4f3f4 85%, #d8eff0 100%);
+}
+
+/* ── Right Panel — transparent, lets section gradient show through ── */
+.warm-panel {
+    background: transparent;
+    padding: 4rem 2.5rem 2rem 1.5rem;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT WORKFLOW NODE CARDS
+   ══════════════════════════════════════════════════════════════ */
+
+.dark-workflow-node {
+    z-index: 10;
+}
+
+.dark-node-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    background: #ffffff;
+    padding: 0.875rem 1.25rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    position: relative;
+    min-width: 90px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark-node-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Teal border variant */
+.dark-node-card-teal {
+    border: 1.5px solid rgba(97, 194, 200, 0.4);
+}
+
+/* Orange highlight variant (for AI Filter) */
+.dark-node-card-orange-highlight {
+    border: 2px solid #f97316;
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.15);
+}
+
+.dark-node-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark-node-icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.dark-node-title {
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #374151;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Node connection dots */
+.dark-node-dot {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    top: -5px;
+    right: -5px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dark-dot-teal {
+    background: #61C2C8;
+}
+
+.dark-dot-orange {
+    background: #f97316;
+}
+
+.dark-dot-green {
+    background: #22c55e;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NODE HIGHLIGHT ANIMATIONS (when flow arrives)
+   ══════════════════════════════════════════════════════════════ */
+
+/* Pulse glow effect for nodes */
+@keyframes node-pulse-teal {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-color: rgba(97, 194, 200, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(97, 194, 200, 0.5), 0 0 40px rgba(97, 194, 200, 0.25);
+        border-color: #61C2C8;
+    }
+}
+
+@keyframes node-pulse-orange {
+    0%, 100% {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        border-color: rgba(249, 115, 22, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(249, 115, 22, 0.5), 0 0 40px rgba(249, 115, 22, 0.25);
+        border-color: #f97316;
+    }
+}
+
+@keyframes dot-pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.4);
+    }
+}
+
+/* Staggered highlight animations for each node */
+.node-highlight-1 .dark-node-card {
+    animation: node-pulse-teal 4s ease-in-out infinite;
+    animation-delay: 0s;
+}
+
+.node-highlight-2 .dark-node-card {
+    animation: node-pulse-teal 4s ease-in-out infinite;
+    animation-delay: 0.5s;
+}
+
+.node-highlight-3 .dark-node-card {
+    animation: node-pulse-orange 4s ease-in-out infinite;
+    animation-delay: 1s;
+}
+
+.node-highlight-4 .dark-node-card {
+    animation: node-pulse-teal 4s ease-in-out infinite;
+    animation-delay: 1.5s;
+}
+
+.node-highlight-5 .dark-node-card {
+    animation: node-pulse-teal 4s ease-in-out infinite;
+    animation-delay: 2s;
+}
+
+.node-highlight-6 .dark-node-card {
+    animation: node-pulse-teal 4s ease-in-out infinite;
+    animation-delay: 2.5s;
+}
+
+.node-highlight-7 .dark-node-card {
+    animation: node-pulse-teal 4s ease-in-out infinite;
+    animation-delay: 3s;
+}
+
+/* Dot pulse animations synced with node highlights */
+.node-highlight-1 .dark-node-dot {
+    animation: dot-pulse 4s ease-in-out infinite;
+    animation-delay: 0s;
+}
+
+.node-highlight-2 .dark-node-dot {
+    animation: dot-pulse 4s ease-in-out infinite;
+    animation-delay: 0.5s;
+}
+
+.node-highlight-3 .dark-node-dot {
+    animation: dot-pulse 4s ease-in-out infinite;
+    animation-delay: 1s;
+}
+
+.node-highlight-4 .dark-node-dot {
+    animation: dot-pulse 4s ease-in-out infinite;
+    animation-delay: 1.5s;
+}
+
+.node-highlight-5 .dark-node-dot {
+    animation: dot-pulse 4s ease-in-out infinite;
+    animation-delay: 2s;
+}
+
+.node-highlight-6 .dark-node-dot {
+    animation: dot-pulse 4s ease-in-out infinite;
+    animation-delay: 2.5s;
+}
+
+.node-highlight-7 .dark-node-dot {
+    animation: dot-pulse 4s ease-in-out infinite;
+    animation-delay: 3s;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   TESTIMONIAL CARD
+   ══════════════════════════════════════════════════════════════ */
+
+.testimonial-card {
+    background: rgba(15, 25, 25, 0.82);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 0.875rem;
+    padding: 0.875rem 1.375rem 1rem;
+    min-height: 140px;
+    min-width: 260px;
+    max-width: 300px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle top-left accent glow */
+.testimonial-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, #f59e0b 0%, transparent 100%);
+    border-radius: 0 0 2px 0;
+}
+
+.testimonial-card .stars {
+    display: flex;
+    align-items: center;
+    gap: 0.2rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.75rem;
+    line-height: 1;
+}
+
+.testimonial-name {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: #ffffff;
+    margin-bottom: 0.15rem;
+    letter-spacing: -0.01em;
+}
+
+.testimonial-role {
+    font-size: 0.6875rem;
+    color: #6b7a90;
+    margin-bottom: 0.375rem;
+}
+
+.testimonial-quote {
+    font-size: 0.725rem;
+    color: #c8d3e0;
+    font-style: italic;
+    line-height: 1.55;
+    margin: 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   100% TESTED BADGE
+   ══════════════════════════════════════════════════════════════ */
+
+.tested-badge {
+    background: rgba(245, 252, 252, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(97, 194, 200, 0.25);
+    border-radius: 0.625rem;
+    padding: 0.625rem 1.25rem;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    min-width: 130px;
+}
+
+.tested-badge-value {
+    font-size: 1.375rem;
+    font-weight: 800;
+    color: #61C2C8;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.tested-badge-label {
+    font-size: 0.5625rem;
+    font-weight: 700;
+    color: #1a3a3c;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DAY 1 READY BADGE
+   ══════════════════════════════════════════════════════════════ */
+
+.day1-badge {
+    background: rgba(245, 252, 252, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(97, 194, 200, 0.25);
+    border-radius: 0.625rem;
+    padding: 0.625rem 1.25rem;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    min-width: 140px;
+}
+
+.day1-badge-title {
+    font-family: 'IBM Plex Sans', var(--font-ibm-plex), sans-serif;
+    font-size: 1.125rem;
+    font-weight: 500;
+    color: #f97316;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.day1-badge-subtitle {
+    font-size: 0.5625rem;
+    font-weight: 700;
+    color: #1a3a3c;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    line-height: 1.3;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ALERT BADGE
+   ══════════════════════════════════════════════════════════════ */
+
+.testimonial-alert-anchor {
+    margin-top: -1px;
+    display: flex;
+    justify-content: center;
+}
+
+.alert-badge {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+    color: white;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    text-transform: capitalize;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   HAPPY CLIENT BADGE (Double border - solid inner, segmented outer)
+   ══════════════════════════════════════════════════════════════ */
+
+.happy-client-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.happy-client-photo-wrapper {
+    position: relative;
+    width: 86px;
+    height: 86px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Outer segmented/dashed orange border ring - thin with rotation */
+.happy-client-border-ring {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    background: conic-gradient(
+        #f97316 0deg 6deg,
+        transparent 6deg 18deg,
+        #f97316 18deg 24deg,
+        transparent 24deg 36deg,
+        #f97316 36deg 42deg,
+        transparent 42deg 54deg,
+        #f97316 54deg 60deg,
+        transparent 60deg 72deg,
+        #f97316 72deg 78deg,
+        transparent 78deg 90deg,
+        #f97316 90deg 96deg,
+        transparent 96deg 108deg,
+        #f97316 108deg 114deg,
+        transparent 114deg 126deg,
+        #f97316 126deg 132deg,
+        transparent 132deg 144deg,
+        #f97316 144deg 150deg,
+        transparent 150deg 162deg,
+        #f97316 162deg 168deg,
+        transparent 168deg 180deg,
+        #f97316 180deg 186deg,
+        transparent 186deg 198deg,
+        #f97316 198deg 204deg,
+        transparent 204deg 216deg,
+        #f97316 216deg 222deg,
+        transparent 222deg 234deg,
+        #f97316 234deg 240deg,
+        transparent 240deg 252deg,
+        #f97316 252deg 258deg,
+        transparent 258deg 270deg,
+        #f97316 270deg 276deg,
+        transparent 276deg 288deg,
+        #f97316 288deg 294deg,
+        transparent 294deg 306deg,
+        #f97316 306deg 312deg,
+        transparent 312deg 324deg,
+        #f97316 324deg 330deg,
+        transparent 330deg 342deg,
+        #f97316 342deg 348deg,
+        transparent 348deg 360deg
+    );
+    -webkit-mask: radial-gradient(transparent 95%, black 95.5%, black 98%, transparent 98.5%);
+    mask: radial-gradient(transparent 95%, black 95.5%, black 98%, transparent 98.5%);
+    animation: ring-rotate 8s linear infinite;
+}
+
+@keyframes ring-rotate {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Inner solid orange border */
+.happy-client-inner-border {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid #f97316;
+    background: transparent;
+    z-index: 1;
+}
+
+.happy-client-photo {
+    position: relative;
+    width: 66px;
+    height: 66px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #374151;
+    z-index: 2;
+}
+
+.happy-client-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.happy-client-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+}
+
+.happy-client-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.happy-client-check {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background: #f97316;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    z-index: 3;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.happy-client-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #f97316;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.happy-client-stars {
+    display: flex;
+    align-items: center;
+    gap: 0.125rem;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DASHED CONNECTOR PATHS
+   ══════════════════════════════════════════════════════════════ */
+
+.dashed-connector {
+    fill: none;
+    stroke: #9ca3af;
+    stroke-width: 1.5;
+    stroke-dasharray: 8, 6;
+    stroke-linecap: round;
+    opacity: 0.6;
+}
+
+.dashed-connector-orange {
+    fill: none;
+    stroke: #f97316;
+    stroke-width: 1.5;
+    stroke-dasharray: 8, 6;
+    stroke-linecap: round;
+    opacity: 0.7;
+}
+
+.dashed-subtle {
+    stroke: #d1d5db;
+    stroke-width: 1;
+    stroke-dasharray: 6, 5;
+    opacity: 0.4;
+}
+
+.dashed-connector-animated {
+    fill: none;
+    stroke: #61C2C8;
+    stroke-width: 2;
+    stroke-dasharray: 12, 200;
+    stroke-linecap: round;
+    animation: dash-flow 4s ease-in-out infinite;
+}
+
+.dashed-connector-animated-orange {
+    fill: none;
+    stroke: #f97316;
+    stroke-width: 2;
+    stroke-dasharray: 12, 200;
+    stroke-linecap: round;
+    animation: dash-flow 4s ease-in-out infinite;
+}
+
+@keyframes dash-flow {
+    0% {
+        stroke-dashoffset: 0;
+    }
+    50% {
+        stroke-dashoffset: -120;
+    }
+    100% {
+        stroke-dashoffset: -240;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FLOAT ANIMATION
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes float-warm {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-6px);
+    }
+}
+
+.animate-float-warm {
+    animation: float-warm 4s ease-in-out infinite;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ANIMATION DELAYS
+   ══════════════════════════════════════════════════════════════ */
+
+.delay-1 {
+    animation-delay: 0.3s;
+}
+
+.delay-2 {
+    animation-delay: 0.6s;
+}
+
+.delay-3 {
+    animation-delay: 0.9s;
+}
+
+.delay-4 {
+    animation-delay: 1.2s;
+}
+
+.delay-5 {
+    animation-delay: 1.5s;
+}
+
+.delay-6 {
+    animation-delay: 1.8s;
+}
+
+.delay-7 {
+    animation-delay: 2.1s;
+}
+
+.delay-8 {
+    animation-delay: 2.4s;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE ADJUSTMENTS
+   ══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1280px) {
+    .dark-node-card {
+        min-width: 80px;
+        padding: 0.75rem 1rem;
+    }
+
+    .dark-node-icon {
+        width: 2rem;
+        height: 2rem;
+        font-size: 0.875rem;
+    }
+
+    .dark-node-title {
+        font-size: 0.6875rem;
+    }
+
+    .testimonial-card {
+        min-width: 215px;
+        max-width: 240px;
+        min-height: 120px;
+        padding: 0.75rem 1.125rem 0.875rem;
+    }
+
+    .testimonial-name {
+        font-size: 0.9375rem;
+    }
+
+    .testimonial-card .stars i {
+        font-size: 0.875rem;
+    }
+
+    .happy-client-photo-wrapper {
+        width: 76px;
+        height: 76px;
+    }
+
+    .happy-client-border-ring {
+        width: 76px;
+        height: 76px;
+    }
+
+    .happy-client-inner-border {
+        width: 64px;
+        height: 64px;
+    }
+
+    .happy-client-photo {
+        width: 58px;
+        height: 58px;
+    }
+}

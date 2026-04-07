@@ -56,17 +56,8 @@ window.scrollToHero = function () {
         window.scrollTo({ top: heroTop, behavior: 'smooth' });
     }
 };
-window.scrollToHero = function () {
-    var hero = document.getElementById('hero');
-    var header = document.querySelector('header');
-    if (hero) {
-        var headerHeight = header ? header.offsetHeight : 0;
-        var heroTop = hero.getBoundingClientRect().top + window.pageYOffset - headerHeight;
-        window.scrollTo({ top: heroTop, behavior: 'smooth' });
-    }
-};
 
-// Last significant change: Added for Blazor navigation from CaseStudies.razor to WhoIAm.razor Highlighted Projects section.
+// Last significant change:
 window.scrollToElementById = function (id) {
     var el = document.getElementById(id);
     if (el) {
@@ -106,6 +97,8 @@ window.scrollToElementById = function (id) {
  * Shows/hides the button based on scroll position and handles scroll visibility updates.
  * @param {object} dotNetHelper - Reference to the Blazor component for state updates.
  */
+let _scrollToTopHandler = null;
+
 window.initScrollToTop = function (dotNetHelper) {
     let scrollThreshold = 300; // Show button after scrolling 300px
     let ticking = false;
@@ -113,7 +106,7 @@ window.initScrollToTop = function (dotNetHelper) {
     function updateButtonVisibility() {
         const scrollY = window.pageYOffset || document.documentElement.scrollTop;
         const shouldShow = scrollY > scrollThreshold;
-        
+
         if (dotNetHelper) {
             dotNetHelper.invokeMethodAsync('UpdateVisibility', shouldShow);
         }
@@ -128,10 +121,19 @@ window.initScrollToTop = function (dotNetHelper) {
         }
     }
 
+    // Store reference so it can be removed on dispose
+    _scrollToTopHandler = handleScroll;
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
+
     // Initial check
     updateButtonVisibility();
+};
+
+window.disposeScrollToTop = function () {
+    if (_scrollToTopHandler) {
+        window.removeEventListener('scroll', _scrollToTopHandler);
+        _scrollToTopHandler = null;
+    }
 };
 
 /**

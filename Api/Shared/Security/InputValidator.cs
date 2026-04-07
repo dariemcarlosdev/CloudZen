@@ -375,8 +375,17 @@ public static class SecurityHeadersExtensions
         // Control referrer information
         headers.TryAdd("Referrer-Policy", "strict-origin-when-cross-origin");
 
-        // Content Security Policy
-        headers.TryAdd("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'");
+        // Content Security Policy — scoped directives per resource type
+        headers.TryAdd("Content-Security-Policy",
+            "default-src 'self'; " +
+            "script-src 'self'; " +
+            "style-src 'self' https://fonts.googleapis.com https://cdn.jsdelivr.net; " +
+            "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net; " +
+            "img-src 'self' data: https:; " +
+            "connect-src 'self'; " +
+            "frame-ancestors 'none'; " +
+            "base-uri 'self'; " +
+            "form-action 'self'");
 
         // Permissions Policy (previously Feature-Policy)
         headers.TryAdd("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
@@ -472,7 +481,16 @@ public record CorsSettings(string[] AllowedOrigins)
     public bool IsOriginAllowed(string? origin)
     {
         if (string.IsNullOrEmpty(origin)) return false;
-        if (AllowedOrigins.Contains("*")) return true; // only for staging/testing, not recommended for production
+
+        if (AllowedOrigins.Contains("*"))
+        {
+            var env = Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT");
+            if (!string.Equals(env, "Development", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Wildcard CORS origin '*' is not allowed outside the Development environment.");
+
+            return true;
+        }
+
         return AllowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
     }
 }
