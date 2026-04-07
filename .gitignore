@@ -366,3 +366,11 @@ MigrationBackup/
 /Api/local.settings.json
 /Api/local.settings.json
 /cloudzen-chatbot.jsx
+
+# Claude Code — sensitive/runtime files
+.claude/settings.local.json
+.claude/hooks/.rate-limit-timestamp
+.claude/hooks/notifications.log
+.claude/hooks/notification-config.json
+.claude/hooks/smtp-cred-*.xml
+.claude/hooks/test.txt
