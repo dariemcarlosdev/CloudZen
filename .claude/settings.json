@@ -1,0 +1,83 @@
+{
+  "env": {},
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/context-optimizer.ps1",
+            "statusMessage": "Loading project context..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/research-first.ps1",
+            "statusMessage": "Checking research-first..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/security-scanner.ps1",
+            "statusMessage": "🔒 Security scanning..."
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/dotnet-conventions.ps1",
+            "statusMessage": "Checking conventions..."
+          },
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/doc-sync-reminder.ps1"
+          },
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/build-reminder.ps1"
+          },
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/notification.ps1",
+            "statusMessage": "Sending notification..."
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "powershell -ExecutionPolicy Bypass -File .claude/hooks/notification.ps1",
+            "statusMessage": "Sending notification..."
+          }
+        ]
+      }
+    ]
+  }
+}
