@@ -47,7 +47,7 @@ public class FeatureHighlightService : IFeatureHighlightService
             TitleBold: "Faster Results",
             TitleSuffix: " Mean Happier Customers",
             Description: "CloudZen helps you clear the bottlenecks so you can respond to clients and deliver your services quicker. When you move faster, your customers stay happier — and keep coming back.",
-            ImagePath: "/images/features/faster-result-1.webp"
+            ImagePath: "/images/features/faster-result.webp"
         )
     };
 }

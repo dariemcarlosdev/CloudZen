@@ -197,7 +197,7 @@ const session = await joinSession({
 
     tools: [
         {
-            name: "owasp_security_scan",
+            name: "cloudzen_owasp_security_scan",
             description: "Scans a file for OWASP Top 10 security issues including injection, broken auth, sensitive data exposure, XSS, security misconfiguration, and mass assignment. Returns structured findings with severity levels.",
             parameters: {
                 type: "object",
@@ -226,7 +226,7 @@ const session = await joinSession({
             },
         },
         {
-            name: "check_secrets",
+            name: "cloudzen_check_secrets",
             description: "Recursively scans .cs and .json files in a directory for hardcoded secrets, API keys, connection strings, and credentials. Reports findings with file path and line number.",
             parameters: {
                 type: "object",

@@ -137,7 +137,7 @@ const session = await joinSession({
 
   tools: [
     {
-      name: "docs_status",
+      name: "cloudzen_docs_status",
       description:
         "Compares last-modified timestamps of source code directories vs their corresponding docs/ README.md files. Reports which docs are potentially stale.",
       parameters: {

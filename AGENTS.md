@@ -1,230 +1,167 @@
-# AGENTS.md — Project AI Instructions
+# AGENTS.md — CloudZen AI Instructions
 
-> Universal instructions for all AI coding agents working on this repository.
-> Adapt to your project's domain — replace generic examples with your actual entities, features, and business rules.
+> Repository-specific rules for AI agents working in CloudZen.
 
-## Architecture Overview
+## 1. Project Context
 
-This project follows **Clean Architecture** with **CQRS via MediatR** and **DDD**.
+CloudZen is a **Blazor WebAssembly** frontend (`CloudZen.csproj`) plus an **Azure Functions Isolated Worker** API backend under `Api/`.
 
-### Layer Map
+- Frontend: .NET 8 WASM SPA
+- Backend: Azure Functions v4 (.NET 8, isolated)
+- Deployment: Azure Static Web Apps + Azure Functions
+- Styling: Tailwind (CDN) + component-scoped CSS
 
-```
-Presentation    →  Components/           Blazor pages, layouts, scoped CSS
-Application     →  Features/{Domain}/    MediatR command/query handlers (vertical slices)
-Domain          →  Models/               Entities, value objects, enums
-                   Events/               Domain events (DomainEvent, IEventBus)
-                   Services/Strategies/  Strategy interfaces (e.g., IChargeable, IRefundable)
-Infrastructure  →  Data/                 EF Core DbContext, repositories
-                   Services/             External service implementations
-                   Infrastructure/       Auth handlers, middleware
-```
+## 2. Architecture Style
 
-### Dependency Rules — MANDATORY
+CloudZen uses **vertical slice architecture by feature**, not classic layer-first folders.
 
-- **Inner layers NEVER reference outer layers.** Models/ and Events/ must not import from Data/, Services/, or Components/.
-- Domain entities must not depend on EF Core, third-party SDKs, or ASP.NET Core types.
-- Infrastructure implements domain interfaces — domain defines contracts, infrastructure fulfills them.
-- Application layer (Features/) orchestrates via interfaces only — never instantiate infrastructure directly.
-
----
-
-## CQRS & MediatR — MANDATORY
-
-All business operations go through MediatR handlers in `Features/{Domain}/`:
-
-| Slice | Command/Query | Purpose |
-|---|---|---|
-| `CreateOrder/` | `CreateOrderCommand` | Create a new aggregate instance |
-| `CompleteOrder/` | `CompleteOrderCommand` | Transition aggregate to completed state |
-| `CancelOrder/` | `CancelOrderCommand` | Cancel an in-progress aggregate |
-| `GetOrder/` | `GetOrderQuery` | Read single aggregate by ID |
-| `ListOrders/` | `ListOrdersQuery` | Read aggregate list with filtering |
-
-**Rules:**
-- UI components and API controllers dispatch commands/queries via `IMediator` — never call services directly.
-- Handlers orchestrate: validate → execute strategy → persist via repository → publish domain events.
-- Prefer MediatR vertical slices for all new work — avoid monolithic service classes.
-
----
-
-## Design Patterns
-
-### Strategy Pattern — External Providers
-
-Business operations use ISP-compliant strategy interfaces in `Services/Strategies/`:
-
-- `IPaymentProcessor` — marker interface; every provider implements this
-- `IChargeable` — create charges (`ChargeAsync`)
-- `IRefundable` — process refunds (`RefundAsync`)
-- `ICancellable` — cancel pending operations (`CancelAsync`)
-- `IPaymentProcessorFactory` — resolves the correct strategy at runtime
-
-**OCP:** Adding a new provider means registering a new `IPaymentProcessor` implementation. Zero changes to existing code.
-
-### Repository Pattern
-
-- All data access goes through domain repository interfaces (e.g., `IOrderRepository`) in `Data/Repositories/`.
-- **Never inject `DbContext` into Features/, Services/, or Components/ directly.**
-- Repositories live in Infrastructure; interfaces live adjacent to domain.
-
-### Event Bus
-
-- `IEventBus` (in `Events/`) publishes `DomainEvent` subclasses (e.g., `OrderCreatedEvent`, `OrderCompletedEvent`).
-- Current implementation: `InMemoryEventBus`. Swappable for MassTransit, Azure Service Bus, or other transports.
-- Handlers publish events after successful state changes — never before persistence.
-
----
-
-## Blazor Component Rules — MANDATORY
-
-Every Blazor component **must** use the code-behind pattern with three files:
+### Frontend (WASM)
 
 ```
-ComponentName.razor       — Markup only (no @code blocks)
-ComponentName.razor.cs    — Partial class with logic
-ComponentName.razor.css   — Scoped styles (Bootstrap 5 utilities + custom)
+Features/
+  Booking/   Contact/   Chat/   Landing/   Profile/   Projects/   Tickets/
+Common/
+Layout/
+Pages/
 ```
 
-- **NEVER** use inline `@code {}` blocks in `.razor` files.
-- **ALWAYS** create scoped CSS — never use global styles for component-specific elements.
-- Use `[CascadingParameter] Task<AuthenticationState>` for auth — not `IHttpContextAccessor`.
-- Use `IStringLocalizer<SharedResource>` for all user-facing strings.
+Each feature owns its `Components/`, `Models/`, and `Services/` folders.
 
----
-
-## Localization
-
-- Resource files: `Resources/SharedResource.resx` (default locale) and additional `.{culture}.resx` files.
-- Inject `IStringLocalizer<SharedResource>` in code-behind files.
-- All user-facing strings must be localized — no hardcoded UI text.
-- Culture switch endpoint: `/culture/set?culture={code}&redirectUri={path}`.
-
----
-
-## Business Rules
-
-> **Define your domain-specific business rules here.** Every project has non-negotiable invariants.
-> Document them in this section so all AI agents enforce them consistently.
-
-Example rules to define per project:
-
-1. **Data integrity:** Which state transitions are valid? Document the aggregate's state machine.
-2. **Idempotency:** Which operations must be idempotent? Define idempotency key strategies.
-3. **Audit trail:** Which state changes must emit domain events for traceability?
-4. **Logging safety:** Never log PII, tokens, or secrets in any environment.
-5. **Authorization:** Which operations require specific policies or claims?
-
----
-
-## Security — OWASP Top 10 Mindset
-
-- **A01 Broken Access Control:** Policy-based auth (`[Authorize(Policy = "...")]`). Default deny.
-- **A02 Cryptographic Failures:** Secrets in environment variables or Azure Key Vault — never in code/config.
-- **A03 Injection:** Parameterized queries via EF Core. Never concatenate user input into SQL.
-- **A05 Security Misconfiguration:** HTTPS enforced, HSTS enabled, antiforgery tokens on state-changing requests.
-- **A07 Auth Failures:** Validate authentication on every request. Use established identity providers.
-- **A09 Logging Failures:** Structured logging with correlation IDs. Never log secrets or PII.
-
----
-
-## Documentation — MANDATORY
-
-Maintain a `docs/` directory with architectural documentation. Organize by feature area using a numbered convention:
+### Backend (API)
 
 ```
-docs/
-├── 00-Architecture-Overview    ← Cross-cutting architecture and design decisions
-├── 01-Feature-Name             ← Document each major feature
-├── 02-Feature-Name             ← One doc per feature area
-└── ...
+Api/
+  Features/Booking
+  Features/Contact
+  Features/Chat
+  Shared/Security
+  Shared/Services
+  Shared/Models
 ```
 
-**When you add or change a feature, update the corresponding doc.** If no doc exists for a new feature, create one following the numbering convention.
+Use the **WASM -> Azure Function -> external provider** proxy pattern for sensitive operations.
 
----
+## 3. Feature Classification
 
-## Code Conventions
+### Full-stack slices (WASM + API)
 
-- File-scoped namespaces (`namespace X;`)
-- Nullable reference types enabled
-- `sealed` on classes not designed for inheritance
-- `record` types for DTOs and command/query models
-- Async/await everywhere — propagate `CancellationToken`
-- Guard clauses over nested conditionals
-- No magic strings — use constants or enums
-- Intention-revealing names — no abbreviations except well-known acronyms (DTO, ID, HTTP)
+- Booking
+- Contact
+- Chat
 
----
+### Frontend-only slices
 
-## Skills Catalog — Universal (All Models)
+- Landing
+- Profile
+- Projects
+- Tickets
 
-> **These are markdown instruction files, not tool invocations.** Read them with your file
-> tools (`cat`, `Read`, `view`, `Grep`) and follow the workflow steps inside. Do NOT try
-> to "invoke", "call", or use any built-in Skill/Tool mechanism — just read the SKILL.md
-> file and execute its Core Workflow as your action plan.
+Only full-stack slices should add/modify Azure Function endpoints.
 
-Reusable AI skills at `.github/skills/` — 41 skills across 11 categories.
-These skills work identically across **GitHub Copilot CLI, Claude Code, Gemini, and any
-AI assistant** that can read files.
+## 4. Component Rules (MANDATORY)
 
-### How to Use a Skill (Any Model)
+Use code-behind for component logic.
 
-```bash
-# Step 1: Find the right skill
-cat .github/skills/CATALOG.md
-
-# Step 2: Read the skill core file
-cat .github/skills/{skill-name}/SKILL.md
-
-# Step 3: Follow the Core Workflow inside — it has numbered steps + checkpoints
-
-# Step 4: When the Reference Guide table says to load a deep-dive:
-cat .github/skills/{skill-name}/references/{topic}.md
-# Load ONLY the reference matching your current sub-task — never all at once
+```
+ComponentName.razor
+ComponentName.razor.cs
+ComponentName.razor.css   (when needed)
 ```
 
-### Example — Security Review
+Rules:
 
-```bash
-# User asks: "Review this code for security issues"
+1. Keep `.razor` focused on markup.
+2. Put state, lifecycle, handlers, and service calls in `.razor.cs`.
+3. Prefer Tailwind utilities first; use `.razor.css` for advanced/isolated styling.
+4. Use `[Parameter]` for parent-to-child data and `EventCallback<T>` for child-to-parent events.
+5. Keep Pages thin orchestration shells.
 
-# 1. Read the skill
-cat .github/skills/owasp-audit/SKILL.md          # ← 5 KB core
+## 5. Service & DI Rules
 
-# 2. Follow Core Workflow steps 1-5
+- Register frontend feature services in root `Program.cs`.
+- Use interfaces for injectable services (`IEmailService`, `IChatbotService`, `IBookingService`, etc.).
+- Backend-calling services use `HttpClient` + options classes.
+- Data-only services remain in feature service layer; avoid UI/business coupling.
+- Do not place secrets in WASM client configuration.
 
-# 3. Reference Guide table says:
-#    "Injection Prevention → references/injection-prevention.md → Load when doing SQL review"
-#    "Broken Auth → references/broken-auth.md → Load when doing auth review"
+## 6. Configuration Rules
 
-# 4. You're reviewing SQL code, so load ONLY:
-cat .github/skills/owasp-audit/references/injection-prevention.md
+Use strongly typed options classes:
 
-# 5. Continue the workflow with that knowledge loaded
-```
+- `EmailServiceOptions`
+- `ChatbotOptions`
+- `BookingServiceOptions`
+- `BlobStorageOptions`
 
-### Skills (41) — Flat Structure
+Bind via `AddOptions<T>().BindConfiguration(...)`.
 
-All skills live directly under `.github/skills/{skill-name}/SKILL.md`. Use `/skills` in Copilot CLI to list them, or invoke with `/skill-name`.
+In development, local API base URL overrides in `Program.cs` are allowed for local Functions ports.
 
-| Category | Skills |
-|----------|--------|
-| Code Quality | code-reviewer, refactor-planner, code-documenter, debugging-wizard, quality-analyzer, smart-refactor, tech-debt-tracker |
-| Security | owasp-audit, secret-scanner, threat-modeler, authentication, authorization |
-| Architecture | architecture-reviewer, design-pattern-advisor, dependency-analyzer, legacy-modernizer, polyglot-analyzer |
-| Testing | test-generator, tdd-coach, test-coverage-analyzer |
-| Database | schema-reviewer, query-optimizer |
-| DevOps | ci-cd-builder, deployment-preflight, monitoring-expert, chaos-engineer |
-| Documentation | readme-generator, adr-creator, api-documenter |
-| Research | codebase-explorer, tech-spike-planner, spec-miner, deep-context-generator |
-| Project Mgmt | spec-writer, issue-creator, feature-forge |
-| AI | mcp-developer, prompt-engineer, agent-orchestrator |
-| Language | dotnet-core-expert, csharp-developer |
+## 7. API & Security Rules (CRITICAL)
 
-### Rules
+All API endpoints are under `/api/*` and must preserve the existing security baseline:
 
-- **Read, don't invoke** — skills are files, not tools. Use `cat`/`Read`/`view`.
-- **One skill at a time** — only read the skill matching the current task
-- **Progressive disclosure** — never load all references; use the Reference Guide table to pick one
-- **Follow checkpoints** — each Core Workflow step has a ✅ checkpoint; verify before proceeding
+1. Input validation and sanitization via shared validators.
+2. Rate limiting (Polly-based) per endpoint/client context.
+3. Security headers and proper CORS behavior.
+4. Correlation IDs in logs.
+5. Secrets from environment/Key Vault only.
+6. No secret, token, or PII leakage in logs or client responses.
+
+## 8. Endpoint Ownership
+
+Current API feature endpoints:
+
+- `/api/send-email`
+- `/api/chat`
+- `/api/book-appointment`
+
+If you add endpoints, place them under the matching `Api/Features/{Feature}` folder and document request/response contracts.
+
+## 9. Model Ownership Across Projects
+
+WASM and API are separate projects. DTO duplication is acceptable when needed.
+
+- Do not force direct project references between WASM and API to share request models.
+- Keep transformation logic in API proxy functions when external systems require different field names.
+
+## 10. Namespace & Naming Conventions
+
+- Namespace root: `CloudZen.*`
+- Mirror folder paths in namespaces (feature-first).
+- File names should reflect role (`*Service`, `I*Service`, `*Options`, `*Function`).
+- Prefer explicit, intention-revealing names.
+
+## 11. Documentation Synchronization (MANDATORY)
+
+When behavior changes, update docs in `docs/` alongside code.
+
+Primary architecture docs:
+
+- `docs/01-architecture/VERTICAL_SLICE_ARCHITECTURE.md`
+- `docs/01-architecture/COMPONENT_ARCHITECTURE.md`
+- `docs/01-architecture/AZURE_FUNCTIONS.md`
+- `docs/01-architecture/API_ENDPOINTS.md`
+
+Also keep feature and security docs in sync under:
+
+- `docs/03-features/`
+- `docs/04-security/`
+- `docs/05-troubleshooting/`
+- `docs/06-patterns/`
+
+## 12. Quality and Safety Guardrails
+
+1. Preserve existing feature isolation (avoid unnecessary cross-feature coupling).
+2. Keep frontend secrets-free; route privileged operations through API.
+3. Prefer incremental, low-blast-radius changes over broad rewrites.
+4. Maintain nullable-enabled, compile-safe C#.
+5. Follow existing patterns before introducing new abstractions.
+
+## 13. Source-of-Truth Files to Check Before Major Changes
+
+- `README.md`
+- `Program.cs`
+- `docs/01-architecture/*`
+- `Api/Program.cs`
+- `.github/copilot-instructions.md`

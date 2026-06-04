@@ -78,12 +78,45 @@ public partial class ManageAppointmentReschedule
 
     /// <summary>
     /// Advances from Step 1 (enter details) to Step 2 (select date/time).
-    /// Called when the form in Step 1 passes validation.
+    /// Validates that the booking ID exists in the database before proceeding.
     /// </summary>
-    private void GoToSelectDateTime()
+    private async Task GoToSelectDateTime()
     {
         errorMessage = null;
-        currentStep = Step.SelectDateTime;
+        isSubmitting = true;
+
+        try
+        {
+            //Create request to verify booking exists with provided ID and email first before showing calendar.
+            // If the booking doesn't exist, we can show an error immediately instead of showing an empty calendar with no available slots.
+            var request = new VerifyBookingRequest
+            {
+                BookingId = rescheduleForm.BookingId!,
+                Email = rescheduleForm.Email!
+            };
+
+            var result = await AppointmentService.VerifyBookingExistsAsync(request);
+
+            if (result.Success)
+            {
+                // Booking exists, proceed to step 2
+                currentStep = Step.SelectDateTime;
+            }
+            else
+            {
+                // Booking not found or other error - show error
+                errorMessage = result.Error
+                    ?? "We couldn't find an appointment with that Booking ID. Please check your confirmation email for the correct Booking ID and try again.";
+            }
+        }
+        catch
+        {
+            errorMessage = "Something went wrong. Please try again later.";
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
     }
 
     /// <summary>

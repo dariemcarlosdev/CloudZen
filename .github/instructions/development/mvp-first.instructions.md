@@ -1,5 +1,5 @@
 ---
-applyTo: "**/*"
+applyTo: "**/*.cs, **/*.razor, **/*.razor.cs, **/*.razor.css, **/*.ts, **/*.js"
 ---
 
 # MVP-First Development Rules

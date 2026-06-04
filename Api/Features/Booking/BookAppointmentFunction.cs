@@ -160,7 +160,7 @@ public class BookAppointmentFunction(
                     StatusCode = StatusCodes.Status500InternalServerError
                 };
             }
-
+            // Use a named HttpClient with appropriate timeout and retry policies configured in Startup.cs for secure external calls
             var httpClient = _httpClientFactory.CreateClient("SecureClient");
 
             // Send original request body - N8N JavaScript handles the transformation
@@ -230,10 +230,10 @@ public class BookAppointmentFunction(
     private static string? ValidateRequest(BookAppointmentRequest request)
     {
         // Validate action
-        var validActions = new[] { "book", "cancel", "reschedule" };
+        var validActions = new[] { "book", "cancel", "reschedule", "verify" };
         if (!validActions.Contains(request.Action.ToLowerInvariant()))
         {
-            return "Invalid action. Must be 'book', 'cancel', or 'reschedule'.";
+            return "Invalid action. Must be 'book', 'cancel', 'reschedule', or 'verify'.";
         }
 
         // Email is always required
@@ -245,6 +245,7 @@ public class BookAppointmentFunction(
             "book" => ValidateBookAction(request),
             "cancel" => ValidateCancelAction(request),
             "reschedule" => ValidateRescheduleAction(request),
+            "verify" => ValidateVerifyAction(request),
             _ => "Invalid action."
         };
     }
@@ -332,6 +333,22 @@ public class BookAppointmentFunction(
 
         if (!TimeOnly.TryParseExact(request.NewEndTime, "HH:mm", out _))
             return "Please select a valid new time slot.";
+
+        return null;
+    }
+
+    /// <summary>
+    /// Validates fields required for the "verify" action.
+    /// </summary>
+    private static string? ValidateVerifyAction(BookAppointmentRequest request)
+    {
+        // Verify only needs bookingId and email (same as cancel)
+        if (string.IsNullOrWhiteSpace(request.BookingId))
+            return "Booking ID is required to verify an appointment.";
+
+        // BookingId format: APT-XXXXXXXX-XXXX
+        if (!request.BookingId.StartsWith("APT-") || request.BookingId.Length < 10)
+            return "Please enter a valid booking ID (e.g., APT-MN7O3825-TMVP).";
 
         return null;
     }

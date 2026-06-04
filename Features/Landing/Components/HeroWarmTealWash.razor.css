@@ -5,13 +5,21 @@
 
 /* ── Section-wide gradient background ── */
 .warm-teal-wash {
-    background: linear-gradient(to right, #fce8de 0%, #fdf2ec 15%, #fefaf7 30%, #fefefe 50%, #f0f9f9 70%, #e4f3f4 85%, #d8eff0 100%);
+    background: #fcf9f5;
 }
 
 /* ── Right Panel — transparent, lets section gradient show through ── */
 .warm-panel {
+    background: #fcf9f5;
+    padding: 0;
+}
+
+/* ── Left-to-right fade overlay on top of the hero image ── */
+.hero-image-fade-overlay {
+    position: absolute;
+    inset: 0;
     background: transparent;
-    padding: 4rem 2.5rem 2rem 1.5rem;
+    pointer-events: none;
 }
 
 /* ══════════════════════════════════════════════════════════════

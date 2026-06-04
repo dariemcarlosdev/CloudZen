@@ -89,7 +89,7 @@ const session = await joinSession({
 
   tools: [
     {
-      name: "check_docs",
+      name: "cloudzen_check_docs",
       description:
         "Lists available feature documentation in EscrowApp/docs/ and optionally searches README.md files for a term.",
       parameters: {

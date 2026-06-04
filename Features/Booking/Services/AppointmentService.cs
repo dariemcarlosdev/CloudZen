@@ -64,6 +64,15 @@ public class AppointmentService : IAppointmentService
         return await SendAsync(request, "reschedule");
     }
 
+    /// <inheritdoc />
+    public async Task<AppointmentResponse> VerifyBookingExistsAsync(VerifyBookingRequest request)
+    {
+        _logger.LogInformation("Verifying booking {BookingId} for {Email}",
+            request.BookingId, request.Email);
+
+        return await SendAsync(request, "verify");
+    }
+
     /// <summary>
     /// Sends a request to the API and maps the response.
     /// </summary>
@@ -135,6 +144,8 @@ public class AppointmentService : IAppointmentService
         var error = api.Message ?? "The operation could not be completed.";
 
         if (error.Contains("not found", StringComparison.OrdinalIgnoreCase) ||
+            error.Contains("couldn't find", StringComparison.OrdinalIgnoreCase) ||
+            error.Contains("could not find", StringComparison.OrdinalIgnoreCase) ||
             error.Contains("does not exist", StringComparison.OrdinalIgnoreCase))
         {
             return AppointmentResponse.NotFound(statusCode, error);

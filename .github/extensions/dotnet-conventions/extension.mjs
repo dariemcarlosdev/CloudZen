@@ -151,7 +151,7 @@ const session = await joinSession({
 
   tools: [
     {
-      name: "check_conventions",
+      name: "cloudzen_check_conventions",
       description:
         "Checks .NET coding conventions on a file or directory. Scans .cs and .razor files for: file-scoped namespaces, code-behind pattern, partial class declarations, inline styles, and class naming.",
       parameters: {

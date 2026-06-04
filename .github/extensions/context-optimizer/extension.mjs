@@ -66,7 +66,7 @@ const session = await joinSession({
 
     tools: [
         {
-            name: "project_summary",
+            name: "cloudzen_project_summary",
             description: "Returns a concise, structured summary of the NexTruzt.io EscrowApp project including architecture diagram, key files, design patterns, and technology stack. Use this to quickly orient yourself without reading multiple files.",
             parameters: {
                 type: "object",

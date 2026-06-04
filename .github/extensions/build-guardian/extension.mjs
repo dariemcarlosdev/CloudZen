@@ -95,14 +95,14 @@ const session = await joinSession({
 
             const fileList = [...modifiedFiles].map(f => `  - ${f}`).join("\n");
             return {
-                additionalContext: `🏗️ Build Guardian: ${modifiedFiles.size} file(s) modified since last build check:\n${fileList}\nRemember to verify the build compiles after these changes. Use the dotnet_build_check tool to validate.`,
+                additionalContext: `🏗️ Build Guardian: ${modifiedFiles.size} file(s) modified since last build check:\n${fileList}\nRemember to verify the build compiles after these changes. Use the project_dotnet_build_check tool to validate.`,
             };
         },
     },
 
     tools: [
         {
-            name: "dotnet_build_check",
+            name: "project_dotnet_build_check",
             description: "Runs 'dotnet build' on the EscrowApp.sln solution and returns a structured result. Returns 'Build succeeded' on success or detailed error messages on failure.",
             parameters: {
                 type: "object",
@@ -149,7 +149,7 @@ const session = await joinSession({
             },
         },
         {
-            name: "dotnet_test_check",
+            name: "project_dotnet_test_check",
             description: "Runs 'dotnet test' on the EscrowApp.sln solution. Returns test results summary on success or failing test details on failure. Reports if no test projects exist.",
             parameters: {
                 type: "object",

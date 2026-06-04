@@ -5,7 +5,7 @@ namespace CloudZen.Features.Landing.Services;
 /// <summary>
 /// Interface for retrieving professional service offerings.
 /// </summary>
-public interface IPersonalService
+public interface IServiceOfferingsService
 {
     List<ServiceInfo> GetAllServices();
 }

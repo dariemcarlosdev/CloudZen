@@ -24,19 +24,21 @@
             <NavLink href="/services" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active">Services</NavLink>
             <a href="/#cases" @onclick='() => SetActive("#cases")' class="nav-link @GetNavClass("#cases") font-medium tracking-wide transition-colors">Our Work</a>
             <NavLink href="/mission" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active">About</NavLink>
-            <NavLink href="/whoiam" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active">Who I Am</NavLink>
+@*             <NavLink href="/whoiam" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active">Who I Am</NavLink> *@
+            <NavLink href="/faq" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active">FAQ</NavLink>
             <NavLink href="/contact" class="cta-button px-5 py-2 bg-orange-400 text-white text-sm font-semibold rounded-full hover:bg-orange-500" ActiveClass="ring-2 ring-orange-300 ring-offset-1">Let's Talk</NavLink>
         </nav>
 
         @* ── Mobile nav ── *@
         @if (_isMobileMenuOpen)
         {
-            <nav class="mobile-nav absolute top-full left-0 w-full bg-white/98 backdrop-blur-md flex flex-col items-center gap-5 py-8 md:hidden shadow-lg border-t border-gray-100 z-50"
+            <nav class="mobile-nav absolute top-full left-0 w-full bg-white backdrop-blur-none flex flex-col items-center gap-5 py-8 md:hidden shadow-lg border-t border-gray-100 z-50"
                  aria-label="Mobile navigation">
                 <NavLink href="/services" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active" @onclick="CloseMobileMenu">Services</NavLink>
                 <a href="/#cases" @onclick='() => OnMobileNavClick("#cases")' class="nav-link @GetNavClass("#cases") font-medium tracking-wide transition-colors">Our Work</a>
                 <NavLink href="/mission" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active" @onclick="CloseMobileMenu">About</NavLink>
-                <NavLink href="/whoiam" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active" @onclick="CloseMobileMenu">Who I Am</NavLink>
+                @* <NavLink href="/whoiam" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active" @onclick="CloseMobileMenu">Who I Am</NavLink> *@
+                <NavLink href="/faq" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active" @onclick="CloseMobileMenu">FAQ</NavLink>
                 <NavLink href="/contact" class="cta-button px-5 py-2 bg-orange-400 text-white text-sm font-semibold rounded-full hover:bg-orange-500" ActiveClass="ring-2 ring-orange-300 ring-offset-1" @onclick="CloseMobileMenu">Let's Talk</NavLink>
             </nav>
         }

@@ -27,4 +27,11 @@ public interface IAppointmentService
     /// <param name="request">The reschedule details.</param>
     /// <returns>An <see cref="AppointmentResponse"/> with status code and result.</returns>
     Task<AppointmentResponse> RescheduleAsync(RescheduleAppointmentRequest request);
+
+    /// <summary>
+    /// Verifies if a booking ID exists in the system.
+    /// </summary>
+    /// <param name="request">The verification details.</param>
+    /// <returns>An <see cref="AppointmentResponse"/> with status code and result.</returns>
+    Task<AppointmentResponse> VerifyBookingExistsAsync(VerifyBookingRequest request);
 }

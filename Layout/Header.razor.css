@@ -3,8 +3,9 @@
     position: fixed;
     inset: 0;
     z-index: 45;
-    background: rgba(0, 0, 0, 0.08);
-    backdrop-filter: blur(2px);
+    background: rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     cursor: default;
     animation: overlay-fade-in 0.2s ease;
 }
@@ -27,7 +28,7 @@
     left: 50%;
     width: 0;
     height: 2px;
-    background: #61C2C8; /* teal-cyan-aqua */
+    background: #9ca3af; /* gray */
     border-radius: 1px;
     transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -45,7 +46,7 @@
 .nav-link--active::after {
     width: 100%;
     left: 0;
-    background: #61C2C8;
+    background: #9ca3af; /* gray */
 }
 
 /* ── Animated hamburger ☰ → ✕ ── */
@@ -98,4 +99,14 @@
 .cta-button:hover {
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3);
+}
+
+/* ── Header scroll bottom border line ── */
+header {
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.25s ease;
+}
+
+header.header-scrolled {
+    border-color: #d1d5db; /* gray-300 — visible only on scroll */
 }

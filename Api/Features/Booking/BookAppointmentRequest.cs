@@ -4,7 +4,7 @@ namespace CloudZen.Api.Features.Booking;
 
 /// <summary>
 /// Request model for the BookAppointment function.
-/// Supports <c>book</c>, <c>cancel</c>, and <c>reschedule</c> actions via the <see cref="Action"/> field.
+/// Supports <c>book</c>, <c>cancel</c>, <c>reschedule</c>, and <c>verify</c> actions via the <see cref="Action"/> field.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -17,13 +17,14 @@ namespace CloudZen.Api.Features.Booking;
 ///   <item><description><b>book</b>: Name, Email, Phone, BusinessName, Date, Time, EndTime</description></item>
 ///   <item><description><b>cancel</b>: BookingId, Email</description></item>
 ///   <item><description><b>reschedule</b>: BookingId, Email, NewDate, NewTime, NewEndTime</description></item>
+///   <item><description><b>verify</b>: BookingId, Email</description></item>
 /// </list>
 /// </para>
 /// </remarks>
 public class BookAppointmentRequest
 {
     /// <summary>
-    /// Workflow action to perform: <c>"book"</c>, <c>"cancel"</c>, or <c>"reschedule"</c>.
+    /// Workflow action to perform: <c>"book"</c>, <c>"cancel"</c>, <c>"reschedule"</c>, or <c>"verify"</c>.
     /// Defaults to <c>"book"</c>.
     /// </summary>
     [JsonPropertyName("action")]

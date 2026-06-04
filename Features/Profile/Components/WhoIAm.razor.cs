@@ -74,6 +74,12 @@ public partial class WhoIAm
     /// </summary>
     private async Task DownloadResume()
     {
+        // Validate that ResumeUrl is configured
+        if (string.IsNullOrWhiteSpace(ResumeService.ResumeBlobUrl))
+        {
+            throw new InvalidOperationException("Resume URL is not configured. Please ensure 'BlobStorage:ResumeUrl' is set in appsettings.json");
+        }
+
         var resumeBytes = await ResumeService.DownloadResumeAsync();
         var uri = new Uri(ResumeService.ResumeBlobUrl);
         var fileName = System.IO.Path.GetFileName(uri.LocalPath);

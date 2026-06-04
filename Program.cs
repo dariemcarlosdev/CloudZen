@@ -122,8 +122,8 @@ builder.Services.AddScoped<IChatbotService, ChatbotService>();
 // Register ProjectService for managing portfolio projects
 builder.Services.AddScoped<IProjectService, ProjectService>();
 
-// Register PersonalService for managing service offerings
-builder.Services.AddScoped<IPersonalService, PersonalService>();
+// Register ServiceOfferingsService for managing professional service offerings
+builder.Services.AddScoped<IServiceOfferingsService, ServiceOfferingsService>();
 
 // Register ToolService for the Tools Overview section
 builder.Services.AddScoped<IToolService, ToolService>();

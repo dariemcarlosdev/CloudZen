@@ -66,8 +66,8 @@ window.scrollToElementById = function (id) {
 };
 
 /**
- * Initializes the header glass morphism effect on scroll.
- * Adds/removes 'header-scrolled' class based on scroll position.
+ * Adds/removes 'header-scrolled' class on scroll to show a gray bottom border.
+ * Background effect is intentionally disabled — only the bottom line is active.
  */
 (function () {
     let ticking = false;

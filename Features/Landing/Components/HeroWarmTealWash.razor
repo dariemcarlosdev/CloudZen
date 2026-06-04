@@ -5,30 +5,28 @@
 
 <section class="warm-teal-wash relative min-h-[85vh] flex overflow-hidden">
     @* ── Left Side: White/Light Background ── *@
-    <div class="flex-1 flex flex-col justify-center px-8 lg:pl-36 lg:pr-16 xl:pl-44 xl:pr-20 py-10 relative">
-        <div class="relative z-10 max-w-lg">
+    <div class="w-full lg:w-1/2 shrink-0 flex flex-col items-center lg:items-start justify-center px-8 lg:pl-36 lg:pr-16 xl:pl-44 xl:pr-20 py-10 relative bg-[#fcf9f5]">
+        <div class="relative z-10 max-w-lg text-center lg:text-left">
             @* Badge *@
             <span class="inline-flex items-center gap-2 px-4 py-2 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-600 text-sm font-medium rounded-full mb-8 border border-teal-cyan-aqua-200">
                 <span class="w-2 h-2 bg-orange-400 rounded-full"></span>
-                Build &amp; Grow Model
+                AUTOMATION WORKFLOWS FOR SMALL BUSINESSES
             </span>
 
             @* Headline *@
-            <h1 class="text-4xl lg:text-5xl xl:text-6xl leading-tight mb-6">
-                <span class="font-bold text-teal-cyan-aqua-700">Every piece</span>
-                <span class="block text-teal-cyan-aqua-500 font-light italic">fits together.</span>
-                <span class="block font-bold text-gray-800">Finally, yours.</span>
+            <h1 class="text-5xl sm:text-6xl lg:text-5xl xl:text-6xl leading-tight mb-6">
+                <span class="font-bold text-teal-cyan-aqua-700">Smart systems.</span>
+                <span class="block text-teal-cyan-aqua-500 font-light italic">Less busywork.</span>
+                <span class="block font-bold text-gray-800">More time for growing.</span>
             </h1>
 
             @* Subtext *@
             <p class="text-lg lg:text-xl text-gray-500 leading-relaxed mb-10">
-                Custom systems built around your exact workflow — no
-                generic templates, no one-size-fits-all boxes. Technology
-                shaped for your business.
+                We build custom automation tools designed around your daily routine—whether you run a clinic, agency, hospitality venue, retail store, or any local small business. One partner, clear communication, and outcomes you can actually measure.
             </p>
 
             @* CTA Buttons *@
-            <div class="flex flex-col sm:flex-row gap-4 mb-12">
+            <div class="flex flex-col sm:flex-row gap-4 mb-12 justify-center lg:justify-start">
                 <a href="/contact" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-orange-400 text-white font-semibold rounded-full shadow-lg hover:bg-orange-500 transition-all duration-300 hover:scale-105">
                     <i class="bi bi-calendar-check"></i>
                     Book Free Consultation
@@ -39,31 +37,41 @@
             </div>
 
             @* Stats Row *@
-            <div class="flex items-center gap-8 pt-8 border-t border-gray-200">
+            <div class="flex items-center justify-center lg:justify-start gap-8 pt-8 border-t border-gray-200">
                 <div>
+                    <i class="bi bi-hourglass-split text-teal-cyan-aqua-400 text-sm mb-1 block"></i>
                     <div class="text-3xl lg:text-4xl font-bold">
                         <span class="text-teal-cyan-aqua-500">12h</span><span class="text-orange-400 text-lg font-normal">/wk</span>
                     </div>
-                    <div class="text-xs uppercase tracking-wider text-orange-400 font-medium">Time Saved</div>
+                    <div class="text-xs uppercase tracking-wider text-orange-400 font-medium">Avg. Time Saved</div>
                 </div>
-                <div class="w-px h-12 bg-gray-200"></div>
+                <div class="w-px h-16 bg-gray-200"></div>
                 <div>
-                    <div class="text-3xl lg:text-4xl font-bold text-gray-800">
-                        <span class="text-gray-400">1</span> Fee
+                    <i class="bi bi-tag text-teal-cyan-aqua-400 text-sm mb-1 block"></i>
+                    <div class="text-3xl lg:text-4xl font-bold">
+                        <span class="text-teal-cyan-aqua-500">1</span><span class="text-orange-400 text-lg font-normal"> Fee</span>
                     </div>
-                    <div class="text-xs uppercase tracking-wider text-gray-400 font-medium">Flat Build</div>
+                    <div class="text-xs uppercase tracking-wider text-orange-400 font-medium">Flat Build Price</div>
                 </div>
-                <div class="w-px h-12 bg-gray-200"></div>
+                <div class="w-px h-16 bg-gray-200"></div>
                 <div>
-                    <div class="text-3xl lg:text-4xl font-bold text-gray-400">0</div>
-                    <div class="text-xs uppercase tracking-wider text-gray-400 font-medium">Jargon</div>
+                    <i class="bi bi-rocket-takeoff text-teal-cyan-aqua-400 text-sm mb-1 block"></i>
+                    <div class="text-3xl lg:text-4xl font-bold">
+                        <span class="text-teal-cyan-aqua-500">0</span><span class="text-orange-400 text-lg font-normal"> Stress</span>
+                    </div>
+                    <div class="text-xs uppercase tracking-wider text-orange-400 font-medium">Day-One Launch</div>
                 </div>
             </div>
         </div>
     </div>
 
-    @* ── Right Side: Empty panel, lets section gradient show through ── *@
-    <div class="warm-panel flex-1 relative hidden lg:flex items-center justify-center overflow-hidden">
+    @* ── Right Side: AI illustration ── *@
+    <div class="warm-panel lg:w-1/2 shrink-0 relative hidden lg:flex items-center justify-center overflow-hidden bg-[#fcf9f5]">
+        <img src="/images/hero-ai-illustration.png"
+             alt="AI automation workflow illustration"
+             class="w-full object-contain"
+             width="640" height="427" loading="eager" />
+        <div class="hero-image-fade-overlay"></div>
     </div>
 
     @* ── Mobile: Simplified View ── *@
@@ -76,6 +84,3 @@
     </div>
 </section>
 
-@code {
-    // Component is primarily visual/CSS-driven. No complex logic needed.
-}

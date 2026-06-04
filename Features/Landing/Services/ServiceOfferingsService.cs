@@ -3,10 +3,10 @@ using CloudZen.Features.Landing.Models;
 namespace CloudZen.Features.Landing.Services;
 
 /// <summary>
-/// Service for managing and retrieving personal service offerings.
+/// Service for managing and retrieving professional service offerings.
 /// This service centralizes service data management and can be extended to load from external sources (API, database, JSON files, etc.).
 /// </summary>
-public class PersonalService : IPersonalService
+public class ServiceOfferingsService : IServiceOfferingsService
 {
     /// <summary>
     /// Retrieves all professional services offered.

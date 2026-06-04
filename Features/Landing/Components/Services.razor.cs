@@ -9,14 +9,14 @@ namespace CloudZen.Features.Landing.Components;
 /// </summary>
 public partial class Services
 {
-    [Inject] private IPersonalService ProfessionalService { get; set; } = default!;
+    [Inject] private IServiceOfferingsService ServiceOfferings { get; set; } = default!;
 
     private List<ServiceInfo> _featured = new();
     private List<ServiceInfo> _remaining = new();
 
     protected override void OnInitialized()
     {
-        var all = ProfessionalService.GetAllServices();
+        var all = ServiceOfferings.GetAllServices();
         _featured = all.Take(3).ToList();
         _remaining = all.Skip(3).ToList();
     }

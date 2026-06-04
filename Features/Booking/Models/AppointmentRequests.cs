@@ -91,3 +91,21 @@ public sealed record RescheduleAppointmentRequest
     [JsonPropertyName("action")]
     public string Action => "reschedule";
 }
+
+/// <summary>
+/// Request to verify if a booking exists.
+/// </summary>
+public sealed record VerifyBookingRequest
+{
+    /// <summary>The booking ID to verify (e.g. "APT-MN7O3825-TMVP").</summary>
+    [JsonPropertyName("bookingId")]
+    public required string BookingId { get; init; }
+
+    /// <summary>Email address associated with the booking.</summary>
+    [JsonPropertyName("email")]
+    public required string Email { get; init; }
+
+    /// <summary>Workflow action (always "verify" for this request type).</summary>
+    [JsonPropertyName("action")]
+    public string Action => "verify";
+}

@@ -46,7 +46,7 @@ public sealed partial class Faq : ComponentBase
                 "<p>Easy — <a href=\"/contact\" class=\"faq-answer-link\">book a free 30-minute consultation</a>. " +
                 "We'll discuss your needs, answer your questions, and outline how we can help. " +
                 "No commitment required. You can also email us at " +
-                "<a href=\"mailto:info@cloud-zen.net\" class=\"faq-answer-link\">info@cloud-zen.net</a> " +
+                "<a href=\"mailto:cloudzen.inc@gmail.com\" class=\"faq-answer-link\">cloudzen.inc@gmail.com</a> " +
                 "and we'll respond within 24 hours.</p>");
         }),
 
