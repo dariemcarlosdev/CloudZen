@@ -6,14 +6,14 @@ description: Context window and token optimization rules — load less, achieve 
 # Memory & Context Optimization
 
 > **Bridge to universal instruction.** The full rules live in
-> `.github/instructions/memory/memory-optimization.instructions.md`.
+> `~/.claude/skills/memory-optimization/SKILL.md`.
 
 This skill teaches token-efficient AI behavior: progressive disclosure, context budgeting,
 selective loading, and output compression. Apply these rules to **every session**.
 
 ## Instructions
 
-1. **Read the full rules:** Open `.github/instructions/memory/memory-optimization.instructions.md`
+1. **Read the full rules:** Open `~/.claude/skills/memory-optimization/SKILL.md`
 2. **Internalize the 7 sections** — they apply to all tasks, not just specific workflows
 3. **Key principles to always follow:**
    - Load only what you need (grep first, then read matched files)
@@ -26,5 +26,5 @@ selective loading, and output compression. Apply these rules to **every session*
 ## Quick Start
 
 ```
-Read .github/instructions/memory/memory-optimization.instructions.md
+Read ~/.claude/skills/memory-optimization/SKILL.md
 ```

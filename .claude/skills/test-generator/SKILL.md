@@ -6,17 +6,17 @@ description: Generate unit and integration tests with Arrange-Act-Assert structu
 # Test Generator
 
 > **Bridge to universal skill catalog.** This file registers the skill with Claude's `/skills` system.
-> The full skill definition lives in `.github/skills/testing/test-generator/SKILL.md`.
+> The full skill definition lives in `~/.claude/skills/test-generator/SKILL.md`.
 
 ## Instructions
 
-1. **Read the full skill:** Open `.github/skills/testing/test-generator/SKILL.md`
+1. **Read the full skill:** Open `~/.claude/skills/test-generator/SKILL.md`
 2. **Follow the Core Workflow** steps defined in that file
-3. **Load references on demand** from `.github/skills/testing/test-generator/references/` — only when the Reference Guide table says to
+3. **Load references on demand** from `~/.claude/skills/test-generator/references/` — only when the Reference Guide table says to
 4. **Never load all references at once** — progressive disclosure saves tokens
 
 ## Quick Start
 
 ```
-Read .github/skills/testing/test-generator/SKILL.md
+Read ~/.claude/skills/test-generator/SKILL.md
 ```
