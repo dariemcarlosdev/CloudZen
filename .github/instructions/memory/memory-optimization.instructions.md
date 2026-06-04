@@ -9,163 +9,56 @@ applyTo: "**/*.cs, **/*.razor, **/*.razor.cs, **/*.razor.css, **/*.ts, **/*.js"
 
 ## 1. Context Window Discipline
 
-### Load Only What You Need
+**Load Only What You Need:** Never bulk-read directories; use `glob`/`grep` first, then read only matched files. Use `view_range` for specific line ranges. Batch parallel reads in a single turn. Suppress verbose output (`--quiet`, `--no-pager`, pipe to `head`). Don't re-read files you've seen unless modified. Don't echo content back unless asked. Trim build/test output — report "Build succeeded" not full logs.
 
-- **Never bulk-read directories.** Use `glob` or `grep` to find specific files first, then read only relevant ones.
-- **Use `view_range`** to read specific line ranges instead of full files when you know the target area.
-- **Prefer `grep` with `output_mode: "files_with_matches"`** for initial discovery, then read only matched files.
-- **Batch parallel reads.** When you need multiple files, read them all in a single tool-call turn.
-
-### Avoid Context Pollution
-
-- **Suppress verbose output.** Use `--quiet`, `--no-pager`, pipe to `head`/`Select-Object -First` on long outputs.
-- **Don't re-read files** you've already seen in this session unless they were modified.
-- **Don't echo file contents back** to the user unless explicitly asked — they can see the timeline.
-- **Trim build/test output.** On success, report "Build succeeded" or "All N tests passed" — don't paste full logs.
-- **Don't paste full stack traces** unless debugging a specific failure. Summarize the error first.
-
-### Structured Over Verbose
-
-- Use tables, bullet points, and concise summaries over prose when reporting findings.
-- When showing code, show only the relevant snippet with enough context (5-10 lines), not entire files.
-- Prefer `show_file` with `view_range` over dumping code into chat text.
+**Structured Over Verbose:** Use tables, bullet points, and summaries over prose when reporting findings. Show only relevant code snippets with 5–10 lines context, not entire files.
 
 ## 2. Session Priming Strategy
 
-### First Turn Efficiency
+**First Turn Efficiency:** Use `project_summary` tool instead of reading multiple files. Check `docs/` first to find relevant feature documentation. Narrow `grep`/`glob` to layer directories: `Components/` (UI), `Features/` (business logic), `Data/` (access), `Services/Strategies/` (external providers), `Models/` / `Events/` (domain).
 
-When starting a new session or task:
-
-1. **Read the architecture summary** — use the `project_summary` tool (context-optimizer extension) instead of reading multiple files.
-2. **Check docs/ first** — use `check_docs` tool to find relevant feature documentation before exploring source.
-3. **Use scoped searches** — narrow grep/glob to the relevant layer directory:
-   - UI changes → `Components/`
-   - Business logic → `Features/`
-   - Data access → `Data/`
-   - Payment flow → `Services/Strategies/`
-   - Domain model → `Models/`, `Events/`
-
-### Context Checkpoint Pattern
-
-For long-running tasks:
-
-- After completing a logical unit of work, summarize what was done and what's next.
-- If context is growing large, proactively use `/compact` to summarize and free space.
-- Before `/compact`, ensure all important decisions and findings are captured in the plan or todos.
+**Context Checkpoints:** After completing logical units, summarize what's done. Use `/compact` when context grows large. Before compacting, ensure decisions/findings are captured in plan.md or todos.
 
 ## 3. File Access Patterns
 
-### Read Order Priority
+**Read Order (Most Efficient First):**
+1. `docs/{feature}/README.md` — high-level understanding
+2. Interface/contract files — API surface
+3. MediatR command/handler — business flow
+4. Implementation — only if needed
+5. Tests — only for verification
 
-When investigating a feature, read files in this order (most context-efficient first):
-
-1. **docs/{feature}/README.md** — high-level understanding, cheapest context
-2. **Interface/contract files** — understand the API surface (e.g., repository or service interfaces)
-3. **MediatR command/handler** — understand the business flow
-4. **Implementation** — only if you need to understand internals
-5. **Tests** — only if verifying behavior or writing new tests
-
-### Write Order Priority
-
-When implementing, minimize context churn:
-
-1. **Plan first** — outline changes before opening files
-2. **Edit bottom-up** — Domain → Application → Infrastructure → Presentation
-3. **Batch edits per file** — make all edits to one file in a single turn
-4. **Don't interleave reads and writes** to the same file — read once, plan edits, apply all
+**Write Order:** Plan first. Edit bottom-up (Domain → Application → Infrastructure → Presentation). Batch edits per file in a single turn. Don't interleave reads/writes.
 
 ## 4. Search Efficiency
 
-### Grep/Glob Best Practices
+Fast: `grep pattern:"IPaymentService" glob:"**/*.cs" output_mode:"files_with_matches"` (file paths only)
 
-```
-✅ grep pattern:"IPaymentService" glob:"**/*.cs" output_mode:"files_with_matches"
-   → Fast: returns only file paths
+Wasteful: `grep pattern:"IPaymentService" output_mode:"content" -A:50` (loads unnecessary context)
 
-❌ grep pattern:"IPaymentService" output_mode:"content" -A:50
-   → Wasteful: loads 50 lines of context per match across entire repo
-```
-
-### Progressive Disclosure Pattern
-
-1. **Find files** — `glob` or `grep` with `files_with_matches`
-2. **Count matches** — `grep` with `count` to assess scope
-3. **Read specific matches** — `grep` with `content` and `-n` on targeted files
-4. **Deep dive** — `view` with `view_range` on the most relevant result
+**Progressive Disclosure:** Find files → Count matches (`count`) → Read specific matches (`content` + `-n`) → Deep dive with `view_range`.
 
 ## 5. Sub-Agent Delegation
 
-### When to Delegate vs. Do It Yourself
+**When to Delegate:** Read 1-3 files yourself. Search symbols yourself. Delegate 5+ independent areas to explore agents (parallel benefit). Delegate complex multi-file refactors to general-purpose agents. Delegate build/test to task agents (summary-only return).
 
-| Task | Approach | Why |
-|------|----------|-----|
-| Read 1-3 known files | Do it yourself | Faster, stays in context |
-| Search for a symbol | Do it yourself (grep) | Single tool call |
-| Analyze 5+ independent areas | Delegate to explore agents | Parallel, keeps main context clean |
-| Complex multi-file refactor | Delegate to general-purpose | Separate context window |
-| Run build/tests | Delegate to task agent | Summary only comes back |
-
-### Delegation Context Rules
-
-- **Give complete context** to sub-agents — they don't share your memory.
-- **Don't duplicate** sub-agent findings by re-reading the same files afterward.
-- **Trust sub-agent results** for status (pass/fail), verify only if suspicious.
+**Context Rules:** Give complete context to sub-agents (no memory sharing). Don't re-read their findings. Trust their status (pass/fail), verify only if suspicious.
 
 ## 6. Memory Across Sessions
 
-### Session Store Usage
-
-Before starting major work, check session history:
-
-```sql
--- What was done recently in this project?
-SELECT s.id, s.summary, s.updated_at 
-FROM sessions s 
-WHERE s.repository LIKE '%my-project%' 
-ORDER BY s.updated_at DESC LIMIT 5;
-
--- Was this problem solved before?
-SELECT content FROM search_index 
-WHERE search_index MATCH 'keyword1 OR keyword2' 
-ORDER BY rank LIMIT 10;
-```
-
-### Continuity Patterns
-
-- **Check plan.md** at session start — it may contain unfinished work.
-- **Check todos** — `SELECT * FROM todos WHERE status != 'done'` for pending items.
-- **Reference previous sessions** when the user says "continue" or "pick up where we left off."
+**Session Store Usage:** Before starting major work, check session history with DuckDB session_store_sql. Find prior approaches to similar problems. Check plan.md for unfinished work. Query todos for pending items (`WHERE status != 'done'`). Reference previous sessions on "continue" requests.
 
 ## 7. Token Budget Guidelines
 
-### Awareness Thresholds
+| Context % | Action |
+|-----------|--------|
+| < 30% | Normal — read freely |
+| 30-60% | Selective — use view_range, prefer summaries |
+| 60-80% | Conservative — delegate, summarize |
+| > 80% | Critical — suggest /compact, stop reading new files |
 
-| Context Usage | Action |
-|---------------|--------|
-| < 30% | Normal operation — read freely |
-| 30-60% | Be selective — use view_range, prefer summaries |
-| 60-80% | Conservative — delegate to sub-agents, summarize findings |
-| > 80% | Critical — suggest /compact, stop reading new files, work from memory |
-
-### Cost-Per-Action Estimates
-
-| Action | Relative Context Cost | Notes |
-|--------|----------------------|-------|
-| `grep` (files_with_matches) | Very Low | Just file paths |
-| `glob` | Very Low | Just file paths |
-| `grep` (content, 5 matches) | Low | Small snippets |
-| `view` (50 lines) | Low | Targeted read |
-| `view` (full file, 200 lines) | Medium | Only when necessary |
-| `powershell` (build output) | Medium-High | Suppress verbose output |
-| `view` (full file, 500+ lines) | High | Avoid — use view_range |
-| Multiple full file reads | Very High | Batch and parallelize |
+**Cost Estimates:** `grep`/`glob` = very low. `grep` (5 matches) = low. `view` (50 lines) = low. `view` (200 lines) = medium. `view` (500+ lines) = high. Multiple full reads = very high.
 
 ## 8. Anti-Patterns (Never Do These)
 
-- ❌ **Cat-then-grep**: Don't read an entire file just to search it — use grep directly.
-- ❌ **Exploratory full reads**: Don't read files "just to understand" without a specific question.
-- ❌ **Re-reading after edit**: Don't view a file you just edited — you know what's in it.
-- ❌ **Verbose confirmations**: Don't paste back what you wrote. Say "Created X with Y" not "Here's the file I created: [full content]."
-- ❌ **Sequential single-file reads**: Don't read files one-per-turn. Batch parallel reads.
-- ❌ **Ignoring docs/**: Don't explore source code when docs/ has a README for that feature.
-- ❌ **Global unrestricted grep**: Always scope to relevant directories or file types.
+Cat-then-grep (use grep directly). Exploratory full reads without specific question. Re-reading edited files. Verbose confirmations (say "Created X" not full content). Sequential single-file reads (batch parallel). Ignoring docs/ when it has a README. Global unrestricted grep (always scope to directory/type).

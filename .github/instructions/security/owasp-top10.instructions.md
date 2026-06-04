@@ -14,48 +14,7 @@ The #1 web application security risk. Default posture: **deny all, allow explici
 
 ### Mandatory Practices
 
-- Apply `[Authorize]` on **every** Blazor page and API endpoint — no anonymous defaults
-- Use **policy-based authorization** — never inline role strings
-
-```csharp
-// ✅ Policy-based — centralized, testable
-[Authorize(Policy = "CanApproveOrder")]
-public sealed partial class ApproveOrderPage : ComponentBase { }
-
-// ❌ Role string scattered across codebase
-[Authorize(Roles = "Admin,Manager")] // VIOLATION — use policies
-```
-
-- Define all policies in a single `AuthorizationPolicies` class:
-
-```csharp
-public static class AuthorizationPolicies
-{
-    public const string CanApproveOrder = nameof(CanApproveOrder);
-    public const string CanCancelOrder = nameof(CanCancelOrder);
-    public const string CanViewOrders = nameof(CanViewOrders);
-
-    public static void Register(AuthorizationOptions options)
-    {
-        options.AddPolicy(CanApproveOrder, policy =>
-            policy.RequireClaim("app_role", "manager", "admin"));
-
-        options.AddPolicy(CanCancelOrder, policy =>
-            policy.RequireClaim("app_role", "manager", "admin", "support"));
-    }
-}
-```
-
-- Use **resource-based authorization** for entity-level checks:
-
-```csharp
-var authResult = await AuthorizationService.AuthorizeAsync(
-    user, order, "OrderOwnerPolicy");
-if (!authResult.Succeeded)
-    return Forbid();
-```
-
-- **Never** rely on UI hiding alone — always enforce server-side
+Apply `[Authorize]` on **every** Blazor page and API endpoint — no anonymous defaults. Use **policy-based authorization** (never inline role strings). Define all policies in `AuthorizationPolicies` class: constant names, registered via `AddPolicy`. Use **resource-based authorization** for entity-level checks via `AuthorizationService.AuthorizeAsync()`. **Never** rely on UI hiding alone — always enforce server-side.
 
 ---
 
@@ -63,35 +22,11 @@ if (!authResult.Succeeded)
 
 ### Secrets Management
 
-- **Never** store secrets in `appsettings.json`, source code, or environment variables in production
-- Use **Azure Key Vault** with **Managed Identity** for all production secrets
-- Use `dotnet user-secrets` for local development only
-- Stripe API keys: store in Key Vault, inject via `IOptions<StripeSettings>`
-```csharp
-// ✅ Options pattern — secret from Key Vault
-public sealed class StripeSettings
-{
-    public string SecretKey { get; init; } = string.Empty;
-    public string WebhookSecret { get; init; } = string.Empty;
-}
-
-// ❌ CRITICAL VIOLATION — hardcoded secret
-var stripe = new StripeClient("sk_live_abc123..."); // NEVER DO THIS
-```
+Never store secrets in `appsettings.json`, source code, or production environment variables. Use **Azure Key Vault** with **Managed Identity** for production. Use `dotnet user-secrets` for local development. Store Stripe API keys in Key Vault, inject via `IOptions<StripeSettings>` Options pattern.
 
 ### Data Protection
 
-- Enforce **HTTPS everywhere** — `app.UseHsts()` and `app.UseHttpsRedirection()`
-- Encrypt sensitive fields at rest in the database (PII, financial data)
-- Never log tokens, API keys, connection strings, or PII
-
-```csharp
-// ❌ VIOLATION — logging PII / secrets
-_logger.LogInformation("Processing request for {Email} with key {ApiKey}", user.Email, apiKey);
-
-// ✅ Log only correlation identifiers
-_logger.LogInformation("Processing request for order {OrderId}", order.Id);
-```
+Enforce **HTTPS everywhere** via `app.UseHsts()` and `app.UseHttpsRedirection()`. Encrypt sensitive fields at rest (PII, financial data). Never log tokens, API keys, connection strings, or PII — log only correlation IDs.
 
 ---
 
@@ -99,29 +34,11 @@ _logger.LogInformation("Processing request for order {OrderId}", order.Id);
 
 ### SQL Injection Prevention
 
-- **Always** use EF Core parameterized queries — never string-concatenate user input
-- If raw SQL is required, use `FromSqlInterpolated` (never `FromSqlRaw` with concatenation)
-
-```csharp
-// ✅ EF Core — parameterized by default
-var orders = await context.Orders
-    .Where(o => o.CustomerId == customerId && o.Status == status)
-    .ToListAsync(cancellationToken);
-
-// ✅ Raw SQL — interpolated (parameterized)
-var result = await context.Orders
-    .FromSqlInterpolated($"SELECT * FROM orders WHERE customer_id = {customerId}")
-    .ToListAsync(cancellationToken);
-
-// ❌ CRITICAL VIOLATION — SQL injection vector
-var sql = $"SELECT * FROM orders WHERE customer_id = '{request.CustomerId}'";
-var result = await context.Orders.FromSqlRaw(sql).ToListAsync();
-```
+**Always** use EF Core parameterized queries — never string-concatenate user input. If raw SQL required, use `FromSqlInterpolated` (never `FromSqlRaw` with concatenation).
 
 ### Input Validation
 
-- Validate **all** input at the application boundary using FluentValidation
-- Every MediatR command must have a corresponding validator
+Validate **all** input at application boundary using FluentValidation. Every MediatR command must have corresponding validator.
 
 ```csharp
 public sealed class CreateOrderCommandValidator : AbstractValidator<CreateOrderCommand>
@@ -130,16 +47,13 @@ public sealed class CreateOrderCommandValidator : AbstractValidator<CreateOrderC
     {
         RuleFor(x => x.OrderId).NotEmpty();
         RuleFor(x => x.Amount).GreaterThan(0).LessThanOrEqualTo(1_000_000);
-        RuleFor(x => x.Currency).NotEmpty().Length(3);
-        RuleFor(x => x.IdempotencyKey).NotEmpty();
     }
 }
 ```
 
 ### XSS Prevention
 
-- Blazor encodes output by default — never use `@((MarkupString)untrustedContent)`
-- Sanitize any user-provided HTML before rendering
+Blazor encodes output by default — never use `@((MarkupString)untrustedContent)`. Sanitize any user-provided HTML before rendering.
 
 ---
 
@@ -147,29 +61,11 @@ public sealed class CreateOrderCommandValidator : AbstractValidator<CreateOrderC
 
 ### Secure Headers
 
-Configure security headers in `Program.cs` or middleware:
-
-```csharp
-app.UseHsts();
-app.UseHttpsRedirection();
-
-app.Use(async (context, next) =>
-{
-    context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-    context.Response.Headers.Append("X-Frame-Options", "DENY");
-    context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
-    context.Response.Headers.Append(
-        "Content-Security-Policy",
-        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';");
-    await next();
-});
-```
+Configure in `Program.cs` or middleware: `app.UseHsts()`, `app.UseHttpsRedirection()`, set `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, CSP headers.
 
 ### Environment Configuration
 
-- Never enable Swagger/OpenAPI in production
-- Use `builder.Environment.IsDevelopment()` guards for debug-only features
-- Disable detailed error pages in production — use `UseExceptionHandler`
+Never enable Swagger/OpenAPI in production. Use `builder.Environment.IsDevelopment()` guards for debug features. Disable detailed error pages in production — use `UseExceptionHandler`.
 
 ---
 
@@ -177,17 +73,7 @@ app.Use(async (context, next) =>
 
 ### Authentication Strategy
 
-- Use **Microsoft Entra ID** (primary) or **Duende IdentityServer** for authentication
-- **Never** implement custom authentication or store plaintext passwords
-- Enforce MFA for privileged operations (approvals, administrative actions)
-- Use `Microsoft.Identity.Web` for Entra ID integration
-
-```csharp
-builder.Services.AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-```
-
-- For Blazor Server: use `RevalidatingServerAuthenticationStateProvider`
-- Session timeout: configure reasonable expiration for application workflows
+Use **Microsoft Entra ID** (primary) or **Duende IdentityServer** for authentication. Never implement custom auth or store plaintext passwords. Enforce MFA for privileged operations. Use `Microsoft.Identity.Web` for Entra integration. For Blazor Server: use `RevalidatingServerAuthenticationStateProvider`. Configure reasonable session timeout for workflows.
 
 ---
 
@@ -195,67 +81,21 @@ builder.Services.AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("Az
 
 ### Sensitive Data Handling
 
-- **Never** store raw card numbers, CVVs, or full magnetic stripe data
-- Delegate payment processing to a PCI-compliant provider (e.g., **Stripe**) — use tokenized references only
-- Store only external payment references (e.g., PaymentIntent IDs) in `Order` — never raw credentials
-- Audit log all sensitive operations with timestamps and user identity
+Never store raw card numbers, CVVs, or full magnetic stripe. Delegate payment processing to PCI-compliant provider (Stripe) — use tokenized references only. Store only external references (PaymentIntent IDs) in Order — never raw credentials. Audit log all sensitive operations with timestamps and user identity.
 
 ### Third-Party API Key Management
 
-```csharp
-// ✅ Keys injected via Options pattern, sourced from Key Vault
-builder.Services.Configure<StripeSettings>(
-    builder.Configuration.GetSection("Stripe"));
-
-// Register Stripe client with DI
-builder.Services.AddSingleton<IStripeClient>(sp =>
-{
-    var settings = sp.GetRequiredService<IOptions<StripeSettings>>().Value;
-    return new StripeClient(settings.SecretKey);
-});
-```
-
-- Rotate API keys on a schedule
-- Use restricted keys with minimum required permissions
-- Validate Stripe webhook signatures on every incoming event
+Keys injected via Options pattern, sourced from Key Vault. Register Stripe client with DI. Rotate keys on schedule. Use restricted keys with minimum permissions. Validate Stripe webhook signatures on every event.
 
 ### Idempotency Keys
 
-All state-changing commands **must** include an `IdempotencyKey` to prevent duplicate operations:
-
-```csharp
-public sealed record CreateOrderCommand(
-    Guid OrderId,
-    decimal Amount,
-    string Currency,
-    string IdempotencyKey) : IRequest<CreateOrderResult>;
-```
-
-- Generate idempotency keys client-side (GUID v7 recommended)
-- Store and check idempotency keys server-side before processing
-- Return cached results for duplicate requests
+All state-changing commands **must** include `IdempotencyKey` to prevent duplicates. Generate client-side (GUID v7 recommended). Store and check server-side before processing. Return cached results for duplicates.
 
 ---
 
 ## Mass Assignment Prevention
 
-**Never** bind request data directly to domain entities.
-
-```csharp
-// ❌ CRITICAL VIOLATION — mass assignment
-[HttpPost]
-public async Task<IActionResult> CreateOrder(
-    [FromBody] Order order) // Domain entity bound directly!
-{
-    await repository.AddAsync(order);
-}
-
-// ✅ Use a DTO with explicit properties
-public sealed record CreateOrderRequest(
-    Guid CustomerId,
-    decimal Amount,
-    string Currency);
-```
+Never bind request data directly to domain entities. Use DTOs with explicit properties instead.
 
 ---
 

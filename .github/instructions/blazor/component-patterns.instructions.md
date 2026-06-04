@@ -6,120 +6,19 @@ applyTo: "**/*.razor, **/*.razor.cs, **/*.razor.css"
 
 ## Mandatory Code-Behind Pattern
 
-Every Blazor component consists of **three files**. No exceptions.
+Every Blazor component consists of **three files**:
 
 ```
-Components/Pages/OrderDashboard/
-├── OrderDashboard.razor        ← Markup only (HTML + Razor directives)
-├── OrderDashboard.razor.cs     ← Logic (partial class, lifecycle, event handlers)
-└── OrderDashboard.razor.css    ← Scoped styles (Bootstrap 5 overrides only)
+ComponentName.razor        ← Markup only (HTML + Razor directives)
+ComponentName.razor.cs     ← Logic (partial class, lifecycle, event handlers)
+ComponentName.razor.css    ← Scoped styles (Bootstrap 5 overrides only)
 ```
 
 ### .razor — Markup
-
-Contains HTML, Razor directives, and component references. **No `@code {}` blocks.**
-
-```razor
-@page "/orders/dashboard"
-@attribute [Authorize(Policy = "AppUser")]
-@attribute [StreamRendering]
-
-<PageTitle>@Localizer["Dashboard.Title"]</PageTitle>
-
-<div class="container-fluid mt-3">
-    <h1 class="mb-4">@Localizer["Dashboard.Heading"]</h1>
-
-    @if (_orders is null)
-    {
-        <div class="d-flex justify-content-center">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">@Localizer["Loading"]</span>
-            </div>
-        </div>
-    }
-    else
-    {
-        <table class="table table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>@Localizer["Column.Id"]</th>
-                    <th>@Localizer["Column.Amount"]</th>
-                    <th>@Localizer["Column.Status"]</th>
-                    <th>@Localizer["Column.Actions"]</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var order in _orders)
-                {
-                    <OrderRow Order="order"
-                              OnComplete="HandleCompleteAsync"
-                              OnCancel="HandleCancelAsync" />
-                }
-            </tbody>
-        </table>
-    }
-</div>
-```
+Contains HTML, Razor directives, and component references. **No `@code {}` blocks.** Use `@inject IStringLocalizer<SharedResource> L` for localized strings. Render loading indicators while data loads: `@if (_orders is null) { <spinner /> } else { <table /> }`.
 
 ### .razor.cs — Code-Behind
-
-Must be a `partial` class matching the `.razor` filename. Owns all logic.
-
-```csharp
-namespace MyApp.Components.Pages.OrderDashboard;
-
-public sealed partial class OrderDashboard : ComponentBase, IDisposable
-{
-    [Inject] private IMediator Mediator { get; set; } = default!;
-    [Inject] private IStringLocalizer<SharedResource> Localizer { get; set; } = default!;
-    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
-
-    private IReadOnlyList<OrderDto>? _orders;
-    private CancellationTokenSource _cts = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        var result = await Mediator.Send(
-            new GetOrdersQuery(), _cts.Token);
-        _orders = result.Orders;
-    }
-
-    private async Task HandleCompleteAsync(Guid orderId)
-    {
-        await Mediator.Send(
-            new CompleteOrderCommand(orderId), _cts.Token);
-        // Refresh data after action
-        await OnInitializedAsync();
-    }
-
-    private async Task HandleCancelAsync(Guid orderId)
-    {
-        await Mediator.Send(
-            new CancelOrderCommand(orderId), _cts.Token);
-        await OnInitializedAsync();
-    }
-
-    public void Dispose() => _cts.Cancel();
-}
-```
-
-### .razor.css — Scoped Styles
-
-Component-scoped CSS. Use only for overrides beyond Bootstrap 5 defaults.
-
-```css
-/* OrderDashboard.razor.css */
-h1 {
-    font-weight: 600;
-    color: var(--bs-primary);
-}
-
-::deep .status-badge {
-    font-size: 0.85rem;
-    min-width: 5rem;
-    text-align: center;
-}
-```
+Sealed partial class with all logic. Inject services via `[Inject]` properties. Override `OnInitializedAsync` for data loading (not constructor). Implement `IDisposable` if component owns `CancellationTokenSource`. Use `protected` access on fields to allow markup binding. Call `IMediator.Send()` for all data operations.
 
 ---
 
@@ -160,21 +59,7 @@ Use these standard Bootstrap 5 classes consistently:
 
 ## Localization
 
-Inject `IStringLocalizer<SharedResource>` in every component that renders user-facing text.
-
-```csharp
-// In .razor.cs
-[Inject] private IStringLocalizer<SharedResource> Localizer { get; set; } = default!;
-```
-
-```razor
-<!-- In .razor — reference as @Localizer["Key"] -->
-<h1>@Localizer["Dashboard.Heading"]</h1>
-<button class="btn btn-primary">@Localizer["Button.CreateOrder"]</button>
-```
-
-- Resource keys: dot-separated, context-prefixed (e.g., `Dashboard.Title`, `Button.CreateOrder`)
-- Never hardcode user-visible strings — always use localizer keys
+Inject `IStringLocalizer<SharedResource>` in every component that renders user-facing text. Resource keys: dot-separated, context-prefixed (e.g., `Dashboard.Title`, `Button.CreateOrder`). Never hardcode user-visible strings — always use localizer keys. In markup: `@Localizer["Key"]`. In code-behind: `L["Key"]`.
 
 ---
 
@@ -182,72 +67,23 @@ Inject `IStringLocalizer<SharedResource>` in every component that renders user-f
 
 ### EventCallback&lt;T&gt; — Child notifies parent
 
-```csharp
-// Child component (.razor.cs)
-[Parameter] public EventCallback<Guid> OnComplete { get; set; }
-
-private async Task CompleteClicked() =>
-    await OnComplete.InvokeAsync(_orderId);
-```
-
-```razor
-<!-- Parent component (.razor) -->
-<OrderRow Order="order" OnComplete="HandleCompleteAsync" />
-```
+Child component declares `[Parameter] public EventCallback<Guid> OnComplete { get; set; }` and calls `await OnComplete.InvokeAsync(_orderId)`. Parent invokes: `<ChildComponent OnComplete="HandleCompleteAsync" />`.
 
 ### CascadingParameter — Reserved for auth state only
 
-```csharp
-// Only use CascadingParameter for authentication state
-[CascadingParameter]
-private Task<AuthenticationState> AuthState { get; set; } = default!;
-```
-
-Do **not** cascade custom state objects. Use `IMediator` or scoped DI services instead.
+Only use `[CascadingParameter] private Task<AuthenticationState> AuthState` for authentication. Do **not** cascade custom state objects. Use `IMediator` or scoped DI services instead.
 
 ---
 
 ## StreamRendering for Progressive Loading
 
-Apply `[StreamRendering]` on pages that fetch data in `OnInitializedAsync`. This renders the page shell immediately and streams content as data becomes available.
-
-```razor
-@attribute [StreamRendering]
-```
-
-Pair with a loading indicator:
-
-```razor
-@if (_data is null)
-{
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">@Localizer["Loading"]</span>
-    </div>
-}
-else
-{
-    <!-- Render data -->
-}
-```
+Apply `[StreamRendering]` on pages that fetch data in `OnInitializedAsync`. Renders page shell immediately, streams content as data becomes available. Pair with a loading indicator that displays when `_data is null`.
 
 ---
 
 ## IDisposable Cleanup
 
-Always implement `IDisposable` (or `IAsyncDisposable`) when the component owns:
-- `CancellationTokenSource`
-- `Timer` or `PeriodicTimer`
-- Event handler subscriptions
-- `DotNetObjectReference` or `IJSObjectReference`
-
-```csharp
-public sealed partial class MyComponent : ComponentBase, IDisposable
-{
-    private CancellationTokenSource _cts = new();
-
-    public void Dispose() => _cts.Cancel();
-}
-```
+Implement `IDisposable` when component owns: `CancellationTokenSource`, `Timer`, `PeriodicTimer`, event handler subscriptions, or `IJSObjectReference`. Call `.Cancel()` on `CancellationTokenSource` in `Dispose()`. This prevents memory leaks and circuit issues from dangling async operations.
 
 ---
 

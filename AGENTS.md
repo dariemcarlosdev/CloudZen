@@ -1,167 +1,307 @@
-# AGENTS.md — CloudZen AI Instructions
+# AGENTS.md — CloudZen AI Instructions (Merged)
 
-> Repository-specific rules for AI agents working in CloudZen.
+> Consolidated from AGENTS.md + CLAUDE.md + GEMINI.md. Original files archived.
 
 ## 1. Project Context
 
-CloudZen is a **Blazor WebAssembly** frontend (`CloudZen.csproj`) plus an **Azure Functions Isolated Worker** API backend under `Api/`.
+CloudZen is a **Blazor WebAssembly** frontend plus an **Azure Functions Isolated Worker** API backend under `Api/`.
 
 - Frontend: .NET 8 WASM SPA
 - Backend: Azure Functions v4 (.NET 8, isolated)
 - Deployment: Azure Static Web Apps + Azure Functions
 - Styling: Tailwind (CDN) + component-scoped CSS
 
-## 2. Architecture Style
+---
 
-CloudZen uses **vertical slice architecture by feature**, not classic layer-first folders.
-
-### Frontend (WASM)
+## 2. Architecture — Vertical Slices by Feature
 
 ```
-Features/
-  Booking/   Contact/   Chat/   Landing/   Profile/   Projects/   Tickets/
-Common/
-Layout/
-Pages/
+Frontend:  Features/{Booking|Contact|Chat|Landing|Profile|Projects|Tickets}/
+           Common/  Layout/  Pages/
+
+Backend:   Api/Features/{Booking|Contact|Chat}/
+           Api/Shared/{Security|Services|Models}/
 ```
 
-Each feature owns its `Components/`, `Models/`, and `Services/` folders.
+Each feature owns its `Components/`, `Models/`, and `Services/`. Use **WASM → Azure Function → external provider** proxy pattern for sensitive operations.
 
-### Backend (API)
+### Feature Classification
 
-```
-Api/
-  Features/Booking
-  Features/Contact
-  Features/Chat
-  Shared/Security
-  Shared/Services
-  Shared/Models
-```
+**Full-stack slices (WASM + API):** Booking, Contact, Chat  
+**Frontend-only slices:** Landing, Profile, Projects, Tickets
 
-Use the **WASM -> Azure Function -> external provider** proxy pattern for sensitive operations.
+Only full-stack slices add/modify Azure Function endpoints.
 
-## 3. Feature Classification
+---
 
-### Full-stack slices (WASM + API)
+## 3. Component Rules (MANDATORY)
 
-- Booking
-- Contact
-- Chat
-
-### Frontend-only slices
-
-- Landing
-- Profile
-- Projects
-- Tickets
-
-Only full-stack slices should add/modify Azure Function endpoints.
-
-## 4. Component Rules (MANDATORY)
-
-Use code-behind for component logic.
+**Always generate three files per component:**
 
 ```
-ComponentName.razor
-ComponentName.razor.cs
-ComponentName.razor.css   (when needed)
+ComponentName.razor       ← Markup only. No @code {} blocks.
+ComponentName.razor.cs    ← sealed partial class. All logic.
+ComponentName.razor.css   ← Scoped CSS (when needed)
 ```
 
-Rules:
+**Template:**
 
-1. Keep `.razor` focused on markup.
-2. Put state, lifecycle, handlers, and service calls in `.razor.cs`.
-3. Prefer Tailwind utilities first; use `.razor.css` for advanced/isolated styling.
-4. Use `[Parameter]` for parent-to-child data and `EventCallback<T>` for child-to-parent events.
-5. Keep Pages thin orchestration shells.
+```csharp
+// .razor — Markup only
+@page "/route"
+<div class="wrapper"><h1>@L["Title"]</h1></div>
 
-## 5. Service & DI Rules
+// .razor.cs — Logic
+namespace CloudZen.Features.{Feature}.Components;
+public sealed partial class ComponentName
+{
+    [Inject] private HttpClient Http { get; set; } = default!;
+    protected override async Task OnInitializedAsync() { }
+}
+```
 
-- Register frontend feature services in root `Program.cs`.
-- Use interfaces for injectable services (`IEmailService`, `IChatbotService`, `IBookingService`, etc.).
-- Backend-calling services use `HttpClient` + options classes.
-- Data-only services remain in feature service layer; avoid UI/business coupling.
-- Do not place secrets in WASM client configuration.
+**Rules:**
+1. Keep `.razor` markup-only
+2. All logic in `.razor.cs`
+3. Tailwind utilities first, `.razor.css` for advanced styling
+4. `[Parameter]` for parent-to-child, `EventCallback<T>` for child-to-parent
+5. Pages are thin orchestration shells
+6. Localize all user text: `@L["Key"]`
 
-## 6. Configuration Rules
+---
 
-Use strongly typed options classes:
+## 4. Service & DI Rules
 
-- `EmailServiceOptions`
-- `ChatbotOptions`
-- `BookingServiceOptions`
-- `BlobStorageOptions`
+- Register services in `Program.cs`
+- Use interfaces: `IEmailService`, `IChatbotService`, `IBookingService`
+- Backend services use `HttpClient` + options classes
+- Strongly typed options: `EmailServiceOptions`, `ChatbotOptions`, `BookingServiceOptions`
+- Bind via `AddOptions<T>().BindConfiguration(...)`
+- **Never place secrets in WASM client config**
 
-Bind via `AddOptions<T>().BindConfiguration(...)`.
+---
 
-In development, local API base URL overrides in `Program.cs` are allowed for local Functions ports.
+## 5. API & Security (CRITICAL)
 
-## 7. API & Security Rules (CRITICAL)
+All `/api/*` endpoints must preserve:
+1. Input validation via shared validators
+2. Rate limiting (Polly-based) per endpoint
+3. Security headers + proper CORS
+4. Correlation IDs in logs
+5. Secrets from environment/Key Vault only
+6. **No PII, tokens, or secrets in logs or responses**
 
-All API endpoints are under `/api/*` and must preserve the existing security baseline:
+### OWASP Top 10 Checklist
 
-1. Input validation and sanitization via shared validators.
-2. Rate limiting (Polly-based) per endpoint/client context.
-3. Security headers and proper CORS behavior.
-4. Correlation IDs in logs.
-5. Secrets from environment/Key Vault only.
-6. No secret, token, or PII leakage in logs or client responses.
+| # | Check |
+|---|---|
+| A01 | Authorization on every endpoint? Policy-based? |
+| A02 | Secrets in code? PII in logs? TLS enforced? |
+| A03 | Parameterized queries? No SQL concatenation? |
+| A04 | Threat model reviewed? Business logic bypasses? |
+| A05 | HTTPS? HSTS? Debug disabled in prod? |
+| A06 | NuGet packages up to date? CVEs? |
+| A07 | Token validation? Brute-force protection? |
+| A08 | Deserialization safe? Pipeline integrity? |
+| A09 | Audit trail? Correlation IDs? No secrets logged? |
+| A10 | External URL validation? Allowlisting? |
 
-## 8. Endpoint Ownership
+**Report format:** Severity (Critical/High/Medium/Low), Location, Issue, Fix.
 
-Current API feature endpoints:
+---
 
+## 6. Endpoint Ownership
+
+**Current API endpoints:**
 - `/api/send-email`
 - `/api/chat`
 - `/api/book-appointment`
 
-If you add endpoints, place them under the matching `Api/Features/{Feature}` folder and document request/response contracts.
+Place new endpoints under `Api/Features/{Feature}/` and document request/response contracts.
 
-## 9. Model Ownership Across Projects
+---
 
-WASM and API are separate projects. DTO duplication is acceptable when needed.
+## 7. Model Ownership
 
-- Do not force direct project references between WASM and API to share request models.
-- Keep transformation logic in API proxy functions when external systems require different field names.
+WASM and API are separate projects. DTO duplication is acceptable.
+- No forced project references between WASM and API
+- Transformation logic in API proxy functions
 
-## 10. Namespace & Naming Conventions
+---
 
-- Namespace root: `CloudZen.*`
-- Mirror folder paths in namespaces (feature-first).
-- File names should reflect role (`*Service`, `I*Service`, `*Options`, `*Function`).
-- Prefer explicit, intention-revealing names.
+## 8. Namespace & Naming
 
-## 11. Documentation Synchronization (MANDATORY)
+- Root: `CloudZen.*`
+- Mirror folder paths (feature-first)
+- File names reflect role: `*Service`, `I*Service`, `*Options`, `*Function`
+- Explicit, intention-revealing names
 
-When behavior changes, update docs in `docs/` alongside code.
+---
 
-Primary architecture docs:
+## 9. Code Style
 
+**C# conventions:**
+- Explicit types for domain objects: `BookingRequest request` (not `var`)
+- File-scoped namespaces: `namespace CloudZen.Features.Booking;`
+- Nullable enabled: `string?` for nullable
+- `sealed` by default on concrete classes
+- `record` types for DTOs with `init` properties
+- Primary constructors for DI
+- `CancellationToken` in all async methods
+- Guard clauses — fail fast
+
+**Immutability:**
+- `record` over `class` for DTOs
+- `readonly` fields in services
+- `init` properties where mutation not needed
+- `IReadOnlyCollection<T>` for returns
+- Expression-bodied members for single-line logic
+
+---
+
+## 10. Reasoning & Exploration
+
+**Before making changes:**
+1. Trace inbound/outbound references
+2. Identify feature slice ownership
+3. Check pattern consistency in same directory
+4. Verify interface contracts + all implementations
+5. Map dependencies
+
+**Cross-reference checklist:**
+
+| Question | Where |
+|---|---|
+| DI wired? | `Program.cs`, `Api/Program.cs` |
+| Services? | `Features/{Feature}/Services/` |
+| Azure Functions? | `Api/Features/{Feature}/` |
+| Components? | `Features/{Feature}/Components/` |
+| Models? | `Features/{Feature}/Models/`, `Api/Shared/Models/` |
+
+**When refactoring:**
+1. Identify smell
+2. Trace dependencies
+3. Evaluate SOLID impact
+4. Plan migration (backward compatibility)
+5. Verify invariants (no PII logging, secrets safe)
+
+---
+
+## 11. Component Analysis
+
+**When working with Blazor components:**
+1. Check all three files (`.razor`, `.razor.cs`, `.razor.css`)
+2. Verify `[Parameter]` and `EventCallback<T>` usage
+3. Confirm localization: `@L["Key"]` or `L["Key"]`
+4. Scoped CSS only — no global overrides
+5. Tailwind consistency
+
+**Component inventory:**
+
+| Type | Location |
+|---|---|
+| Pages | `Features/{Feature}/Components/` (with `@page`) |
+| Layouts | `Layout/` |
+| Common | `Common/` |
+
+---
+
+## 12. Feature Workflow
+
+**When adding/modifying features:**
+1. Identify vertical slice in `Features/{Feature}/`
+2. Check `docs/03-features/`
+3. Map dependencies (services, models, API)
+4. Follow existing patterns
+5. Update docs
+6. Verify DI in `Program.cs`
+7. Update `Api/Features/{Feature}/` if API changes
+
+---
+
+## 13. Business Rules
+
+**Non-negotiable invariants:**
+
+| Rule | Rationale |
+|---|---|
+| Validate input at API boundaries | Prevents invalid state |
+| Never log PII/tokens/secrets | GDPR compliance |
+| Idempotency on external calls | Prevents duplicates on retry |
+| Authorization on every API endpoint | Default deny |
+| Rate limiting on API | Prevents abuse/DoS |
+| Secrets from environment only | Never in code/WASM config |
+
+---
+
+## 14. Error Handling
+
+- Domain-specific exceptions for business violations
+- API catches infrastructure exceptions → meaningful HTTP responses
+- Never swallow silently — log with context + correlation IDs
+- HTTP status codes: 400 (validation), 404 (not found), 409 (conflict), 500 (unexpected)
+
+---
+
+## 15. Documentation (MANDATORY)
+
+Update `docs/` when behavior changes.
+
+**Primary docs:**
 - `docs/01-architecture/VERTICAL_SLICE_ARCHITECTURE.md`
 - `docs/01-architecture/COMPONENT_ARCHITECTURE.md`
 - `docs/01-architecture/AZURE_FUNCTIONS.md`
 - `docs/01-architecture/API_ENDPOINTS.md`
+- `docs/03-features/`, `docs/04-security/`, `docs/05-troubleshooting/`, `docs/06-patterns/`
 
-Also keep feature and security docs in sync under:
+**Update matrix:**
 
-- `docs/03-features/`
-- `docs/04-security/`
-- `docs/05-troubleshooting/`
-- `docs/06-patterns/`
+| Change | Doc |
+|---|---|
+| Architecture | `docs/01-architecture/*` |
+| Feature logic | `docs/03-features/{Feature}.md` |
+| Security | `docs/04-security/*` |
+| API endpoints | `API_ENDPOINTS.md` |
+| Component patterns | `COMPONENT_PATTERNS.md` |
 
-## 12. Quality and Safety Guardrails
+---
 
-1. Preserve existing feature isolation (avoid unnecessary cross-feature coupling).
-2. Keep frontend secrets-free; route privileged operations through API.
-3. Prefer incremental, low-blast-radius changes over broad rewrites.
-4. Maintain nullable-enabled, compile-safe C#.
-5. Follow existing patterns before introducing new abstractions.
+## 16. Quality Guardrails
 
-## 13. Source-of-Truth Files to Check Before Major Changes
+1. Preserve feature isolation — avoid cross-feature coupling
+2. Frontend secrets-free — backend handles sensitive ops
+3. Incremental changes over broad rewrites
+4. Nullable-enabled, compile-safe C#
+5. Follow existing patterns before new abstractions
 
+---
+
+## 17. Source-of-Truth Files
+
+Check before major changes:
 - `README.md`
-- `Program.cs`
+- `Program.cs` (frontend)
+- `Api/Program.cs` (backend)
 - `docs/01-architecture/*`
-- `Api/Program.cs`
 - `.github/copilot-instructions.md`
+
+---
+
+## 18. Skills Catalog
+
+All skills in `.github/skills/`. Browse: `.github/skills/CATALOG.md`
+
+**Claude integration:** Skills registered in `.claude/skills/` (bridge files) → redirect to `.github/skills/` (source of truth).
+
+**Quick reference:**
+
+| Invoke | Path |
+|---|---|
+| `/code-reviewer` | `.github/skills/code-reviewer/SKILL.md` |
+| `/owasp-audit` | `.github/skills/owasp-audit/SKILL.md` |
+| `/test-generator` | `.github/skills/test-generator/SKILL.md` |
+| `/architecture-reviewer` | `.github/skills/architecture-reviewer/SKILL.md` |
+
+---
+
+**This merged guide consolidates CloudZen project conventions, code generation standards, security baseline, exploration strategies, and skills integration for all AI agents.**

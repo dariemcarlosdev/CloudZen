@@ -14,114 +14,35 @@ applyTo: "**/*Tests*/**/*.cs, **/*Test*/**/*.cs"
 
 ## Naming Convention
 
-Use the pattern: **MethodName_Scenario_ExpectedResult**
-
-```csharp
-// ✅ Clear intent
-public async Task CreateOrder_ValidInput_ReturnsSuccess()
-public async Task CreateOrder_InsufficientBalance_ThrowsPaymentException()
-public void CancelOrder_OrderNotInActiveState_ThrowsInvalidOrderStateException()
-public async Task CreateOrder_DuplicateIdempotencyKey_ReturnsConflict()
-
-// ❌ Vague or undescriptive
-public void Test1()
-public async Task TestCreateOrder()
-```
+Use pattern: **MethodName_Scenario_ExpectedResult**. Example: `CreateOrder_ValidInput_ReturnsSuccess()`, `CreateOrder_InsufficientBalance_ThrowsPaymentException()`.
 
 ## Arrange-Act-Assert (AAA)
 
-Every test must have **clearly separated** AAA sections. Use blank lines and optional comments for readability.
-
-```csharp
-[Fact]
-public async Task CreateOrder_ValidInput_ReturnsSuccess()
-{
-    // Arrange
-    var order = new OrderBuilder()
-        .WithStatus(OrderStatus.Created)
-        .WithAmount(new Money(500m, Currency.USD))
-        .Build();
-
-    var mockRepo = new Mock<IOrderRepository>();
-    mockRepo.Setup(r => r.GetByIdAsync(order.Id, It.IsAny<CancellationToken>()))
-        .ReturnsAsync(order);
-
-    var mockPayment = new Mock<IChargeable>();
-    mockPayment.Setup(s => s.ChargeAsync(order, It.IsAny<CancellationToken>()))
-        .ReturnsAsync(OrderResult.Success("pay_123"));
-
-    var handler = new CreateOrderCommandHandler(mockRepo.Object, mockPayment.Object);
-
-    // Act
-    var result = await handler.Handle(new CreateOrderCommand(order.Id), CancellationToken.None);
-
-    // Assert
-    result.Should().NotBeNull();
-    result.IsSuccess.Should().BeTrue();
-    mockRepo.Verify(r => r.UpdateAsync(order, It.IsAny<CancellationToken>()), Times.Once);
-}
-```
+Every test must have **clearly separated** AAA sections using blank lines and optional comments. Arrange: set up test data with builders. Act: execute single operation. Assert: verify results and mock invocations.
 
 ## Unit Tests
 
 ### MediatR Handler Tests
 
-- Test each command/query handler **in isolation** — inject mocked dependencies.
-- Mock `IOrderRepository` and all strategy interfaces (`IChargeable`, `IRefundable`, `ICancellable`).
-- Verify that the handler calls the correct repository/strategy methods with expected arguments.
-- Test both success and failure paths — assert thrown exceptions with FluentAssertions.
+Test each command/query handler **in isolation** with mocked dependencies. Mock `IOrderRepository` and all strategy interfaces. Verify correct repository/strategy calls with expected arguments. Test both success and failure paths — assert thrown exceptions.
 
 ### Domain Model Tests
 
-- Test aggregate root methods directly — `Order.Cancel()`, `Order.Complete()`.
-- Verify that **domain events** are raised correctly after state transitions.
-- Verify that **invariant violations** throw the expected domain exceptions.
-- Test Value Object validation: `Money` rejects negative amounts, `IdempotencyKey` rejects empty strings.
+Test aggregate root methods directly. Verify domain events raised after state transitions. Verify invariant violations throw expected domain exceptions. Test Value Object validation (negative amounts, empty strings rejected).
 
 ### Validation Rule Tests
 
-- Test FluentValidation validators independently — call `validator.TestValidateAsync(model)`.
-- Cover required fields, boundary values, format constraints, and cross-field rules.
+Test FluentValidation validators independently — call `validator.TestValidateAsync(model)`. Cover required fields, boundary values, format constraints, and cross-field rules.
 
 ## Integration Tests
 
 ### API / Endpoint Tests
 
-- Use `WebApplicationFactory<Program>` to bootstrap the application.
-- Override DI registrations to swap real infrastructure with test doubles where appropriate.
-- Use **Testcontainers** for PostgreSQL so integration tests run against a real database engine.
-- Test the full request pipeline: routing → model binding → validation → handler → persistence → response.
-
-```csharp
-public sealed class OrderApiTests : IClassFixture<AppWebApplicationFactory>
-{
-    private readonly HttpClient _client;
-
-    public OrderApiTests(AppWebApplicationFactory factory)
-    {
-        _client = factory.CreateClient();
-    }
-
-    [Fact]
-    public async Task PostOrder_ValidPayload_Returns201()
-    {
-        // Arrange
-        var payload = new CreateOrderRequest(/* ... */);
-
-        // Act
-        var response = await _client.PostAsJsonAsync("/api/orders", payload);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.Created);
-    }
-}
-```
+Use `WebApplicationFactory<Program>` to bootstrap application. Override DI registrations to swap real infrastructure with test doubles. Use **Testcontainers** for PostgreSQL (real database). Test full pipeline: routing → binding → validation → handler → persistence → response.
 
 ### Database Integration Tests
 
-- Verify EF Core mappings, constraints, and indexes against a real PostgreSQL instance.
-- Test repository implementations end-to-end: persist, retrieve, verify.
-- Each test class gets a **fresh database** (Testcontainers per fixture) — never share mutable state across tests.
+Verify EF Core mappings, constraints, indexes against real PostgreSQL. Test repository implementations end-to-end: persist, retrieve, verify. Each test class gets **fresh database** (Testcontainers per fixture) — never share mutable state.
 
 ## What to Test
 
@@ -142,25 +63,7 @@ public sealed class OrderApiTests : IClassFixture<AppWebApplicationFactory>
 
 ## Test Data — Builder Pattern
 
-Use builders for complex domain objects to keep tests readable and decoupled from constructor changes.
-
-```csharp
-public sealed class OrderBuilder
-{
-    private Guid _id = Guid.NewGuid();
-    private OrderStatus _status = OrderStatus.Created;
-    private Money _amount = new(100m, Currency.USD);
-    private Customer? _buyer;
-    private Customer? _seller;
-
-    public OrderBuilder WithStatus(OrderStatus status) { _status = status; return this; }
-    public OrderBuilder WithAmount(Money amount) { _amount = amount; return this; }
-    public OrderBuilder WithBuyer(Customer buyer) { _buyer = buyer; return this; }
-    public OrderBuilder WithSeller(Customer seller) { _seller = seller; return this; }
-
-    public Order Build() => new(_id, _amount, _buyer!, _seller!, _status);
-}
-```
+Use builders for complex domain objects to keep tests readable and decoupled from constructor changes. Builders with fluent interface allow test-specific configuration.
 
 ## Coverage Targets
 
@@ -171,7 +74,4 @@ public sealed class OrderBuilder
 
 ## General Rules
 
-- Tests must be **deterministic** — no dependency on wall-clock time, random data, or external services.
-- Use `CancellationToken.None` in unit tests; integration tests should test cancellation behavior explicitly.
-- Clean up resources in `Dispose` / `IAsyncDisposable` — especially Testcontainers and `HttpClient` instances.
-- Run tests in parallel by default (xUnit's default) — ensure no shared mutable state between test classes.
+Tests must be **deterministic** — no dependency on wall-clock time, random data, or external services. Use `CancellationToken.None` in unit tests; integration tests should test cancellation explicitly. Clean up resources in `Dispose` / `IAsyncDisposable`. Run tests in parallel by default — ensure no shared mutable state.

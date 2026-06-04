@@ -15,44 +15,11 @@ applyTo: "**/Data/**/*.cs, **/Migrations/**/*.cs"
 
 ## AppDbContext Configuration
 
-- One `DbContext` class: `AppDbContext` — registered as a **scoped** service.
-- Apply all entity configurations via `IEntityTypeConfiguration<T>` in separate files, loaded with `modelBuilder.ApplyConfigurationsFromAssembly(...)`.
-- Define **unique constraints** where the domain demands them:
-  - `IdempotencyKey` on `Order` (prevents duplicate submissions).
-  - Composite unique on (`CustomerId`, `OrderId`) for participant enrollment.
-- Define **indexes** on frequently queried columns:
-  - `Status` on `Order` (filtered queries by lifecycle state).
-  - `CreatedAt` for time-range queries and dashboards.
-  - `ExternalPaymentId` for webhook correlation lookups.
-- Configure relationships explicitly — never rely on convention for navigation properties in a DDD model.
-
-```csharp
-public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
-{
-    public void Configure(EntityTypeBuilder<Order> builder)
-    {
-        builder.HasKey(e => e.Id);
-        builder.HasIndex(e => e.IdempotencyKey).IsUnique();
-        builder.HasIndex(e => e.Status);
-
-        builder.OwnsOne(e => e.Amount, money =>
-        {
-            money.Property(m => m.Amount).HasColumnType("numeric(18,4)");
-            money.Property(m => m.Currency).HasConversion<string>();
-        });
-
-        builder.Property(e => e.RowVersion).IsRowVersion();
-    }
-}
-```
+One `DbDbContext` class: `AppDbContext` — registered as scoped. Apply entity configurations via `IEntityTypeConfiguration<T>` in separate files, loaded with `modelBuilder.ApplyConfigurationsFromAssembly(...)`. Define unique constraints on `IdempotencyKey` (prevents duplicates) and composite keys as needed. Define indexes on `Status` (filtered queries), `CreatedAt` (time-range queries), and `ExternalPaymentId` (webhook correlation). Configure relationships explicitly in Fluent API — never rely on convention in DDD models.
 
 ## Repository Pattern
 
-- Define `IOrderRepository` in the **Application** (or Domain) layer — it expresses domain intent, not SQL.
-- The implementation (`OrderRepository`) lives in **Infrastructure/Data** and depends on `AppDbContext`.
-- Repository methods return **domain entities**, not DTOs — mapping to DTOs happens in MediatR handlers or projections.
-- Provide only the operations the domain needs: `GetByIdAsync`, `AddAsync`, `UpdateAsync`, `ExistsByIdempotencyKeyAsync`.
-- Never expose `IQueryable<T>` from the repository — it leaks persistence concerns into the Application layer.
+Define `IOrderRepository` in Application/Domain layer (expresses domain intent). Implementation (`OrderRepository`) lives in Infrastructure/Data and depends on `AppDbContext`. Provide only operations the domain needs: `GetByIdAsync`, `AddAsync`, `UpdateAsync`, `ExistsByIdempotencyKeyAsync`. Return domain entities (DTOs are mapper's job in handlers). Never expose `IQueryable<T>` from repository — leaks persistence concerns into Application layer.
 
 ```csharp
 public interface IOrderRepository
@@ -65,68 +32,27 @@ public interface IOrderRepository
 
 ## Read-Only Query Patterns
 
-- Use `AsNoTracking()` on **every** read-only query — eliminates change-tracker overhead.
-- Prefer **projections** with `Select()` over loading full entities when the consumer needs a subset of fields.
-- Use compiled queries (`EF.CompileAsyncQuery`) for hot-path lookups (e.g., transaction status checks).
-
-```csharp
-// ✅ Projection — loads only what the query needs
-var summary = await _context.Orders
-    .AsNoTracking()
-    .Where(o => o.Id == id)
-    .Select(o => new OrderSummaryDto(o.Id, o.Status, o.Amount.Amount))
-    .SingleOrDefaultAsync(ct);
-
-// ❌ Full entity load for a read-only view
-var entity = await _context.Orders.FindAsync(id);
-return new OrderSummaryDto(entity.Id, entity.Status, entity.Amount.Amount);
-```
+Use `AsNoTracking()` on every read-only query (eliminates change-tracker overhead). Prefer projections with `Select()` over loading full entities when consumer needs subset. Use compiled queries (`EF.CompileAsyncQuery`) for hot-path lookups (e.g., transaction status).
 
 ## Split Queries
 
-- When an `Include()` chain loads **multiple collections**, use `.AsSplitQuery()` to avoid Cartesian explosion.
-- Single-collection includes can stay as a single query — split only when needed.
-
-```csharp
-var order = await _context.Orders
-    .Include(o => o.Customer)
-    .Include(o => o.LineItems)
-    .AsSplitQuery()
-    .SingleOrDefaultAsync(o => o.Id == id, ct);
-```
+When `Include()` chain loads multiple collections, use `.AsSplitQuery()` to avoid Cartesian explosion. Single-collection includes can stay as single query — split only when needed.
 
 ## Migration Conventions
 
-- Migration names must be **descriptive**: `AddIdempotencyKeyIndex`, `CreateCustomersTable` — never `Migration1`.
-- Always review the generated SQL (`dotnet ef migrations script`) before applying to any shared environment.
-- Keep migrations **additive** — avoid destructive changes (drop column, rename) unless behind a planned migration strategy.
-- Never put seed data or business logic in migrations.
-- Use `migrationBuilder.Sql(...)` sparingly — only for DDL that EF cannot express.
+Migration names must be **descriptive**: `AddIdempotencyKeyIndex`, `CreateCustomersTable` (never `Migration1`). Always review generated SQL (`dotnet ef migrations script`) before applying to shared environment. Keep migrations **additive** — avoid destructive changes unless behind planned strategy. Never put seed data or business logic in migrations. Use `migrationBuilder.Sql(...)` sparingly — only for DDL that EF cannot express.
 
 ## Connection String Management
 
-- **Never** hardcode connection strings in code or `appsettings.json` for production.
-- Use the **Options pattern**: bind `PostgresOptions` from configuration, inject `IOptions<PostgresOptions>`.
-- Development: use `dotnet user-secrets` or `appsettings.Development.json`.
-- Production: use environment variables or Azure Key Vault / secret manager.
-- Configure connection pooling and timeouts explicitly in the connection string.
+Never hardcode connection strings in code or `appsettings.json` for production. Use **Options pattern**: bind `PostgresOptions` from configuration, inject `IOptions<PostgresOptions>`. Development: use `dotnet user-secrets` or `appsettings.Development.json`. Production: use environment variables or Azure Key Vault. Configure connection pooling and timeouts explicitly in connection string.
 
 ## Concurrency Control
 
-- `Order` must use **optimistic concurrency** — a `RowVersion` / `xmin` concurrency token.
-- For PostgreSQL, use the `xmin` system column as a concurrency token:
-
-```csharp
-builder.UseXminAsConcurrencyToken();
-```
-
-- Handle `DbUpdateConcurrencyException` in the Application layer — retry or return a conflict result, never silently overwrite.
+`Order` must use **optimistic concurrency** with `RowVersion` / `xmin` concurrency token. For PostgreSQL, use `xmin` system column via `.UseXminAsConcurrencyToken()`. Handle `DbUpdateConcurrencyException` in Application layer — retry or return conflict result, never silently overwrite.
 
 ## Seeding
 
-- Use `HasData()` **only** for reference/lookup data: `OrderStatus` enum table, `Currency` codes.
-- Never seed transactional business data.
-- Seed data must be deterministic and idempotent across migration runs.
+Use `HasData()` **only** for reference/lookup data: `OrderStatus` enum table, `Currency` codes. Never seed transactional business data. Seed data must be deterministic and idempotent across migration runs.
 
 ## Anti-Patterns to Avoid
 

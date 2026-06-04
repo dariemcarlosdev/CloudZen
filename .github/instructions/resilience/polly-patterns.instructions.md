@@ -6,195 +6,39 @@ applyTo: "**/Services/**/*.cs, **/Infrastructure/**/*.cs"
 
 ## Retry Policies — External API Calls
 
-- Use **exponential backoff with jitter** for transient failures from external APIs (e.g., Stripe, payment gateways).
-- Retry on HTTP status codes: `429 Too Many Requests`, `500`, `502`, `503`.
-- Retry on `HttpRequestException` and `TimeoutRejectedException`.
-- Start with **3 retries**, base delay of 1 second, exponential multiplier of 2, plus random jitter to avoid thundering herd.
-- Never retry on `4xx` client errors other than `429` — these indicate invalid requests that will never succeed.
-
-```csharp
-var retryPolicy = HttpPolicyExtensions
-    .HandleTransientHttpError()
-    .OrResult(r => r.StatusCode == HttpStatusCode.TooManyRequests)
-    .WaitAndRetryAsync(
-        retryCount: 3,
-        sleepDurationProvider: attempt =>
-            TimeSpan.FromSeconds(Math.Pow(2, attempt))
-            + TimeSpan.FromMilliseconds(Random.Shared.Next(0, 1000)),
-        onRetry: (outcome, delay, attempt, context) =>
-        {
-            Log.Warning("External API retry {Attempt} after {Delay}ms — {StatusCode}",
-                attempt, delay.TotalMilliseconds, outcome.Result?.StatusCode);
-        });
-```
+Use **exponential backoff with jitter** for transient failures. Retry on HTTP `429`, `500`, `502`, `503`, and on `HttpRequestException` / `TimeoutRejectedException`. Start with **3 retries**, base delay 1 second, exponential multiplier 2, plus random jitter. Never retry `4xx` client errors (except `429`) — they indicate invalid requests that won't succeed on retry.
 
 ## Circuit Breaker — External API Availability
 
-- Break the circuit after **5 consecutive failures** within a **30-second sampling window**.
-- Stay in **open** state for **60 seconds** before transitioning to **half-open**.
-- In half-open state, allow **one probe request** — if it succeeds, close the circuit; if it fails, re-open.
-- When the circuit is open, fail fast with a descriptive `BrokenCircuitException` — do not queue requests.
-- Log every state transition (Closed → Open, Open → HalfOpen, HalfOpen → Closed) for operational visibility.
-
-```csharp
-var circuitBreakerPolicy = HttpPolicyExtensions
-    .HandleTransientHttpError()
-    .OrResult(r => r.StatusCode == HttpStatusCode.TooManyRequests)
-    .AdvancedCircuitBreakerAsync(
-        failureThreshold: 0.5,
-        samplingDuration: TimeSpan.FromSeconds(30),
-        minimumThroughput: 5,
-        durationOfBreak: TimeSpan.FromSeconds(60),
-        onBreak: (outcome, breakDelay) =>
-            Log.Error("External API circuit OPEN for {BreakDuration}s", breakDelay.TotalSeconds),
-        onReset: () => Log.Information("External API circuit CLOSED"),
-        onHalfOpen: () => Log.Information("External API circuit HALF-OPEN"));
-```
+Break after **5 consecutive failures** in **30-second sampling window**. Stay in **open** state for **60 seconds** before **half-open**. In half-open, allow **one probe request** — succeeds → close, fails → re-open. When open, fail fast with `BrokenCircuitException` — don't queue. Log every state transition for visibility.
 
 ## Timeout Policies
 
-- **Always** pass and honor `CancellationToken` on every async method in the call chain.
-- Apply an **optimistic timeout** of **15 seconds** per external API call — cancels the underlying `HttpClient` request.
-- Apply a **pessimistic timeout** of **30 seconds** as an outer policy for the entire business operation.
-- Handle `TimeoutRejectedException` explicitly — return a timeout-specific error result to the caller.
-
-```csharp
-var timeoutPolicy = Policy.TimeoutAsync<HttpResponseMessage>(
-    TimeSpan.FromSeconds(15),
-    TimeoutStrategy.Optimistic,
-    onTimeoutAsync: (context, timeout, task) =>
-    {
-        Log.Warning("External API call timed out after {Timeout}s", timeout.TotalSeconds);
-        return Task.CompletedTask;
-    });
-```
+**Always** pass and honor `CancellationToken` on every async method in call chain. Apply **optimistic timeout** of **15 seconds** per external API call (cancels underlying `HttpClient`). Apply **pessimistic timeout** of **30 seconds** as outer policy for entire operation. Handle `TimeoutRejectedException` explicitly — return timeout-specific error result.
 
 ## Bulkhead Isolation
 
-- Limit **concurrent external API operations** to prevent a surge of calls from cascading into resource exhaustion.
-- Configure a bulkhead of **10 concurrent executions** with a **queue depth of 5** for burst absorption.
-- When the bulkhead rejects a request, return `503 Service Unavailable` with a `Retry-After` header.
-- Use separate bulkheads for business-critical operations vs. non-critical queries (e.g., status lookups).
-
-```csharp
-var bulkheadPolicy = Policy.BulkheadAsync<HttpResponseMessage>(
-    maxParallelization: 10,
-    maxQueuingActions: 5,
-    onBulkheadRejectedAsync: context =>
-    {
-        Log.Warning("External API bulkhead rejected — max concurrency reached");
-        return Task.CompletedTask;
-    });
-```
+Limit **concurrent external API operations** to prevent resource exhaustion cascades. Configure bulkhead of **10 concurrent executions** with **queue depth 5** for burst absorption. When rejected, return `503 Service Unavailable` with `Retry-After` header. Use separate bulkheads for critical operations vs. non-critical queries.
 
 ## IHttpClientFactory + Polly Integration
 
-- Register a **named or typed `HttpClient`** for external APIs via `IHttpClientFactory` — never instantiate `HttpClient` manually.
-- Attach Polly policies using `.AddPolicyHandler()` in the registration chain.
-- Compose policies using `Policy.WrapAsync()` — order matters: **Bulkhead → Circuit Breaker → Retry → Timeout** (outermost → innermost).
-
-```csharp
-services.AddHttpClient("PaymentGateway", client =>
-    {
-        client.BaseAddress = new Uri("https://api.stripe.com/");
-        client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
-        client.Timeout = Timeout.InfiniteTimeSpan; // Polly controls timeout
-    })
-    .AddPolicyHandler(bulkheadPolicy)
-    .AddPolicyHandler(circuitBreakerPolicy)
-    .AddPolicyHandler(retryPolicy)
-    .AddPolicyHandler(timeoutPolicy);
-```
+Register **named or typed `HttpClient`** via `IHttpClientFactory` — never instantiate manually. Attach policies using `.AddPolicyHandler()`. Compose policies via `Policy.WrapAsync()` — order matters: **Bulkhead → Circuit Breaker → Retry → Timeout** (outermost → innermost).
 
 ## Idempotency Keys — Safe Retries
 
-- **Every** state-changing API mutation (create, capture, refund) must include an `Idempotency-Key` header.
-- Generate the idempotency key **deterministically** from the domain operation: `{OrderId}:{Operation}:{Attempt}`.
-- Store the idempotency key on the domain aggregate — check for duplicates before initiating a new operation.
-- Many payment APIs (e.g., Stripe) honor idempotency keys for 24 hours — retries within that window return the original response, preventing duplicate operations.
-
-```csharp
-var idempotencyKey = $"{order.Id}:charge:{Guid.NewGuid():N}";
-request.Headers.Add("Idempotency-Key", idempotencyKey);
-```
+**Every** state-changing mutation (create, capture, refund) must include `Idempotency-Key` header. Generate **deterministically** from domain operation: `{OrderId}:{Operation}:{Attempt}`. Store on aggregate — check for duplicates before initiating. Payment APIs honor idempotency keys for 24h — retries return original response, preventing duplicates.
 
 ## Fallback Policy
 
-- Define a fallback for every policy chain — **never let an unhandled exception propagate silently**.
-- On failure after all retries are exhausted, return a structured error result with enough context for the caller to take action.
-- Log the final failure at `Error` level with full exception details, correlation ID, and operation context.
-- Never swallow exceptions — the fallback must either re-throw a domain-specific exception or return a typed failure result.
-
-```csharp
-var fallbackPolicy = Policy<HttpResponseMessage>
-    .Handle<BrokenCircuitException>()
-    .Or<TimeoutRejectedException>()
-    .Or<BulkheadRejectedException>()
-    .FallbackAsync(
-        fallbackAction: (context, ct) =>
-        {
-            Log.Error("External API call failed after all resilience policies — returning service unavailable");
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
-        });
-```
+Define fallback for **every** policy chain — never let unhandled exceptions propagate silently. On failure after retries exhausted, return structured error result with context. Log final failure at `Error` level with exception details, correlation ID, operation context. Never swallow exceptions — fallback must re-throw domain exception or return typed failure.
 
 ## Health Checks
 
-- Expose circuit breaker state as an ASP.NET Core `IHealthCheck`.
-- Report `Degraded` when the circuit is half-open, `Unhealthy` when open, `Healthy` when closed.
-- Register the health check at `/health/external-api` for infrastructure monitoring and alerting.
-- Include the circuit breaker state in structured logs for correlation with incident timelines.
-
-```csharp
-public sealed class ExternalApiCircuitBreakerHealthCheck(CircuitBreakerStateProvider stateProvider) : IHealthCheck
-{
-    public Task<HealthCheckResult> CheckHealthAsync(
-        HealthCheckContext context, CancellationToken ct = default)
-    {
-        return Task.FromResult(stateProvider.CircuitState switch
-        {
-            CircuitState.Closed => HealthCheckResult.Healthy("External API circuit closed"),
-            CircuitState.HalfOpen => HealthCheckResult.Degraded("External API circuit half-open"),
-            _ => HealthCheckResult.Unhealthy("External API circuit open")
-        });
-    }
-}
-```
+Expose circuit breaker state as ASP.NET Core `IHealthCheck`. Report `Degraded` when half-open, `Unhealthy` when open, `Healthy` when closed. Register at `/health/external-api` for infrastructure monitoring. Include circuit state in structured logs for incident correlation.
 
 ## Configuration via Options Pattern
 
-- **Never hardcode** policy values (retry count, timeout duration, concurrency limits).
-- Bind resilience settings from configuration using `IOptions<ExternalApiResilienceOptions>`.
-- Allow environment-specific overrides (e.g., shorter timeouts in tests, higher retry counts in production).
-
-```csharp
-public sealed class ExternalApiResilienceOptions
-{
-    public const string SectionName = "ExternalApi:Resilience";
-
-    public int RetryCount { get; init; } = 3;
-    public int RetryBaseDelaySeconds { get; init; } = 1;
-    public int TimeoutSeconds { get; init; } = 15;
-    public int CircuitBreakerFailureThreshold { get; init; } = 5;
-    public int CircuitBreakerBreakDurationSeconds { get; init; } = 60;
-    public int BulkheadMaxParallelization { get; init; } = 10;
-    public int BulkheadMaxQueuingActions { get; init; } = 5;
-}
-```
-
-```jsonc
-// appsettings.json
-{
-  "ExternalApi": {
-    "Resilience": {
-      "RetryCount": 3,
-      "TimeoutSeconds": 15,
-      "CircuitBreakerBreakDurationSeconds": 60,
-      "BulkheadMaxParallelization": 10
-    }
-  }
-}
-```
+Never hardcode policy values (retry count, timeout, concurrency limits). Bind settings from configuration using `IOptions<ExternalApiResilienceOptions>`. Allow environment-specific overrides (shorter timeouts in tests, higher retry counts in production).
 
 ## General Rules
 
