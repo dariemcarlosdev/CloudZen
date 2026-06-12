@@ -46,9 +46,9 @@ public class CaseStudyService : ICaseStudyService
         if (title.Contains("Smart Menu"))
             return "AI Menu Optimization";
         if (title.Contains("AI Chatbot"))
-            return "AI Chatbot Assistance";
+            return "Personalized AI Chatbot Assistance";
         if (title.Contains("Booking Appointments"))
-            return "Smart Appointment Booking";
+            return "Smart Appointment Booking System";
         if (title.Contains("Customer-Facing Web"))
             return "Custom Web Application";
 

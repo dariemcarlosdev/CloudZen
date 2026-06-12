@@ -1,0 +1,405 @@
+/* ── Mission Section Base ── */
+.mission-section {
+    background: #ffffff;
+}
+
+.mission-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.mission-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    letter-spacing: -0.025em;
+}
+
+.mission-title-accent {
+    width: 4rem;
+    height: 0.25rem;
+    background: linear-gradient(90deg, #61C2C8 0%, #5dd3d9 100%);
+    border-radius: 9999px;
+    margin: 0.75rem auto 0;
+}
+
+/* ── Content Rows ── */
+.mission-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    margin-bottom: 6rem;
+}
+
+@media (min-width: 768px) {
+    .mission-row {
+        flex-direction: row;
+    }
+
+    .mission-row--reverse {
+        flex-direction: row-reverse;
+    }
+}
+
+.mission-row--reverse {
+    /* Desktop: reversed layout */
+}
+
+.mission-text-content {
+    flex: 1;
+    text-align: center;
+}
+
+@media (min-width: 768px) {
+    .mission-text-content {
+        text-align: left;
+    }
+}
+
+.mission-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.25;
+    margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+    .mission-heading {
+        font-size: 1.875rem;
+    }
+}
+
+.mission-highlight {
+    color: #0891b2;
+}
+
+.mission-divider {
+    width: 4rem;
+    height: 0.25rem;
+    background: linear-gradient(90deg, #61C2C8 0%, #5dd3d9 100%);
+    border-radius: 9999px;
+    margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+    .mission-divider {
+        margin-left: 0;
+        margin-right: auto;
+    }
+}
+
+.mission-description {
+    color: #6b7280;
+    line-height: 1.75;
+    margin-bottom: 1.5rem;
+    max-width: 36rem;
+}
+
+@media (min-width: 768px) {
+    .mission-description {
+        margin-left: auto;
+        margin-right: 0;
+    }
+}
+
+.mission-cta {
+    display: inline-block;
+    padding: 0.875rem 2rem;
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+    color: #ffffff;
+    font-weight: 600;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.2);
+}
+
+.mission-cta:hover {
+    background: linear-gradient(135deg, #fdba74 0%, #fb923c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.3);
+}
+
+.mission-cta:focus-visible {
+    outline: 2px solid #61C2C8;
+    outline-offset: 2px;
+}
+
+.mission-cta:active {
+    transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mission-cta {
+        transition: none;
+        transform: none;
+    }
+    .mission-cta:hover {
+        transform: none;
+    }
+}
+
+/* Icon Circle */
+.mission-icon-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mission-icon-circle {
+    width: 12rem;
+    height: 12rem;
+    background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0891b2;
+    box-shadow: 0 8px 32px rgba(8, 145, 178, 0.12);
+    transition: transform 0.3s ease;
+}
+
+.mission-icon-circle:hover {
+    transform: scale(1.05);
+}
+
+.mission-icon {
+    font-size: 3.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .mission-icon-circle {
+        transition: none;
+    }
+    .mission-icon-circle:hover {
+        transform: none;
+    }
+}
+
+/* ── Mission Points List ── */
+.mission-points {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    text-align: left;
+    max-width: 28rem;
+}
+
+.mission-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+}
+
+.mission-point-icon {
+    color: #0891b2;
+    flex-shrink: 0;
+    margin-top: 0.125rem;
+}
+
+/* ── Standards Section ── */
+.standards-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.standards-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.025em;
+}
+
+.standards-title-accent {
+    width: 4rem;
+    height: 0.25rem;
+    background: linear-gradient(90deg, #61C2C8 0%, #5dd3d9 100%);
+    border-radius: 9999px;
+    margin: 0 auto;
+}
+
+/* StandardCard styles - handled via StandardCard.razor.css */
+
+/* ── Empower Banner ── */
+.empower-banner {
+    text-align: center;
+    padding: 4rem 1.5rem;
+    margin-top: 4rem;
+}
+
+.empower-heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+}
+
+.empower-subheading {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.empower-link {
+    color: #0891b2;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    transition: color 0.2s ease;
+}
+
+.empower-link:hover {
+    color: #06b6d4;
+}
+
+.empower-link:focus-visible {
+    outline: 2px solid #61C2C8;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* ── CTA Footer ── */
+.cta-footer {
+    background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+    color: #ffffff;
+    text-align: center;
+    padding: 4rem 1.5rem;
+}
+
+.cta-footer-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+@media (min-width: 768px) {
+    .cta-footer-title {
+        font-size: 1.875rem;
+    }
+}
+
+.cta-footer-brand {
+    font-weight: 700;
+    color: #61C2C8;
+}
+
+.cta-footer-accent {
+    width: 4rem;
+    height: 0.25rem;
+    background: linear-gradient(90deg, #61C2C8 0%, #5dd3d9 100%);
+    border-radius: 9999px;
+    margin: 0 auto 2rem;
+}
+
+.cta-footer-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+}
+
+@media (min-width: 640px) {
+    .cta-footer-buttons {
+        flex-direction: row;
+    }
+}
+
+.cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 2rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    min-height: 48px;
+    letter-spacing: 0.025em;
+    text-transform: uppercase;
+}
+
+.cta-button--primary {
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
+}
+
+.cta-button--primary:hover {
+    background: linear-gradient(135deg, #fdba74 0%, #fb923c 100%);
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4);
+    transform: translateY(-2px);
+}
+
+.cta-button--primary:focus-visible {
+    outline: 2px solid #61C2C8;
+    outline-offset: 2px;
+}
+
+.cta-button--primary:active {
+    transform: translateY(0);
+}
+
+.cta-button--secondary {
+    background: #ffffff;
+    color: #1f2937;
+    border: 2px solid #ffffff;
+}
+
+.cta-button--secondary:hover {
+    background: #f3f4f6;
+    border-color: #f3f4f6;
+    transform: translateY(-2px);
+}
+
+.cta-button--secondary:focus-visible {
+    outline: 2px solid #61C2C8;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cta-button {
+        transition: none;
+    }
+    .cta-button:hover {
+        transform: none;
+    }
+}
+
+/* ── Responsive Adjustments ── */
+@media (max-width: 767px) {
+    .mission-header {
+        margin-bottom: 3rem;
+    }
+
+    .mission-title {
+        font-size: 1.875rem;
+    }
+
+    .mission-row {
+        margin-bottom: 4rem;
+    }
+
+    .mission-icon-circle {
+        width: 10rem;
+        height: 10rem;
+    }
+
+    .mission-icon {
+        font-size: 2.75rem;
+    }
+
+    .cta-footer {
+        padding: 3rem 1.5rem;
+    }
+}

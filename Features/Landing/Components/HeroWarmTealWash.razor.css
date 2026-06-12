@@ -697,3 +697,34 @@
         height: 58px;
     }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   REDUCED MOTION — disable all continuous animations
+   ══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-float-warm,
+    .node-highlight-1 .dark-node-card,
+    .node-highlight-2 .dark-node-card,
+    .node-highlight-3 .dark-node-card,
+    .node-highlight-4 .dark-node-card,
+    .node-highlight-5 .dark-node-card,
+    .node-highlight-6 .dark-node-card,
+    .node-highlight-7 .dark-node-card,
+    .node-highlight-1 .dark-node-dot,
+    .node-highlight-2 .dark-node-dot,
+    .node-highlight-3 .dark-node-dot,
+    .node-highlight-4 .dark-node-dot,
+    .node-highlight-5 .dark-node-dot,
+    .node-highlight-6 .dark-node-dot,
+    .node-highlight-7 .dark-node-dot,
+    .dashed-connector-animated,
+    .dashed-connector-animated-orange,
+    .happy-client-border-ring {
+        animation: none;
+    }
+
+    .dark-node-card:hover {
+        transform: none;
+    }
+}

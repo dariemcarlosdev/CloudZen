@@ -1,0 +1,7 @@
+{
+  "files": ["wwwroot/index.html"],
+  "insertBefore": "</body>",
+  "commentSyntax": "html",
+  "framework": "blazor-wasm",
+  "cspChecked": true
+}
