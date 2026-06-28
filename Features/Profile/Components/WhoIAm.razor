@@ -8,8 +8,8 @@
 
 <!-- Last significant change: Refactored to use ProfileHeader and ProfileApproach components. Projects loaded from ProjectService. -->
 <section id="who-i-am" class="bg-white pt-8 pb-0">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <ProfileHeader 
+    <div class="entrance entrance-1 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ProfileHeader
             AvatarUrl="/images/dariem-avatar.png"
             AltText="Dariem C. Macias - CloudZen"
             Title="Who I Am"
@@ -26,31 +26,41 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-start mt-12 md:mt-16">
             <!-- Left Column: Bio -->
-            <ProfileApproach />
+            <div class="reveal-left">
+                <ProfileApproach />
+            </div>
             <!-- Right Column: Results Highlights -->
-            <ProfileHighlights OnResumeDownload="DownloadResume" />
+            <div class="reveal-right">
+                <ProfileHighlights OnResumeDownload="DownloadResume" />
+            </div>
         </div>
 
         <!-- Projects Section -->
         <div class="mt-16 md:mt-20">
             <div class="text-center mb-10">
-                <h2 id="highlighted-projects" class="text-3xl font-bold text-gray-800 mb-3">Highlighted Projects</h2>
-                <div class="w-16 h-1 bg-teal-cyan-aqua-600 mx-auto rounded-full mb-4"></div>
-                <p class="text-gray-500 max-w-2xl mx-auto">
+                <h2 id="highlighted-projects" class="reveal text-3xl font-bold text-gray-800 mb-3">Highlighted Projects</h2>
+                <div class="reveal w-16 h-1 bg-teal-cyan-aqua-600 mx-auto rounded-full mb-4"></div>
+                <p class="reveal text-gray-500 max-w-2xl mx-auto">
                     Real-world projects showcasing software engineering, cloud-native design, and applied AI — built from scratch, iterated fast, and delivered production-ready.
                 </p>
             </div>
 
             <!-- Project Filter Component -->
-            <ProjectFilter OnFilterChange="HandleFilterChange" />
+            <div class="reveal">
+                <ProjectFilter OnFilterChange="HandleFilterChange" />
+            </div>
 
             <!-- Projects List (paginated) -->
             @if (FilteredProjects.Any())
             {
                 <div class="flex flex-col gap-6 md:gap-8">
+                    @{ var projIdx = 0; }
                     @foreach (var project in PagedProjects)
                     {
-                        <ProjectCard Project="@project" />
+                        <div class="reveal reveal-delay-@((projIdx % 5) + 1)">
+                            <ProjectCard Project="@project" />
+                        </div>
+                        projIdx++;
                     }
                 </div>
 
@@ -72,11 +82,11 @@
     </div>
 
     <!-- Bottom CTA -->
-    <div class="bg-gray-700 text-white text-center py-12 md:py-16 mt-16">
+    <div class="bg-gradient-to-br from-teal-cyan-aqua-900 to-teal-cyan-aqua-800 text-white text-center py-12 md:py-16 mt-16">
         <div class="max-w-3xl mx-auto px-4 sm:px-6">
-            <h2 class="text-2xl md:text-3xl font-bold mb-4">Like what you see?</h2>
-            <p class="text-gray-300 mb-8">Let's talk about how I can help your business grow.</p>
-            <a href="/contact" class="inline-block px-8 py-3 bg-orange-400 text-white font-semibold rounded-full hover:bg-orange-500 transition-all duration-300 hover:scale-105 uppercase tracking-wide">
+            <h2 class="reveal text-2xl md:text-3xl font-bold mb-4">Like what you see?</h2>
+            <p class="reveal text-teal-cyan-aqua-100 mb-8">Let's talk about how I can help your business grow.</p>
+            <a href="/contact" class="reveal btn-shimmer inline-block px-8 py-3 bg-orange-400 text-teal-cyan-aqua-900 font-semibold rounded-full shadow-lg shadow-orange-500/30 hover:bg-orange-500 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 uppercase tracking-wide">
                 Get In Touch →
             </a>
         </div>

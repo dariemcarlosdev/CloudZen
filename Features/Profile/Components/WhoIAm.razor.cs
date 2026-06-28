@@ -90,6 +90,8 @@ public partial class WhoIAm
     {
         if (firstRender)
         {
+            await JS.InvokeVoidAsync("initScrollReveal");
+
             var uri = new Uri(NavigationManager.Uri);
             var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
             var scrollTarget = query["scroll"];

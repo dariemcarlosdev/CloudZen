@@ -1,9 +1,9 @@
-<header class="fixed top-0 left-0 z-50 w-full h-16 bg-white/95 backdrop-blur-sm">
+<header class="cz-header fixed top-0 left-0 z-50 w-full">
     <div class="max-w-7xl mx-auto h-full flex justify-between items-center px-4 sm:px-6">
 
         @* ── Logo ── *@
-        <a href="" class="flex items-center font-ibm-plex text-gray-800 hover:text-teal-cyan-aqua-600 transition-colors">
-            <img src="/images/HeaderLogo.png" alt="CloudZen Logo"
+        <a href="" class="flex items-center font-ibm-plex text-gray-800 hover:text-teal-cyan-aqua-600 transition-colors logo-hover" aria-label="CloudZen — Home">
+            <img src="/images/HeaderLogo.png" alt="SmartSystems — CloudZen"
                  class="h-10 object-contain" width="120" height="40" />
         </a>
 
@@ -26,7 +26,7 @@
             <NavLink href="/mission" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active">About</NavLink>
 @*             <NavLink href="/whoiam" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active">Who I Am</NavLink> *@
             <NavLink href="/faq" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active">FAQ</NavLink>
-            <NavLink href="/contact" class="cta-button px-5 py-2 bg-orange-400 text-white text-sm font-semibold rounded-full hover:bg-orange-500" ActiveClass="ring-2 ring-orange-300 ring-offset-1">Let's Talk</NavLink>
+            <NavLink href="/contact" class="cta-button btn-shimmer px-5 py-2 bg-orange-400 text-white text-sm font-semibold rounded-full hover:bg-orange-500" ActiveClass="ring-2 ring-orange-300 ring-offset-1">Let's Talk</NavLink>
         </nav>
 
         @* ── Mobile nav ── *@
@@ -39,7 +39,7 @@
                 <NavLink href="/mission" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active" @onclick="CloseMobileMenu">About</NavLink>
                 @* <NavLink href="/whoiam" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active" @onclick="CloseMobileMenu">Who I Am</NavLink> *@
                 <NavLink href="/faq" class="nav-link text-gray-600 font-medium tracking-wide hover:text-teal-cyan-aqua-600 transition-colors" ActiveClass="nav-link--active" @onclick="CloseMobileMenu">FAQ</NavLink>
-                <NavLink href="/contact" class="cta-button px-5 py-2 bg-orange-400 text-white text-sm font-semibold rounded-full hover:bg-orange-500" ActiveClass="ring-2 ring-orange-300 ring-offset-1" @onclick="CloseMobileMenu">Let's Talk</NavLink>
+                <NavLink href="/contact" class="cta-button btn-shimmer px-5 py-2 bg-orange-400 text-white text-sm font-semibold rounded-full hover:bg-orange-500" ActiveClass="ring-2 ring-orange-300 ring-offset-1" @onclick="CloseMobileMenu">Let's Talk</NavLink>
             </nav>
         }
     </div>

@@ -1,16 +1,25 @@
 @page "/tickets"
 
 @inject ITicketService TicketService
+@inject IJSRuntime JS
 
-<div class="max-w-xl mx-auto mt-16 bg-white rounded-xl shadow-lg p-8">
-    <h2 class="text-2xl font-bold mb-8 text-center">Ticket Incidents Overview</h2>
-        <div class="flex flex-col sm:flex-row justify-center items-center gap-10">
-            <AnimatedCounterCircle Label="All" Value="@totalCount" Color="#6366f1" />      <!-- Indigo -->
-            <AnimatedCounterCircle Label="Open" Value="@openCount" Color="#16a34a" />      <!-- Green -->
-            <AnimatedCounterCircle Label="Closed" Value="@closedCount" Color="#6b7280" />  <!-- Gray -->
+<div class="entrance entrance-1 max-w-xl mx-auto mt-16 bg-white rounded-2xl border border-gray-200/80 p-8
+            transition-[border-color,box-shadow] duration-300 ease-out
+            hover:border-teal-cyan-aqua-300 hover:shadow-[0_10px_30px_-15px_rgba(64,103,107,0.18)]">
+    <h2 class="text-2xl font-bold mb-2 text-center text-gray-900 tracking-tight">Ticket incidents overview</h2>
+    <div class="w-12 h-[3px] bg-teal-cyan-aqua-600 mx-auto rounded-full mb-8"></div>
+    <div class="flex flex-col sm:flex-row justify-center items-center gap-10">
+        <div class="reveal-scale reveal-delay-1">
+            <AnimatedCounterCircle Label="All" Value="@totalCount" Color="#40676B" />
         </div>
+        <div class="reveal-scale reveal-delay-2">
+            <AnimatedCounterCircle Label="Open" Value="@openCount" Color="#fb923c" />
+        </div>
+        <div class="reveal-scale reveal-delay-3">
+            <AnimatedCounterCircle Label="Closed" Value="@closedCount" Color="#9CA3AF" />
+        </div>
+    </div>
 </div>
-<div>Debug: total=@totalCount, open=@openCount, closed=@closedCount</div>
 
 @code {
     private int totalCount;
@@ -30,7 +39,11 @@
         isLoading = false;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initScrollReveal");
+        }
+    }
 }
-
-
-

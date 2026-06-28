@@ -5,13 +5,14 @@
     <meta name="description" content="Frequently asked questions about CloudZen's technology consulting services, pricing, process, and more." />
 </HeadContent>
 
-<div class="min-h-screen bg-gray-50">
+<div class="min-h-screen bg-gradient-to-br from-white via-teal-cyan-aqua-50/15 to-white">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
 
         @* ── Header ── *@
         <header class="mb-10 text-center">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">Frequently Asked Questions</h1>
-            <p class="mt-3 text-gray-500 max-w-xl mx-auto">
+            <h1 class="entrance entrance-1 text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">Frequently Asked Questions</h1>
+            <div class="entrance entrance-2 w-16 h-1 bg-teal-cyan-aqua-600 mx-auto rounded-full mt-4 mb-4"></div>
+            <p class="entrance entrance-3 mt-3 text-gray-500 max-w-xl mx-auto">
                 Everything you need to know about working with CloudZen. Can't find what you're looking for?
                 <a href="/contact" class="faq-inline-link">Get in touch</a>.
             </p>
@@ -26,8 +27,10 @@
                 var isOpen = _openIndex == index;
                 var panelId = $"faq-panel-{index}";
                 var headingId = $"faq-heading-{index}";
+                var revealDelay = (index % 6) + 1;
 
-                <div class="faq-item @(isOpen ? "faq-item--open" : "")" role="listitem">
+                <div class="reveal reveal-delay-@revealDelay" role="listitem">
+                <div class="faq-item @(isOpen ? "faq-item--open" : "")">
                     <h2 id="@headingId">
                         <button class="faq-trigger"
                                 type="button"
@@ -42,23 +45,21 @@
                             </svg>
                         </button>
                     </h2>
-                    @if (isOpen)
-                    {
-                        <div id="@panelId"
-                             role="region"
-                             aria-labelledby="@headingId"
-                             class="faq-panel">
-                            <div class="faq-answer">
-                                @item.Answer
-                            </div>
+                    <div id="@panelId"
+                         role="region"
+                         aria-labelledby="@headingId"
+                         class="faq-panel @(isOpen ? "faq-panel--open" : "")">
+                        <div class="faq-answer">
+                            @item.Answer
                         </div>
-                    }
+                    </div>
+                </div>
                 </div>
             }
         </div>
 
         @* ── CTA ── *@
-        <div class="faq-cta">
+        <div class="reveal faq-cta">
             <h2 class="text-lg font-semibold text-gray-800 mb-2">Still have questions?</h2>
             <p class="text-gray-500 text-sm mb-4">
                 We'd love to hear from you. Book a free consultation or drop us a message.

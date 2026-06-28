@@ -1,0 +1,240 @@
+/* ══════════════════════════════════════════════════════════════
+   CloudZen Motion System
+   Shared scroll-reveal + entrance choreography utilities.
+   Pairs with js/scroll-reveal.js (IntersectionObserver).
+   All motion animates opacity/transform only (no layout shift / CLS).
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Scroll reveal: hidden until .is-visible is added by the observer ── */
+.reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* Variant: reveal from the side (used for alternating feature rows) */
+.reveal-left {
+    opacity: 0;
+    transform: translateX(-32px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-right {
+    opacity: 0;
+    transform: translateX(32px);
+    transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-left.is-visible,
+.reveal-right.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* Variant: scale-in for cards/badges */
+.reveal-scale {
+    opacity: 0;
+    transform: scale(0.94);
+    transition: opacity 0.5s ease-out, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal-scale.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* ── Stagger delays for grids/lists ── */
+.reveal-delay-1 { transition-delay: 0.08s; }
+.reveal-delay-2 { transition-delay: 0.16s; }
+.reveal-delay-3 { transition-delay: 0.24s; }
+.reveal-delay-4 { transition-delay: 0.32s; }
+.reveal-delay-5 { transition-delay: 0.40s; }
+.reveal-delay-6 { transition-delay: 0.48s; }
+
+/* ══════════════════════════════════════════════════════════════
+   ABOVE-THE-FOLD ENTRANCE (CSS-only, no JS — fires on load)
+   Apply .entrance + .entrance-N to hero elements.
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes entrance-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.entrance {
+    opacity: 0;
+    animation: entrance-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.entrance-1 { animation-delay: 0.05s; }
+.entrance-2 { animation-delay: 0.15s; }
+.entrance-3 { animation-delay: 0.25s; }
+.entrance-4 { animation-delay: 0.35s; }
+.entrance-5 { animation-delay: 0.45s; }
+.entrance-6 { animation-delay: 0.55s; }
+
+/* ══════════════════════════════════════════════════════════════
+   CTA SHIMMER SWEEP (premium sheen on hover)
+   ══════════════════════════════════════════════════════════════ */
+
+.btn-shimmer {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 75%;
+    height: 100%;
+    background: linear-gradient(
+        100deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.35) 50%,
+        transparent 100%
+    );
+    transform: skewX(-20deg);
+    pointer-events: none;
+}
+
+.btn-shimmer:hover::after {
+    animation: btn-shimmer-sweep 0.85s ease-out;
+}
+
+@keyframes btn-shimmer-sweep {
+    0% { left: -150%; }
+    100% { left: 150%; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ACCORDION PANEL ENTER (fade + slide for newly-rendered panel)
+   Pairs with conditional render: <div class="panel-enter">...</div>
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes panel-enter {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: none;
+        max-height: 800px;
+    }
+}
+
+.panel-enter {
+    animation: panel-enter 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+    overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ICON HALO — soft pulsing glow behind decorative circle icons
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes icon-halo {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(97, 194, 200, 0.35),
+                    0 0 0 0 rgba(97, 194, 200, 0);
+    }
+    50% {
+        box-shadow: 0 0 0 12px rgba(97, 194, 200, 0.0),
+                    0 0 24px 4px rgba(97, 194, 200, 0.18);
+    }
+}
+
+.icon-halo {
+    animation: icon-halo 4.5s ease-in-out infinite;
+}
+
+.icon-halo-hover {
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.35s ease;
+}
+
+.icon-halo-hover:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 30px -8px rgba(97, 194, 200, 0.4);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   STEP NUMBER — gradient + soft glow for numbered process steps
+   ══════════════════════════════════════════════════════════════ */
+
+.step-number {
+    background: linear-gradient(135deg, #40676B 0%, #61C2C8 100%);
+    box-shadow: 0 8px 22px -10px rgba(97, 194, 200, 0.7);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.3s ease;
+}
+
+.step-number:hover {
+    transform: scale(1.08);
+    box-shadow: 0 12px 32px -10px rgba(97, 194, 200, 0.85);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   HEADER LOGO HOVER — gentle scale, brand-safe
+   ══════════════════════════════════════════════════════════════ */
+
+.logo-hover {
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.logo-hover:hover {
+    transform: scale(1.04);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   REDUCED MOTION — global kill-switch
+   Disables every custom animation/transition for users who opt out.
+   ══════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal,
+    .reveal-left,
+    .reveal-right,
+    .reveal-scale {
+        opacity: 1;
+        transform: none;
+        transition: none;
+    }
+
+    .entrance {
+        opacity: 1;
+        animation: none;
+    }
+
+    .btn-shimmer:hover::after {
+        animation: none;
+    }
+
+    .icon-halo,
+    .panel-enter {
+        animation: none;
+    }
+
+    .icon-halo-hover:hover,
+    .step-number:hover,
+    .logo-hover:hover {
+        transform: none;
+    }
+}

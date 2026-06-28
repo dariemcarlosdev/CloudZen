@@ -1,17 +1,14 @@
 @* Profile Header Component - Displays avatar, name, intro, and social links *@
 
 <div class="text-center mb-8">
-    <!-- Avatar/Photo -->
+    <!-- Avatar/Photo — clean ring stack, no blur halo -->
     <div class="flex justify-center mb-6">
-        <div class="relative">
-            <div class="absolute -inset-1 bg-gradient-to-br from-teal-cyan-aqua-400 to-teal-cyan-aqua-600 rounded-full blur-sm opacity-40"></div>
-            <img src="@AvatarUrl"
-                 alt="@AltText"
-                 loading="lazy"
-                 width="160"
-                 height="160"
-                 class="relative w-36 h-36 md:w-40 md:h-40 rounded-full shadow-lg object-cover border-4 border-white ring-2 ring-teal-cyan-aqua-200" />
-        </div>
+        <img src="@AvatarUrl"
+             alt="@AltText"
+             loading="lazy"
+             width="160"
+             height="160"
+             class="w-36 h-36 md:w-40 md:h-40 rounded-full object-cover ring-1 ring-gray-200 outline outline-[6px] outline-white shadow-[0_8px_24px_-12px_rgba(64,103,107,0.25)]" />
     </div>
 
     <!-- Name/Title -->

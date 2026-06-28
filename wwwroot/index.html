@@ -33,6 +33,7 @@
          Using a single CSS framework (Tailwind) ensures consistent styling and avoids specificity issues,
          like the ones that were affecting link hover effects in the header. -->
     <link rel="stylesheet" href="css/app.css" />
+    <link rel="stylesheet" href="css/motion.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
@@ -95,6 +96,7 @@
         <a class="dismiss">&times;</a>
     </div>
     <script src="js/anim.js"></script>
+    <script src="js/scroll-reveal.js"></script>
     <script src="_framework/blazor.webassembly.js" autostart="false"></script>
     <script>
         Blazor.start({
@@ -141,6 +143,25 @@
                     fontFamily: {
                         'ibm-plex': ['IBM Plex Sans', 'Arial', 'Helvetica', 'sans-serif'],
                         'helvetica': ['Helvetica Neue', 'Helvetica', 'Arial', 'sans-serif'],
+                    },
+                    keyframes: {
+                        'fade-up': {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'none' },
+                        },
+                        'fade-in': {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        'scale-in': {
+                            '0%': { opacity: '0', transform: 'scale(0.94)' },
+                            '100%': { opacity: '1', transform: 'none' },
+                        },
+                    },
+                    animation: {
+                        'fade-up': 'fade-up 0.7s cubic-bezier(0.16,1,0.3,1) forwards',
+                        'fade-in': 'fade-in 0.6s ease-out forwards',
+                        'scale-in': 'scale-in 0.5s cubic-bezier(0.16,1,0.3,1) forwards',
                     },
                 }
             }

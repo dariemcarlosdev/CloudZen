@@ -22,6 +22,33 @@
     pointer-events: none;
 }
 
+/* ── Subtle radial teal glow behind the illustration (toned down) ── */
+.hero-radial-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 55%;
+    height: 55%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(97, 194, 200, 0.12) 0%, rgba(97, 194, 200, 0) 72%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ── Structured dot grid pattern — replaces decorative blobs ──
+   Intentional, geometric, fades to nothing at edges via radial mask.
+   Reads as "engineering / systems" not "AI hero blur orb". */
+.hero-grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(64, 103, 107, 0.14) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+    -webkit-mask-image: radial-gradient(ellipse 62% 62% at center, #000 28%, transparent 78%);
+    mask-image: radial-gradient(ellipse 62% 62% at center, #000 28%, transparent 78%);
+    pointer-events: none;
+    z-index: 0;
+}
+
 /* ══════════════════════════════════════════════════════════════
    LIGHT WORKFLOW NODE CARDS
    ══════════════════════════════════════════════════════════════ */
@@ -598,12 +625,12 @@
         transform: translateY(0);
     }
     50% {
-        transform: translateY(-6px);
+        transform: translateY(-4px);
     }
 }
 
 .animate-float-warm {
-    animation: float-warm 4s ease-in-out infinite;
+    animation: float-warm 7s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 /* ══════════════════════════════════════════════════════════════

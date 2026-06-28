@@ -3,16 +3,20 @@
    Displays a grid of tool cards with SVG icons.
    Includes the "What You Get" value propositions (previously in ValueProposition.razor). *@
 
-<section id="tools" class="py-16 md:py-20 bg-white text-center">
-    <h2 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+<section id="tools" class="py-16 md:py-20 bg-gradient-to-br from-white to-teal-cyan-aqua-50/10 text-center">
+    <h2 class="reveal text-4xl md:text-5xl font-bold text-gray-800 mb-4">
         All the tools you need to grow in one place.
     </h2>
-    <div class="w-24 h-1 bg-gray-300 mx-auto mb-10 md:mb-16 rounded-full"></div>
+    <div class="reveal w-24 h-1 bg-teal-cyan-aqua-600 mx-auto mb-10 md:mb-16 rounded-full"></div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-10 md:gap-y-14 gap-x-8 max-w-6xl mx-auto px-4 sm:px-6">
+        @{ var toolIndex = 0; }
         @foreach (var tool in _tools)
         {
-            <ToolCardItem Tool="@tool" />
+            <div class="reveal-scale reveal-delay-@((toolIndex % 6) + 1)">
+                <ToolCardItem Tool="@tool" />
+            </div>
+            toolIndex++;
         }
     </div>
 

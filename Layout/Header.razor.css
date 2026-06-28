@@ -15,38 +15,55 @@
     to { opacity: 1; }
 }
 
-/* ── Nav link hover underline animation ── */
+/* ── Magnetic-pill nav links (2026 morphing-pill pattern) ── */
 .nav-link {
     position: relative;
     text-decoration: none;
+    padding: 0.45rem 0.9rem;
+    border-radius: 9999px;
+    isolation: isolate; /* contain ::before stacking */
+    transition: color 0.25s ease;
 }
 
-.nav-link::after {
+/* Animated pill background — scales in from 92% on hover/active */
+.nav-link::before {
     content: '';
     position: absolute;
-    bottom: -4px;
-    left: 50%;
-    width: 0;
-    height: 2px;
-    background: #9ca3af; /* gray */
-    border-radius: 1px;
-    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    inset: 0;
+    border-radius: 9999px;
+    background: rgba(97, 194, 200, 0.12); /* teal @ 12% */
+    transform: scale(0.92);
+    opacity: 0;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.22s ease;
+    z-index: -1;
 }
 
-.nav-link:hover::after {
-    width: 100%;
-    left: 0;
+.nav-link:hover::before {
+    transform: scale(1);
+    opacity: 1;
 }
 
-/* Active nav link — persistent underline + accent color */
+/* Active — deeper teal pill + ink-shifted text */
 .nav-link--active {
-    color: #61C2C8 !important;
+    color: #2F4E51 !important; /* teal-cyan-aqua-700 */
 }
 
-.nav-link--active::after {
-    width: 100%;
-    left: 0;
-    background: #9ca3af; /* gray */
+.nav-link--active::before {
+    transform: scale(1);
+    opacity: 1;
+    background: rgba(97, 194, 200, 0.18);
+    box-shadow: inset 0 0 0 1px rgba(64, 103, 107, 0.18);
+}
+
+/* Keyboard focus ring (a11y — preserve visibility) */
+.nav-link:focus-visible {
+    outline: none;
+}
+.nav-link:focus-visible::before {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: inset 0 0 0 2px #40676B;
 }
 
 /* ── Animated hamburger ☰ → ✕ ── */
@@ -90,23 +107,60 @@
     }
 }
 
-/* ── CTA button hover lift ── */
+/* ── CTA button — engineered shadow stack + active scale (no lift; anti-Codevibe) ── */
 .cta-button {
-    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 1px 3px rgba(251, 146, 60, 0.2);
+    position: relative;
+    transition: background-color 0.2s ease,
+                box-shadow 0.25s ease,
+                transform 0.12s ease;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.32) inset, /* top highlight — depth */
+                0 1px 3px rgba(251, 146, 60, 0.22),
+                0 4px 14px -6px rgba(251, 146, 60, 0.28);
 }
 
 .cta-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(251, 146, 60, 0.3);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.4) inset,
+                0 2px 6px rgba(251, 146, 60, 0.3),
+                0 8px 22px -6px rgba(251, 146, 60, 0.42);
 }
 
-/* ── Header scroll bottom border line ── */
-header {
-    border-bottom: 1px solid transparent;
-    transition: border-color 0.25s ease;
+.cta-button:active {
+    transform: scale(0.97); /* touch feedback only on active, never hover */
 }
 
-header.header-scrolled {
-    border-color: #d1d5db; /* gray-300 — visible only on scroll */
+/* ── Premium tinted header surface w/ scroll-shrink (2026) ── */
+/* Pearl wash (cool-tinted near-white) with brand temperature.
+   No top decorative strip, no backdrop-blur, neutral warm-tinted hairline. */
+header.cz-header {
+    height: 4.5rem; /* 72px at rest — generous breathing room */
+    background: linear-gradient(180deg, #FFFFFF 0%, #F8FBFC 100%);
+    border-bottom: 1px solid rgba(31, 54, 56, 0.08); /* teal-800 @ 8% — reads as warm neutral */
+    transition: height 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.3s ease,
+                border-color 0.25s ease,
+                box-shadow 0.3s ease;
+    position: fixed;
+}
+
+/* Scrolled: shrink + intensify presence — compact nav, deeper border, soft directional shadow */
+header.cz-header.header-scrolled {
+    height: 3.5rem; /* 56px on scroll — 2026 compact-nav standard */
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 251, 252, 0.97) 100%);
+    border-bottom-color: rgba(31, 54, 56, 0.14); /* same hue, deeper opacity — no hue shift */
+    box-shadow: 0 6px 20px -12px rgba(31, 54, 56, 0.14);
+}
+
+/* Reduced motion — disable all header transitions + magnetic-pill scaling */
+@media (prefers-reduced-motion: reduce) {
+    header.cz-header,
+    header.cz-header.header-scrolled,
+    .nav-link,
+    .nav-link::before,
+    .cta-button {
+        transition: none;
+    }
+    .nav-link::before,
+    .nav-link--active::before {
+        transform: none;
+    }
 }

@@ -1,13 +1,24 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace CloudZen.Features.Legal.Components;
 
 public sealed partial class Faq : ComponentBase
 {
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+
     private int? _openIndex;
 
     private void Toggle(int index) =>
         _openIndex = _openIndex == index ? null : index;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initScrollReveal");
+        }
+    }
 
     private sealed record FaqItem(string Question, RenderFragment Answer);
 

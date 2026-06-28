@@ -8,7 +8,7 @@
 
 .faq-item {
     background: #ffffff;
-    border: 1px solid #e5e7eb;
+    border: 1px solid rgba(97, 194, 200, 0.25);
     border-radius: 0.75rem;
     overflow: hidden;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -71,7 +71,16 @@
 
 /* Answer panel */
 .faq-panel {
-    animation: faq-slide-down 0.2s ease-out;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out, opacity 0.2s ease-out;
+    opacity: 0;
+}
+
+.faq-panel--open {
+    max-height: 800px;
+    opacity: 1;
+    animation: faq-slide-down 0.2s ease-out forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -215,20 +224,19 @@
 }
 
 .faq-cta-button--primary {
-    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
-    color: #ffffff;
-    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.2);
+    background: #fb923c; /* orange-400 — brand primary */
+    color: #0F1E1F;      /* teal-cyan-aqua-900 — high contrast on orange */
+    box-shadow: 0 8px 20px -10px rgba(251, 146, 60, 0.45);
 }
 
 .faq-cta-button--primary:hover {
-    background: linear-gradient(135deg, #fdba74 0%, #fb923c 100%);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
-    transform: translateY(-1px);
+    background: #f97316; /* orange-500 */
+    box-shadow: 0 12px 28px -10px rgba(249, 115, 22, 0.55);
 }
 
 .faq-cta-button--primary:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 4px rgba(249, 115, 22, 0.2);
+    transform: scale(0.97);
+    box-shadow: 0 4px 12px -8px rgba(249, 115, 22, 0.4);
 }
 
 .faq-cta-button--primary:focus-visible {

@@ -22,4 +22,4 @@ All external service integrations (email, AI, etc.) follow this principle — th
 
 ---
 
-*Last Updated: March 2026*
+*Last Updated: June 2026 — UI Design System updated with anti-Codevibe patterns: card border-shift + accent-bar hover (replaces lift), structured dot-grid hero background (replaces blur blobs), outlined status pill variants, teal/orange progress ramp, avatar ring+outline (no glow halo), form filter panel, eyebrow labels, brand counter tokens.*

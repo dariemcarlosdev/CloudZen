@@ -1,6 +1,7 @@
 using CloudZen.Features.Landing.Models;
 using CloudZen.Features.Landing.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace CloudZen.Features.Landing.Components;
 
@@ -10,6 +11,7 @@ namespace CloudZen.Features.Landing.Components;
 public partial class Mission
 {
     [Inject] private IMissionService MissionService { get; set; } = default!;
+    [Inject] private IJSRuntime JS { get; set; } = default!;
 
     private List<string> _missionPoints = new();
     private List<StandardInfo> _standards = new();
@@ -18,5 +20,13 @@ public partial class Mission
     {
         _missionPoints = MissionService.GetMissionPoints();
         _standards = MissionService.GetStandards();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initScrollReveal");
+        }
     }
 }
