@@ -186,6 +186,7 @@ Add these application settings:
 | `ANTHROPIC_API_KEY` | `your-anthropic-api-key` | Anthropic Claude API key (for AI chatbot) |
 | `BREVO_SMTP_KEY` | `your-brevo-smtp-key` | Brevo SMTP relay key |
 | `BREVO_SMTP_LOGIN` | `your-smtp-login@smtp-brevo.com` | Brevo SMTP login |
+| `N8N_WEBHOOK_URL` | `https://cloudzen-n8n.pikapod.net/webhook/appointments` | n8n appointment booking webhook — Production URL only, workflow must be activated (required — 502 if unset). Booking DB (Neon Postgres) is configured inside n8n itself, not an Azure resource. |
 | `KEY_VAULT_ENDPOINT` | `https://cloudzenvault.vault.azure.net/` | *(Optional)* Azure Key Vault URI for secrets management |
 | `EmailSettings:FromEmail` | `cloudzen.inc@gmail.com` | Sender email address |
 | `EmailSettings:CcEmail` | `softevolutionsl@gmail.com` | CC email address |

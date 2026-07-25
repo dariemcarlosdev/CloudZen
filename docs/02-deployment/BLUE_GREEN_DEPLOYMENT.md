@@ -92,6 +92,7 @@ Azure Deployment Slots require **Standard plan or higher** (~$70+/month). Our se
 | `ANTHROPIC_API_KEY` | *(your key)* |
 | `BREVO_SMTP_KEY` | *(your key)* |
 | `BREVO_SMTP_LOGIN` | *(your login)* |
+| `N8N_WEBHOOK_URL` | `https://cloudzen-n8n.pikapod.net/webhook/appointments` *(workflow must be activated — Production URL, not Test URL)* |
 | `EmailSettings:FromEmail` | `cloudzen.inc@gmail.com` |
 | `EmailSettings:CcEmail` | `softevolutionsl@gmail.com` |
 | `RateLimiting:PermitLimit` | `10` |

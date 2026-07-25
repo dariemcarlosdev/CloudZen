@@ -687,7 +687,8 @@ This workflow and the **Appointment Reminders — Optimised (24h & 1h)** workflo
 ## Setup Checklist
 
 - [ ] **Webhook** is publicly accessible (workflow must be **activated**)
-- [ ] **PostgreSQL credential** configured and connected to the correct database
+- [ ] Production webhook URL (`https://cloudzen-n8n.pikapod.net/webhook/appointments`) set as `N8N_WEBHOOK_URL` on both CloudZen Azure Function Apps (prod + staging)
+- [ ] **PostgreSQL credential** configured and connected to the correct database (Neon Postgres, host `ep-broad-fog-a8m4je85-pooler.eastus2.azure.neon.tech`)
 - [ ] Both DB tables (`appointments`, `workflow_errors`) exist with the required columns
 - [ ] **Gmail credential** connected (used for all email nodes)
 - [ ] **Google Calendar credential** connected; calendar ID updated in `Create Calendar Event`, `Delete Calendar — Cancel`, `Update Calendar — Reschedule`
