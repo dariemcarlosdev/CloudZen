@@ -8,19 +8,19 @@
 
 .faq-item {
     background: #ffffff;
-    border: 1px solid rgba(97, 194, 200, 0.25);
+    border: 1px solid #40676B; /* teal-cyan-aqua-600 */
     border-radius: 0.75rem;
     overflow: hidden;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .faq-item:hover {
-    border-color: #d1d5db;
+    border-color: #40676B; /* teal-cyan-aqua-600 */
 }
 
 .faq-item--open {
-    border-color: rgba(97, 194, 200, 0.5);
-    box-shadow: 0 4px 16px rgba(97, 194, 200, 0.1);
+    border-color: #40676B; /* teal-cyan-aqua-600 */
+    box-shadow: 0 4px 16px rgba(64, 103, 107, 0.1);
 }
 
 /* Trigger button */
@@ -157,7 +157,7 @@
 
 /* Inline link in header */
 .faq-inline-link {
-    color: #0891b2;
+    color: #40676B;
     text-decoration: underline;
     text-underline-offset: 2px;
     transition: color 0.2s ease;
