@@ -274,6 +274,29 @@ public class SendEmailFunction(
         // restricted Azure networks, but full certificate chain validation is preserved.
         client.CheckCertificateRevocation = false;
 
+        // Configure certificate validation for Brevo's SMTP server.
+        // CheckCertificateRevocation is already disabled above, so revocation-related chain
+        // errors are expected and acceptable. All other errors (name mismatch, untrusted root,
+        // etc.) are rejected to prevent MITM attacks (OWASP A02: Cryptographic Failures).
+        client.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
+        {
+            if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.None)
+                return true;
+
+            // Allow chain errors caused only by revocation check being disabled
+            if (sslPolicyErrors == System.Net.Security.SslPolicyErrors.RemoteCertificateChainErrors &&
+                chain != null &&
+                chain.ChainStatus.All(status =>
+                    status.Status == System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.RevocationStatusUnknown ||
+                    status.Status == System.Security.Cryptography.X509Certificates.X509ChainStatusFlags.OfflineRevocation))
+            {
+                return true;
+            }
+
+            _logger.LogError("SSL certificate validation failed for Brevo SMTP. Errors: {Errors}", sslPolicyErrors);
+            return false;
+        };
+
         // Connect with STARTTLS
         await client.ConnectAsync(BrevoSmtpHost, BrevoSmtpPort, SecureSocketOptions.StartTls);
 
