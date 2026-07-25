@@ -1,11 +1,8 @@
 # Azure CloudZen Static Web Apps CI/CD
 #
-# Blue/Green Deployment Strategy:
-#   - PRODUCTION: Push to 'master' deploys to the live Static Web App.
-#   - STAGING: Pull requests to 'master' auto-create a preview environment
-#     with a unique URL, built with staging configuration (staging Function App).
-#   - SWAP (Staging to Production): Merging a PR with a preview environment triggers a swap, making the preview live and the old production environment becomes the new staging environment for the next PR. The old staging environment is then destroyed. This allows for zero-downtime deployments and easy rollbacks by simply reverting the merge.
-#     environment is automatically destroyed on PR close.
+# Deployment Strategy:
+#   - Push to 'master' (i.e. a merged PR from 'development') deploys to the live Static Web App.
+#   - Pull requests to 'master' only build/compile-check — no deploy, no preview environment.
 #
 # Build & Deploy Pipeline:
 #   1. "dotnet publish" compiles the Blazor WASM app and outputs to "publish_output/wwwroot".
@@ -26,7 +23,7 @@ on:
       - '.github/workflows/azure-functions.yml'
       - '*.md'    # Don't trigger for markdown changes
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
     branches:
       - master
     paths-ignore:
@@ -35,14 +32,30 @@ on:
       - '*.md'
   workflow_dispatch:  # Allow manual trigger
 
-env:
-  # Update these if your staging Function App hostname differs
-  PRODUCTION_FUNC_HOSTNAME: 'cloudzen-api-func-e4gehdaef9ftdhbn.westus2-01.azurewebsites.net'
-  STAGING_FUNC_HOSTNAME: 'cloudzen-api-func-staging-hch0amaed0gke2dv.westus2-01.azurewebsites.net'
-
 jobs:
+  build:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    name: Build Job (PR check, no deploy)
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore CloudZen.csproj
+
+      - name: Build
+        run: dotnet build CloudZen.csproj --configuration Release --no-restore
+
   build-and-deploy:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed') || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
@@ -62,14 +75,6 @@ jobs:
       - name: Build
         run: dotnet build CloudZen.csproj --configuration Release --no-restore
 
-      # For PR builds (staging), swap in staging configuration before publish
-      - name: Apply staging configuration
-        if: github.event_name == 'pull_request'
-        run: |
-          echo "Applying staging configuration for preview environment..."
-          cp wwwroot/appsettings.Staging.json wwwroot/appsettings.Production.json
-          sed -i "s|${{ env.PRODUCTION_FUNC_HOSTNAME }}|${{ env.STAGING_FUNC_HOSTNAME }}|g" wwwroot/staticwebapp.config.json
-
       - name: Publish Blazor App
         run: dotnet publish CloudZen.csproj -c Release -o publish_output -p:BlazorEnableCompression=false
 
@@ -81,14 +86,3 @@ jobs:
           action: "upload"
           skip_app_build: true
           app_location: "publish_output/wwwroot"
-
-  close-staging:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    name: Close Staging Environment
-    steps:
-      - name: Destroy preview environment
-        uses: Azure/static-web-apps-deploy@v1
-        with:
-          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
-          action: "close"

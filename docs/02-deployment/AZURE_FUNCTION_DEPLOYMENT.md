@@ -2,8 +2,6 @@
 
 This guide documents the complete process for deploying the `CloudZen.Api` Azure Function to Azure.
 
-> **See also:** [BLUE_GREEN_DEPLOYMENT.md](BLUE_GREEN_DEPLOYMENT.md) for the staging/production (blue/green) multi-environment deployment setup.
-
 ## Table of Contents
 
 1. [Prerequisites](#prerequisites)
@@ -461,7 +459,6 @@ curl -X POST https://cloudzen-api-func-e4gehdaef9ftdhbn.westus2-01.azurewebsites
 2. Verify `FUNCTIONS_EXTENSION_VERSION` = `~4`
 3. Verify `WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED` = `1`
 4. Check **Application Insights → Failures → Exceptions** for worker crash details
-5. See [BLUE_GREEN_DEPLOYMENT.md § Troubleshooting](BLUE_GREEN_DEPLOYMENT.md#10-troubleshooting) for full diagnosis steps
 
 ---
 
@@ -566,13 +563,11 @@ CloudZen/
 │   ├── appsettings.json                 # Base config (relative /api paths)
 │   ├── appsettings.Development.json     # Dev overrides (localhost:7257)
 │   ├── appsettings.Production.json      # Production overrides (full Azure URLs)
-│   ├── appsettings.Staging.json         # Staging overrides (staging Function App URL)
 │   ├── staticwebapp.config.json         # SWA routing, CSP, security headers
 │   └── images/
 │       └── cloudzen-logo.png            # Brand logo (chatbot avatar)
 ├── .gitignore                           # Includes local.settings.json
-├── AZURE_FUNCTION_DEPLOYMENT.md         # This file
-└── BLUE_GREEN_DEPLOYMENT.md             # Blue/green staging/production guide
+└── AZURE_FUNCTION_DEPLOYMENT.md         # This file
 ```
 
 ---
@@ -582,7 +577,6 @@ CloudZen/
 | Resource | URL |
 |----------|-----|
 | Production Function App | `https://cloudzen-api-func-e4gehdaef9ftdhbn.westus2-01.azurewebsites.net` |
-| Staging Function App | `https://cloudzen-api-func-staging-hch0amaed0gke2dv.westus2-01.azurewebsites.net` |
 | Email Endpoint | `.../api/send-email` |
 | Chat Endpoint | `.../api/chat` |
 | Azure Portal | [portal.azure.com](https://portal.azure.com) |

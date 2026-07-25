@@ -1,9 +1,8 @@
 name: Deploy Azure Function
 
-# Blue/Green Deployment Strategy:
-#   - PRODUCTION: Push to 'master' deploys to the live Function App.
-#   - STAGING: Pull requests to 'master' deploy to a separate staging Function App
-#     for testing alongside the SWA preview environment.
+# Deployment Strategy:
+#   - Push to 'master' (i.e. a merged PR from 'development') deploys to the live Function App.
+#   - Pull requests to 'master' only build/compile-check — no deploy, no staging environment.
 
 on:
   push:
@@ -23,7 +22,6 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_NAME: 'cloudzen-api-func-e4gehdaef9ftdhbn' # Update if your production Function App hostname differs
-  AZURE_FUNCTIONAPP_NAME_STAGING: 'cloudzen-api-func-staging' # Update if your staging Function App hostname differs
   AZURE_FUNCTIONAPP_PACKAGE_PATH: 'Api' # Path to your Azure Function project
   DOTNET_VERSION: '8.0.x'
 
@@ -54,25 +52,6 @@ jobs:
           name: function-app
           path: ./output
           include-hidden-files: true
-
-  deploy-staging:
-    if: github.event_name == 'pull_request'
-    needs: build
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: function-app
-          path: ./output
-
-      - name: Deploy to Staging Function App
-        uses: Azure/functions-action@v1
-        with:
-          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME_STAGING }}
-          package: './output'
-          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE_STAGING }}
 
   deploy-production:
     if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
