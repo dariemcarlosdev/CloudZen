@@ -1,5 +1,9 @@
 ﻿# Azure Deployment Quick Reference
 
+> **See also:** [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) · [AZURE_FUNCTION_DEPLOYMENT.md](AZURE_FUNCTION_DEPLOYMENT.md)
+>
+> **Last synced: 2026-07-25**
+
 ## ⚡ Quick Start Checklist
 
 ### 🚨 Before You Begin - CRITICAL
@@ -29,21 +33,10 @@
 - [ ] Configure CORS (allow your Static Web App domain)
 
 ### 3️⃣ Azure Functions Backend (REQUIRED for secure operations)
-```bash
-# Create the backend project:
-dotnet new func -n CloudZen.Api
-cd CloudZen.Api
-dotnet add package Azure.Identity
-dotnet add package Azure.Extensions.AspNetCore.Configuration.Secrets
-dotnet add package MailKit
-dotnet add package Polly
-```
-- [ ] Create `SendEmailFunction.cs` (see `DEPLOYMENT_GUIDE.md` section 5)
-- [ ] Create `ChatFunction.cs` (AI chatbot proxy to Anthropic Claude)
-- [ ] Deploy to Azure Function App (Consumption plan)
-- [ ] Enable Managed Identity
-- [ ] Link to Static Web App (in Azure Portal: Static Web App > APIs)
-- [ ] Set `ANTHROPIC_API_KEY` in Azure Function App settings
+- [x] Backend created and deployed (`CloudZen.Api`, Consumption plan) — see [AZURE_FUNCTION_DEPLOYMENT.md](AZURE_FUNCTION_DEPLOYMENT.md) for setup
+- [x] `SendEmailFunction.cs` and `ChatFunction.cs` deployed
+- [x] Managed Identity enabled, linked to Static Web App
+- [ ] Verify all env vars set in Function App settings — see [AZURE_FUNCTION_DEPLOYMENT.md](AZURE_FUNCTION_DEPLOYMENT.md#azure-portal-configuration)
 
 ### 4️⃣ Azure Key Vault Setup
 ```bash

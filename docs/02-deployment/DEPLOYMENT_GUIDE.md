@@ -68,27 +68,11 @@ Azure Static Web Apps requires a configuration file for routing, security header
 }
 ```
 
-### Configure Static Web App Application Settings:
+### Function App Environment Variables
 
-1.  Go to your Static Web App in the Azure Portal.
-2.  Select **Configuration** under **Settings**.
-3.  Add these application settings (these will be available as environment variables):
+Runtime config/secrets (`BREVO_SMTP_KEY`, `N8N_WEBHOOK_URL`, `ANTHROPIC_API_KEY`, rate limiting, CORS origins, etc.) are set on the **Azure Function App** — not the Static Web App. These are two separate Azure resources with separate Configuration blades.
 
-| Name | Value | Purpose |
-|------|-------|---------|
-| `BREVO_SMTP_KEY` | Your Brevo SMTP relay key | Email service (for Azure Function backend) |
-| `BREVO_SMTP_LOGIN` | Your Brevo SMTP login | Email service (for Azure Function backend) |
-| `BLOB_STORAGE_CONNECTION_STRING` | Your storage connection string | Blob operations (for Azure Function backend) |
-| `ANTHROPIC_API_KEY` | Your Anthropic Claude API key | AI chatbot (ChatFunction) |
-| `N8N_WEBHOOK_URL` | Your n8n production webhook URL | Appointment booking webhook (required — 502 if unset) |
-| `KEY_VAULT_ENDPOINT` | Your Key Vault URI | *(Optional)* Loads secrets from Key Vault via Managed Identity |
-| `ProductionOrigin` | Your Static Web App URL | CORS allowed origin |
-| `AllowedOrigins:0` / `AllowedOrigins:1` | Explicit origin URLs | *(Optional)* Overrides default CORS origin list |
-| `RateLimiting:PermitLimit` | e.g. `10` | Max requests per window |
-| `RateLimiting:WindowSeconds` | e.g. `60` | Rate limit window in seconds |
-| `RateLimiting:QueueLimit` | e.g. `0` | Queue limit for excess requests |
-| `RateLimiting:InactivityTimeoutMinutes` | e.g. `5` | Timeout for inactive limiters |
-| `RateLimiting:EnableCircuitBreaker` | `true`/`false` | Enable Polly circuit breaker pattern |
+**Authoritative table:** see [AZURE_FUNCTION_DEPLOYMENT.md](AZURE_FUNCTION_DEPLOYMENT.md#azure-portal-configuration) for the current, complete list (kept in one place to avoid drift).
 
 **Note:** These environment variables are **only accessible to Azure Functions**, not to your Blazor WebAssembly app directly.
 

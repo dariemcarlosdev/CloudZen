@@ -74,11 +74,12 @@ builder.Services.AddOptions<BookingServiceOptions>()
 // HTTP CLIENT REGISTRATION
 // =============================================================================
 
-// Register HttpClient with base address for API calls
-builder.Services.AddScoped(sp => new HttpClient 
-{ 
-    BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) 
-});
+// NOTE: Each service below gets its OWN HttpClient via AddHttpClient<T> (IHttpClientFactory).
+// Do NOT register a single shared HttpClient instance here - ApiEmailService, ChatbotService,
+// and AppointmentService each set httpClient.Timeout in their constructor, and HttpClient throws
+// InvalidOperationException ("net_http_operation_started") if Timeout is set after any request
+// has been sent on that instance. A shared instance crashes as soon as a second service is
+// constructed after the first has made a request.
 
 // =============================================================================
 // SECURITY NOTES FOR BLAZOR WEBASSEMBLY
@@ -101,23 +102,27 @@ builder.Services.AddScoped<IGoogleCalendarUrlService, GoogleCalendarUrlService>(
 builder.Services.AddScoped<IBookingService, BookingService>();
 
 // Register AppointmentService for n8n webhook appointment booking
-builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddHttpClient<IAppointmentService, AppointmentService>(client =>
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
 // Register TicketService as the implementation for ITicketService
 builder.Services.AddScoped<ITicketService, TicketService>();
 
 // Register ResumeService (uses IOptions<BlobStorageOptions> for configuration)
-builder.Services.AddScoped<ResumeService>();
+builder.Services.AddHttpClient<ResumeService>(client =>
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
 // Register ApiEmailService as the implementation for IEmailService
 // Uses IOptions<EmailServiceOptions> for configuration
 // This sends emails through the Azure Functions API backend (secure for WebAssembly)
-builder.Services.AddScoped<IEmailService, ApiEmailService>();
+builder.Services.AddHttpClient<IEmailService, ApiEmailService>(client =>
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
 // Register ChatbotService as the implementation for IChatbotService
 // Uses IOptions<ChatbotOptions> for configuration
 // This sends chat messages through the Azure Functions API backend (API key stays server-side)
-builder.Services.AddScoped<IChatbotService, ChatbotService>();
+builder.Services.AddHttpClient<IChatbotService, ChatbotService>(client =>
+    client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
 // Register ProjectService for managing portfolio projects
 builder.Services.AddScoped<IProjectService, ProjectService>();
