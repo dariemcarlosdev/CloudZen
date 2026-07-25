@@ -3,6 +3,8 @@
 This guide will walk you through configuring your Azure services (Static Web App, Key Vault, Blob Storage) and your application to work with them.
 
 > **See also:** [BLUE_GREEN_DEPLOYMENT.md](BLUE_GREEN_DEPLOYMENT.md) for staging/production (blue/green) deployment setup · [AZURE_FUNCTION_DEPLOYMENT.md](AZURE_FUNCTION_DEPLOYMENT.md) · [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)
+>
+> **Last synced: 2026-07-25**
 
 ## Important: Blazor WebAssembly Limitations
 
@@ -49,7 +51,7 @@ Azure Static Web Apps requires a configuration file for routing, security header
   "globalHeaders": {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
-    "Content-Security-Policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cloudzenstorage.blob.core.windows.net data:; img-src 'self' data: https:; font-src 'self' data: https://cdn.jsdelivr.net;"
+    "Content-Security-Policy": "default-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cloudzenstorage.blob.core.windows.net data:; img-src 'self' data: https:; font-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self' https://cloudzen-api-func-e4gehdaef9ftdhbn.westus2-01.azurewebsites.net;"
   },
   "routes": [
     {
@@ -74,8 +76,19 @@ Azure Static Web Apps requires a configuration file for routing, security header
 
 | Name | Value | Purpose |
 |------|-------|---------|
-| `BREVO_API_KEY` | Your Brevo API key | Email service (for Azure Function backend) |
+| `BREVO_SMTP_KEY` | Your Brevo SMTP relay key | Email service (for Azure Function backend) |
+| `BREVO_SMTP_LOGIN` | Your Brevo SMTP login | Email service (for Azure Function backend) |
 | `BLOB_STORAGE_CONNECTION_STRING` | Your storage connection string | Blob operations (for Azure Function backend) |
+| `ANTHROPIC_API_KEY` | Your Anthropic Claude API key | AI chatbot (ChatFunction) |
+| `N8N_WEBHOOK_URL` | Your n8n production webhook URL | Appointment booking webhook (required — 502 if unset) |
+| `KEY_VAULT_ENDPOINT` | Your Key Vault URI | *(Optional)* Loads secrets from Key Vault via Managed Identity |
+| `ProductionOrigin` | Your Static Web App URL | CORS allowed origin |
+| `AllowedOrigins:0` / `AllowedOrigins:1` | Explicit origin URLs | *(Optional)* Overrides default CORS origin list |
+| `RateLimiting:PermitLimit` | e.g. `10` | Max requests per window |
+| `RateLimiting:WindowSeconds` | e.g. `60` | Rate limit window in seconds |
+| `RateLimiting:QueueLimit` | e.g. `0` | Queue limit for excess requests |
+| `RateLimiting:InactivityTimeoutMinutes` | e.g. `5` | Timeout for inactive limiters |
+| `RateLimiting:EnableCircuitBreaker` | `true`/`false` | Enable Polly circuit breaker pattern |
 
 **Note:** These environment variables are **only accessible to Azure Functions**, not to your Blazor WebAssembly app directly.
 
@@ -99,9 +112,10 @@ Azure Static Web Apps requires a configuration file for routing, security header
 
 | Secret Name | Value | Purpose |
 |------------|-------|---------|
-| `BREVO-API-KEY` | Your Brevo API key | Email sending |
+| `BREVO-SMTP-KEY` | Your Brevo SMTP relay key | Email sending |
+| `BREVO-SMTP-LOGIN` | Your Brevo SMTP login | Email sending |
 | `BLOB-STORAGE-CONNECTION-STRING` | Your storage connection string | Blob operations |
-| `SENDGRID-API-KEY` | Your SendGrid key (if using) | Alternative email provider |
+| `ANTHROPIC-API-KEY` | Your Anthropic Claude API key | AI chatbot (ChatFunction) |
 
 ### Granting Access (Only needed if using Azure Functions):
 
@@ -177,37 +191,27 @@ Your Blazor app runs in the browser and needs CORS enabled to access blobs:
 
 ## 4. Application Configuration
 
-### Current Configuration Issues:
+### Resolved: Secrets No Longer Client-Side
 
-❗ **SECURITY ALERT:** Your `wwwroot/appsettings.json` contains exposed secrets:
+Earlier versions of `wwwroot/appsettings.json` exposed the Brevo API key directly in the Blazor WebAssembly bundle (publicly visible in browser dev tools). This is fixed — secrets now live in Azure Function App settings / Key Vault, never in client-side config.
 
-```json
-{
-  "EmailSettings": {
-    "BrevoApiKey": "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"
-  }
-}
-```
+### Current Architecture:
 
-**This is publicly accessible** in your deployed Blazor WebAssembly app! Anyone can view it in the browser's developer tools.
-
-### Recommended Architecture:
-
-**You need an Azure Functions backend** to handle sensitive operations:
+**An Azure Functions backend handles all sensitive operations** (already deployed — see [AZURE_FUNCTION_DEPLOYMENT.md](AZURE_FUNCTION_DEPLOYMENT.md) for full setup):
 
 ```
-Blazor WASM (Client) → Azure Functions API (Backend) → External Services (Email, Storage)
+Blazor WASM (Client) → Azure Functions API (Backend) → External Services (Email, Storage, Anthropic Claude)
                                    ↓
-                          Azure Key Vault (Secrets)
+                          Azure Key Vault (Secrets, optional)
 ```
 
-### Create Azure Functions for Secure Operations:
+### Azure Functions for Secure Operations:
 
-Create a separate Azure Functions project to handle:
+The Functions backend (`CloudZen.Api`) handles:
 
-1. **Email sending** - Reads `BREVO_API_KEY` from Key Vault
-2. **File uploads** - Handles blob storage operations securely
-3. **Any other sensitive operations**
+1. **Email sending** (`SendEmailFunction`) - Reads `BREVO_SMTP_KEY` / `BREVO_SMTP_LOGIN` from environment/Key Vault
+2. **AI chatbot** (`ChatFunction`) - Proxies to Anthropic Claude using `ANTHROPIC_API_KEY`
+3. **File uploads** - Handles blob storage operations securely
 
 ### Add NuGet Packages (for your Blazor project):
 
@@ -241,17 +245,14 @@ Your project already has these packages (good!):
 
 ### Update `Program.cs`:
 
-Your current `Program.cs` is trying to read `BREVO_API_KEY` from environment variables, but **Blazor WebAssembly cannot access Azure environment variables directly**.
+Blazor WebAssembly **cannot access Azure environment variables directly**, so email sending is not done client-side.
 
-**Remove this approach** and instead call an Azure Function:
+Client code calls the Azure Function endpoint instead:
 
 ```csharp
-// Current code in BrevoEmailProvider.cs:
-var apikey = Environment.GetEnvironmentVariable("BREVO_API_KEY"); // ❌ This won't work in WASM!
-
-// Instead, create an Azure Function endpoint:
-// POST /api/SendEmail
-// The Function reads BREVO_API_KEY from its environment/Key Vault
+// Instead of reading BREVO_SMTP_KEY client-side (❌ won't work in WASM):
+// POST /api/send-email
+// The Function reads BREVO_SMTP_KEY / BREVO_SMTP_LOGIN from its environment/Key Vault
 ```
 
 ### Recommended File Structure:
@@ -269,7 +270,9 @@ CloudZen/
     └── UploadFileFunction.cs
 ```
 
-## 5. Create Azure Functions Backend (Recommended)
+## 5. Azure Functions Backend (Deployed)
+
+The Functions backend is already created and deployed. This section documents the setup for reference — see [AZURE_FUNCTION_DEPLOYMENT.md](AZURE_FUNCTION_DEPLOYMENT.md) for the full, current configuration (including `ChatFunction` and rate limiting).
 
 ### Step 1: Create Functions Project
 
@@ -310,7 +313,7 @@ public class SendEmailFunction
         [HttpTrigger(AuthorizationLevel.Function, "post", Route = null)] HttpRequest req)
     {
         // Read secret from Key Vault via Managed Identity
-        var apiKey = _config["BREVO-API-KEY"];
+        var apiKey = _config["BREVO_SMTP_KEY"];
         
         // Parse request body
         var body = await new StreamReader(req.Body).ReadToEndAsync();
@@ -370,9 +373,9 @@ Your workflow already references these secrets. Ensure they're configured:
 | Secret Name | Value | Purpose |
 |------------|-------|---------|
 | `AZURE_STATIC_WEB_APPS_API_TOKEN` | Auto-generated by Azure | Deployment authentication |
-| `BREVO_API_KEY` | Your Brevo API key | Build-time reference (remove if not needed) |
+| `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` | From Function App publish profile | Function App deployment authentication |
 
-**Note:** The `BREVO_API_KEY` in GitHub secrets is different from runtime configuration. Remove it from the workflow's `environment_variables` section since you'll use Azure Functions instead.
+**Note:** Runtime secrets (`BREVO_SMTP_KEY`, `BREVO_SMTP_LOGIN`, `ANTHROPIC_API_KEY`, etc.) live in Azure Function App settings / Key Vault, not GitHub Secrets — they're not needed at build time.
 
 ## 7. Security Best Practices
 
@@ -408,17 +411,20 @@ Already configured in `staticwebapp.config.json`. Adjust as needed for your doma
 
 ## 8. Deployment Checklist
 
-- [ ] Azure Static Web App created and linked to GitHub
-- [ ] `staticwebapp.config.json` added to `wwwroot/`
-- [ ] Azure Functions backend created for sensitive operations
-- [ ] Azure Key Vault configured with secrets
-- [ ] Managed Identity enabled for Functions and granted Key Vault access
+- [x] Azure Static Web App created and linked to GitHub
+- [x] `staticwebapp.config.json` added to `wwwroot/`
+- [x] Azure Functions backend created and deployed for sensitive operations
+- [x] Exposed API keys rotated and removed from `appsettings.json`
+- [x] GitHub workflow updated (removed `environment_variables`)
+- [x] Build and deploy pipeline tested
+- [ ] Environment Variables set in Azure Function App (see §1 table)
+- [ ] Azure Key Vault configured with secrets (optional — `KEY_VAULT_ENDPOINT`)
+- [ ] Managed Identity enabled for Functions and granted Key Vault access (optional)
 - [ ] Azure Blob Storage CORS configured
-- [ ] Exposed API keys rotated and removed from `appsettings.json`
-- [ ] GitHub workflow updated (removed `environment_variables` if not needed)
+- [ ] `staticwebapp.config.json` CSP `connect-src` updated with Function App URL
+- [ ] Contact form and AI chatbot tested end-to-end
 - [ ] Custom domain configured (optional, in Static Web App settings)
 - [ ] SSL/TLS certificates auto-provisioned by Azure
-- [ ] Build and deploy pipeline tested
 
 ## 9. Testing Your Deployment
 

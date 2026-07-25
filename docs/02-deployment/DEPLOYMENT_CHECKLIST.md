@@ -38,7 +38,7 @@ dotnet add package Azure.Extensions.AspNetCore.Configuration.Secrets
 dotnet add package MailKit
 dotnet add package Polly
 ```
-- [ ] Create `SendEmailFunction.cs` (see `deployment_guide.md` section 5)
+- [ ] Create `SendEmailFunction.cs` (see `DEPLOYMENT_GUIDE.md` section 5)
 - [ ] Create `ChatFunction.cs` (AI chatbot proxy to Anthropic Claude)
 - [ ] Deploy to Azure Function App (Consumption plan)
 - [ ] Enable Managed Identity
@@ -113,7 +113,7 @@ git push origin master        # Triggers GitHub Actions
 |----------|-----|
 | Azure Portal | https://portal.azure.com |
 | Brevo Dashboard | https://app.brevo.com |
-| Your GitHub Repo | https://github.com/dariemcarlosdev/CloudZen |
+| Your GitHub Repo | https://github.com/MyTeamForDev/CloudZen |
 | Azure Static Web Apps Docs | https://learn.microsoft.com/en-us/azure/static-web-apps/ |
 | Azure Functions Docs | https://learn.microsoft.com/en-us/azure/azure-functions/ |
 
