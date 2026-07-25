@@ -1,0 +1,88 @@
+
+using CloudZen.Features.Projects.Models;
+
+namespace CloudZen.Features.Landing.Services;
+
+/// <summary>
+/// Converts technical project data into business-friendly presentation text
+/// for the case studies section.
+/// </summary>
+public class CaseStudyService : ICaseStudyService
+{
+    /// <summary>
+    /// Determines the display category badge for a project based on its type string.
+    /// </summary>
+    public string GetProjectCategory(string projectType)
+    {
+        if (projectType.Contains("Customer"))
+            return "Customer Success";
+        if (projectType.Contains("AI Automation"))
+            return "AI Automation";
+        return "Innovation Project";
+    }
+
+    /// <summary>
+    /// Determines the display category badge from a <see cref="ProjectCategory"/> enum value.
+    /// </summary>
+    public string GetProjectCategory(ProjectCategory category) => category switch
+    {
+        ProjectCategory.CustomerWork => "Customer Success",
+        ProjectCategory.AiAutomation => "AI Automation",
+        ProjectCategory.SideProject => "Innovation Project",
+        _ => "Project"
+    };
+
+    /// <summary>
+    /// Converts long project titles into shorter, more display-friendly versions.
+    /// </summary>
+    public string GetShortTitle(string title)
+    {
+        if (title.Contains("WPBT"))
+            return "Assessment Platform Modernization";
+        if (title.Contains("ETL Optimization"))
+            return "Data Pipeline Optimization";
+        if (title.Contains("VPKFILEPROCESSOR"))
+            return "File Processing Automation";
+        if (title.Contains("Smart Menu"))
+            return "AI Menu Optimization";
+        if (title.Contains("AI Chatbot"))
+            return "Personalized AI Chatbot Assistance";
+        if (title.Contains("Booking Appointments"))
+            return "Smart Appointment Booking System";
+        if (title.Contains("Customer-Facing Web"))
+            return "Custom Web Application";
+
+        return title.Length > 50 ? title.Substring(0, 47) + "..." : title;
+    }
+
+    /// <summary>
+    /// Translates technical descriptions into business-friendly language.
+    /// </summary>
+    public string GetCustomerFriendlyDescription(string description)
+    {
+        var simplified = description
+            .Replace("ASP.NET Web Forms to modular ASP.NET Core architecture", "outdated systems to modern technology")
+            .Replace("SSIS ETL pipeline", "data processing pipeline")
+            .Replace("ABAP-driven delta extraction", "smart data extraction")
+            .Replace("cloud-native solution", "modern online solution")
+            .Replace("Blazor Server interface", "user-friendly web interface")
+            .Replace("Azure Event Grid", "automated notifications");
+
+        return simplified.Length > 150 ? simplified.Substring(0, 147) + "..." : simplified;
+    }
+
+    /// <summary>
+    /// Simplifies technical result statements for non-technical audiences.
+    /// </summary>
+    public string GetSimplifiedResult(string result)
+    {
+        var simplified = result
+            .Replace("turnaround times by roughly", "delivery speed by")
+            .Replace("Runtime Reduction through Delta Processing", "faster processing")
+            .Replace("Scales-Out efficiently with large datasets", "Handles growing data smoothly")
+            .Replace("CI/CD pipelines", "automated deployments")
+            .Replace("Azure Event Grid", "automated notifications");
+
+        return simplified.Length > 80 ? simplified.Substring(0, 77) + "..." : simplified;
+    }
+}

@@ -1,0 +1,49 @@
+@page "/tickets"
+
+@inject ITicketService TicketService
+@inject IJSRuntime JS
+
+<div class="entrance entrance-1 max-w-xl mx-auto mt-16 bg-white rounded-2xl border border-gray-200/80 p-8
+            transition-[border-color,box-shadow] duration-300 ease-out
+            hover:border-teal-cyan-aqua-300 hover:shadow-[0_10px_30px_-15px_rgba(64,103,107,0.18)]">
+    <h2 class="text-2xl font-bold mb-2 text-center text-gray-900 tracking-tight">Ticket incidents overview</h2>
+    <div class="w-12 h-[3px] bg-teal-cyan-aqua-600 mx-auto rounded-full mb-8"></div>
+    <div class="flex flex-col sm:flex-row justify-center items-center gap-10">
+        <div class="reveal-scale reveal-delay-1">
+            <AnimatedCounterCircle Label="All" Value="@totalCount" Color="#40676B" />
+        </div>
+        <div class="reveal-scale reveal-delay-2">
+            <AnimatedCounterCircle Label="Open" Value="@openCount" Color="#fb923c" />
+        </div>
+        <div class="reveal-scale reveal-delay-3">
+            <AnimatedCounterCircle Label="Closed" Value="@closedCount" Color="#9CA3AF" />
+        </div>
+    </div>
+</div>
+
+@code {
+    private int totalCount;
+    private int openCount;
+    private int closedCount;
+    private bool isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        var tickets = await TicketService.GetAllTicketsAsync() ?? new List<TicketDto>();
+        // totalCount = tickets.Count;
+        totalCount = 30;
+        // openCount = tickets.Count(t => t.IsOpen);
+        openCount = 14;
+        closedCount = totalCount - openCount;
+        isLoading = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JS.InvokeVoidAsync("initScrollReveal");
+        }
+    }
+}

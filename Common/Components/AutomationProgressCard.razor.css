@@ -1,0 +1,307 @@
+/* AutomationProgressCard - Scoped CSS */
+
+/* Wrapper for positioning */
+.automation-card-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    perspective: 1000px;
+}
+
+/* Main Card */
+.automation-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+    width: 100%;
+    max-width: 480px;
+    overflow: hidden;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.automation-card.float-animation {
+    opacity: 1;
+    transform: translateY(0);
+    animation: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) rotateX(0deg);
+    }
+    50% {
+        transform: translateY(-10px) rotateX(1deg);
+    }
+}
+
+/* Window Chrome (macOS-style title bar) */
+.window-chrome {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.window-dots {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    transition: opacity 0.2s ease;
+}
+
+.dot:hover {
+    opacity: 0.8;
+}
+
+.dot-red {
+    background: #ff5f57;
+}
+
+.dot-yellow {
+    background: #ffbd2e;
+}
+
+.dot-green {
+    background: #28c840;
+}
+
+.window-title {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Card Content Container */
+.card-content {
+    padding: 1.5rem;
+}
+
+/* Progress Section */
+.progress-section {
+    margin-bottom: 1.5rem;
+}
+
+.progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.progress-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #61C2C8;
+}
+
+.progress-value {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.progress-track {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 9999px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    border-radius: 9999px;
+    transition: width 0.1s ease-out;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: #fafafa;
+    border: 1px solid #f0f0f0;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.stat-hidden {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.stat-enter {
+    animation: statEnter 0.5s ease forwards;
+}
+
+.stat-delay-1 {
+    animation-delay: 0.2s;
+}
+
+.stat-delay-2 {
+    animation-delay: 0.4s;
+}
+
+.stat-delay-3 {
+    animation-delay: 0.6s;
+}
+
+@keyframes statEnter {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-icon {
+    width: 2rem;
+    height: 2rem;
+    margin: 0 auto 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.stat-icon-tasks {
+    color: #61C2C8;
+}
+
+.stat-icon-hours {
+    color: #6b7280;
+}
+
+.stat-icon-workflows {
+    color: #6b7280;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.2;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    text-transform: capitalize;
+}
+
+/* Terminal Section */
+.terminal-section {
+    background: #1e1b2e;
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.terminal-content {
+    padding: 1rem;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    min-height: 120px;
+}
+
+.terminal-line {
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    transform: translateX(-10px);
+}
+
+.terminal-line.message-enter {
+    animation: messageEnter 0.4s ease forwards;
+}
+
+@keyframes messageEnter {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.terminal-prefix {
+    color: #9ca3af;
+    flex-shrink: 0;
+}
+
+.terminal-text {
+    color: #d1d5db;
+}
+
+.terminal-line.highlight .terminal-prefix,
+.terminal-line.highlight .terminal-text {
+    color: #f59e0b;
+}
+
+.terminal-cursor {
+    width: 8px;
+    height: 16px;
+    background: #61C2C8;
+    margin-top: 0.25rem;
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+    .automation-card-wrapper {
+        padding: 1rem;
+    }
+
+    .stats-grid {
+        gap: 0.5rem;
+    }
+
+    .stat-card {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .terminal-content {
+        font-size: 0.7rem;
+        padding: 0.75rem;
+    }
+}

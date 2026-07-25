@@ -1,0 +1,71 @@
+@* ══════════════════════════════════════════════════════════════
+   WarmTealWash Component — Hero section with white left side,
+   AI automation illustration on warm cream/beige right side.
+   Premium pass: staggered entrance choreography, gradient accent
+   headlialsone, CTA glow + shimmer, floating illustration with radial
+   glow, responsive stacking. Respects prefers-reduced-motion.
+   ══════════════════════════════════════════════════════════════ *@
+
+<section class="warm-teal-wash relative min-h-[70vh] lg:min-h-[85vh] flex flex-col md:flex-row overflow-hidden">
+    @* ── Left Side: White/Light Background ── *@
+    <div class="w-full md:w-1/2 shrink-0 flex flex-col items-center md:items-start justify-center px-8 md:pl-12 md:pr-8 lg:pl-36 lg:pr-16 xl:pl-44 xl:pr-20 py-12 md:py-10 relative bg-[#fcf9f5]">
+        <div class="relative z-10 max-w-lg text-center md:text-left">
+            @* Badge *@
+            <span class="entrance entrance-1 inline-flex items-center gap-2 px-4 py-2 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-600 text-sm font-medium rounded-full mb-8 border border-teal-cyan-aqua-200">
+                <span class="w-2 h-2 bg-orange-400 rounded-full"></span>
+                Automation workflows
+            </span>
+
+            @* Headline — single gradient accent line, no italic, tight rhythm *@
+            <h1 class="text-5xl sm:text-6xl lg:text-5xl xl:text-6xl leading-[1.05] mb-6 tracking-tight">
+                <span class="entrance entrance-2 block font-bold text-gray-900">Smart systems.</span>
+                <span class="entrance entrance-3 block font-bold bg-gradient-to-r from-teal-cyan-aqua-600 to-cloudzen-teal bg-clip-text text-transparent">Less busywork.</span>
+                <span class="entrance entrance-4 block font-bold text-gray-900">More time for growing.</span>
+            </h1>
+
+            @* Subtext *@
+            <p class="entrance entrance-4 text-lg lg:text-xl text-gray-500 leading-relaxed mb-10">
+                We build custom automation tools designed around your daily routine—whether you run a clinic, agency, hospitality venue, retail store, or any local small business. One partner, clear communication, and outcomes you can actually measure.
+            </p>
+
+            @* CTA Buttons *@
+            <div class="entrance entrance-5 flex flex-col sm:flex-row gap-4 mb-12 justify-center md:justify-start">
+                <a href="/contact" class="btn-shimmer group inline-flex items-center justify-center gap-2 px-8 py-4 bg-orange-400 text-teal-cyan-aqua-900 font-semibold rounded-full shadow-lg shadow-orange-400/30 hover:bg-orange-500 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95">
+                    <i class="bi bi-calendar-check"></i>
+                    Book Free Consultation
+                </a>
+                <a href="/services" class="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-gray-700 font-light rounded-full border border-gray-300 hover:border-teal-cyan-aqua-300 hover:text-teal-cyan-aqua-600 hover:bg-teal-cyan-aqua-50/40 transition-all duration-300">
+                    Explore Services →
+                </a>
+            </div>
+
+            @* Proof block — replaces hero-metric anti-pattern *@
+            <div class="entrance entrance-6 pt-8 border-t border-teal-cyan-aqua-200/40">
+                <p class="text-base text-teal-cyan-aqua-700 font-medium leading-snug max-w-xs mb-3 mx-auto md:mx-0">
+                    One flat project fee. No retainers, no surprises.
+                </p>
+                <div class="flex justify-center md:justify-start">
+                    <a href="#cases"
+                       class="group inline-flex items-center gap-1.5 text-sm font-semibold text-teal-cyan-aqua-600 hover:text-teal-cyan-aqua-400 transition-colors">
+                        See what we've built
+                        <i class="bi bi-arrow-right transition-transform group-hover:translate-x-1" aria-hidden="true"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    @* ── Right Side: AI illustration (md and up) ── *@
+    <div class="warm-panel w-full md:w-1/2 shrink-0 relative hidden md:flex items-center justify-center overflow-hidden bg-gradient-to-br from-teal-cyan-aqua-50 to-teal-cyan-aqua-50/10">
+        @* Structured background: subtle teal dot grid, masked to a soft ellipse *@
+        <div class="hero-grid-pattern" aria-hidden="true"></div>
+        <div class="hero-radial-glow" aria-hidden="true"></div>
+
+        <img src="/images/hero-ai-illustration.png"
+             alt="AI automation workflow illustration"
+             class="relative z-10 w-full object-contain animate-float-warm"
+             width="640" height="427" loading="eager" />
+        <div class="hero-image-fade-overlay"></div>
+    </div>
+</section>

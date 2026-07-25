@@ -1,8 +1,8 @@
 using Azure.Identity;
-using CloudZen.Api.Models;
-using CloudZen.Api.Models.Options;
-using CloudZen.Api.Security;
-using CloudZen.Api.Services;
+using CloudZen.Api.Shared.Models;
+using CloudZen.Api.Shared.Security;
+using CloudZen.Api.Shared.Services;
+using CloudZen.Api.Features.Contact;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Builder;
 using Microsoft.Extensions.Configuration;

@@ -1,0 +1,101 @@
+@* Profile Header Component - Displays avatar, name, intro, and social links *@
+
+<div class="text-center mb-8">
+    <!-- Avatar/Photo — clean ring stack, no blur halo -->
+    <div class="flex justify-center mb-6">
+        <img src="@AvatarUrl"
+             alt="@AltText"
+             loading="lazy"
+             width="160"
+             height="160"
+             class="w-36 h-36 md:w-40 md:h-40 rounded-full object-cover ring-1 ring-gray-200 outline outline-[6px] outline-white shadow-[0_8px_24px_-12px_rgba(64,103,107,0.25)]" />
+    </div>
+
+    <!-- Name/Title -->
+    <h1 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">@Title</h1>
+    <div class="w-16 h-1 bg-teal-cyan-aqua-600 mx-auto rounded-full mb-6"></div>
+
+    <!-- Introduction -->
+    <div class="max-w-2xl mx-auto">
+        <p class="text-lg text-gray-600 mb-4">
+            <span class="font-semibold text-gray-800">@NameHighlight</span> — @RoleDescription
+        </p>
+        <p class="text-gray-500 leading-relaxed">
+            @DetailedDescription
+        </p>
+    </div>
+
+    <!-- Social Links -->
+    <div class="flex justify-center gap-4 mt-6">
+        @if (!string.IsNullOrWhiteSpace(LinkedInUrl))
+        {
+            <a href="@LinkedInUrl" 
+               target="_blank" 
+               rel="noopener" 
+               class="w-10 h-10 rounded-full bg-teal-cyan-aqua-50 text-teal-cyan-aqua-600 hover:bg-teal-cyan-aqua-600 hover:text-white flex items-center justify-center text-lg transition-all duration-200" 
+               title="LinkedIn">
+                <i class="bi bi-linkedin"></i>
+            </a>
+        }
+        @if (!string.IsNullOrWhiteSpace(GitHubUrl))
+        {
+            <a href="@GitHubUrl" 
+               target="_blank" 
+               rel="noopener" 
+               class="w-10 h-10 rounded-full bg-gray-100 text-gray-700 hover:bg-gray-800 hover:text-white flex items-center justify-center text-lg transition-all duration-200" 
+               title="GitHub">
+                <i class="bi bi-github"></i>
+            </a>
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// URL to the profile avatar image.
+    /// </summary>
+    [Parameter]
+    public string AvatarUrl { get; set; } = "/images/dariem-avatar.png";
+
+    /// <summary>
+    /// Alt text for the avatar image (accessibility).
+    /// </summary>
+    [Parameter]
+    public string AltText { get; set; } = "Profile Avatar";
+
+    /// <summary>
+    /// Main title/heading for the profile section.
+    /// </summary>
+    [Parameter]
+    public string Title { get; set; } = "Who I Am";
+
+    /// <summary>
+    /// Highlighted name portion in the introduction.
+    /// </summary>
+    [Parameter]
+    public string NameHighlight { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Short role description following the name.
+    /// </summary>
+    [Parameter]
+    public string RoleDescription { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Detailed description paragraph about experience and expertise.
+    /// </summary>
+    [Parameter]
+    public string DetailedDescription { get; set; } = string.Empty;
+
+    /// <summary>
+    /// LinkedIn profile URL (optional).
+    /// </summary>
+    [Parameter]
+    public string? LinkedInUrl { get; set; }
+
+    /// <summary>
+    /// GitHub profile URL (optional).
+    /// </summary>
+    [Parameter]
+    public string? GitHubUrl { get; set; }
+}

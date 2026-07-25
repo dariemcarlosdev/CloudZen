@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-04T21:11:38.000Z",
+  "title": "Design System: CloudZen",
+  "extensions": {
+    "colorMeta": {
+      "teal-brand":   { "role": "primary",   "displayName": "Aqua Signal",       "canonical": "#61C2C8", "tonalRamp": ["#DAF6F9","#B8EFF4","#89D6DC","#78BCC2","#659FA5","#61C2C8","#538488","#40676B","#2F4E51","#1F3638","#0F1E1F"] },
+      "cta-orange":   { "role": "secondary",  "displayName": "Action Orange",      "canonical": "#f97316", "tonalRamp": ["#fff7ed","#ffedd5","#fed7aa","#fb923c","#f97316","#ea580c","#c2410c"] },
+      "teal-600":     { "role": "accent",     "displayName": "Deep Signal Teal",   "canonical": "#40676B" },
+      "teal-700":     { "role": "ink-body",   "displayName": "Ink Teal",           "canonical": "#2F4E51" },
+      "teal-800":     { "role": "ink-heading","displayName": "Heading Teal",       "canonical": "#1F3638" },
+      "teal-900":     { "role": "dark-surface","displayName": "Deep Teal Surface", "canonical": "#0F1E1F" },
+      "teal-50":      { "role": "tint",       "displayName": "Teal Mist",          "canonical": "#DAF6F9" },
+      "surface-white":{ "role": "neutral-bg", "displayName": "Surface White",      "canonical": "#ffffff" },
+      "ink-body":     { "role": "neutral-ink","displayName": "Ink Body",           "canonical": "#374151" },
+      "ink-heading":  { "role": "neutral-ink","displayName": "Ink Heading",        "canonical": "#1f2937" }
+    },
+    "typographyMeta": {
+      "display":  { "displayName": "Display",  "purpose": "Hero headlines. One per view. Never exceed 3.75rem." },
+      "headline": { "displayName": "Headline", "purpose": "Section headings, card group headers." },
+      "title":    { "displayName": "Title",    "purpose": "Individual card titles, step labels." },
+      "body":     { "displayName": "Body",     "purpose": "All prose. Max 65–72ch line length in reading sections." },
+      "label":    { "displayName": "Label",    "purpose": "Buttons, nav, badges. IBM Plex Sans always." },
+      "caption":  { "displayName": "Caption",  "purpose": "Metadata, timestamps, stat labels." }
+    },
+    "shadows": [
+      { "name": "ambient-low",     "value": "0 2px 8px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04)", "purpose": "Workflow node cards at rest; small floating elements." },
+      { "name": "ambient-mid",     "value": "0 4px 16px rgba(0,0,0,0.10)",                            "purpose": "Modals, dropdowns, badges floating over content." },
+      { "name": "hover-lift",      "value": "0 8px 24px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06)","purpose": "Interactive card hover state." },
+      { "name": "glow-teal",       "value": "0 0 20px rgba(97,194,200,0.45), 0 0 40px rgba(97,194,200,0.2)","purpose": "Animated node pulse — never static elevation." },
+      { "name": "glow-orange",     "value": "0 0 20px rgba(249,115,22,0.45), 0 0 40px rgba(249,115,22,0.2)","purpose": "Animated orange-highlight node pulse." },
+      { "name": "cta-button",      "value": "0 4px 12px rgba(249,115,22,0.3)",                        "purpose": "CTA button hover shadow." }
+    ],
+    "motion": [
+      { "name": "ease-standard",    "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default easing for all state transitions." },
+      { "name": "ease-in-out-soft", "value": "ease-in-out",                  "purpose": "Float and pulse animations." },
+      { "name": "duration-fast",    "value": "150ms",                        "purpose": "Micro-interactions (button active state)." },
+      { "name": "duration-base",    "value": "200ms",                        "purpose": "Hover color/border transitions." },
+      { "name": "duration-lift",    "value": "300ms",                        "purpose": "Card hover transform and shadow." },
+      { "name": "duration-flow",    "value": "4s",                           "purpose": "Dash-flow and node-pulse animations." },
+      { "name": "stagger-increment","value": "0.3s–0.5s",                    "purpose": "Delay increment between sequentially animated siblings." }
+    ],
+    "breakpoints": [
+      { "name": "sm",  "value": "640px"  },
+      { "name": "md",  "value": "768px"  },
+      { "name": "lg",  "value": "1024px" },
+      { "name": "xl",  "value": "1280px" },
+      { "name": "2xl", "value": "1536px" }
+    ],
+    "zIndex": [
+      { "name": "dropdown",       "value": 10 },
+      { "name": "sticky-header",  "value": 40 },
+      { "name": "mobile-overlay", "value": 45 },
+      { "name": "modal-backdrop", "value": 50 },
+      { "name": "modal",          "value": 60 },
+      { "name": "toast",          "value": 70 },
+      { "name": "tooltip",        "value": 80 }
+    ],
+    "northStar": "The Working Prototype — built things, visible craft, purposeful motion. Every element is evidence of technical judgment.",
+    "rules": [
+      "The Orange Monopoly Rule: orange appears on one element per screen — the primary CTA button.",
+      "The Teal Contrast Rule: body text minimum is teal-700 (#2F4E51) on white. Never use teal-500+ for prose.",
+      "The Two-Family Rule: IBM Plex Sans for structure, Helvetica Neue for reading. No third typeface.",
+      "The Flat-by-Default Rule: cards have no box-shadow at rest; only border-gray-100 boundary and tonal background.",
+      "The Uppercase Restriction: all-caps only on labels ≤ 4 words at ≤ 0.75rem with letter-spacing ≥ 0.08em.",
+      "The Motion-as-Flow Rule: stagger animated siblings 0.3–0.5s so reveals read as sequence, not simultaneous burst.",
+      "The Reduced-Motion Rule: every animation has a @media(prefers-reduced-motion: reduce) fallback."
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary CTA Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Primary call-to-action. Orange, rounded-full. One per screen.",
+      "html": "<button class=\"ds-btn-primary\">Book a Call</button>",
+      "css": ".ds-btn-primary { background: #f97316; color: #fff; padding: 0.75rem 1.75rem; border: none; border-radius: 9999px; font: 600 0.875rem 'IBM Plex Sans', sans-serif; letter-spacing: 0.01em; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; } .ds-btn-primary:hover { background: #ea6c0a; transform: translateY(-2px) scale(1.02); box-shadow: 0 4px 12px rgba(249,115,22,0.3); } .ds-btn-primary:focus-visible { outline: 2px solid #40676B; outline-offset: 3px; } @media (prefers-reduced-motion: reduce) { .ds-btn-primary { transition: background 0.2s ease; } .ds-btn-primary:hover { transform: none; } }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ghost variant for secondary actions. White fill, gray border, rounded-full.",
+      "html": "<button class=\"ds-btn-secondary\">View Projects</button>",
+      "css": ".ds-btn-secondary { background: #fff; color: #374151; border: 2px solid #e5e7eb; padding: 0.625rem 1.5rem; border-radius: 9999px; font: 500 0.875rem 'IBM Plex Sans', sans-serif; cursor: pointer; transition: all 0.2s ease; } .ds-btn-secondary:hover { background: #DAF6F9; color: #40676B; border-color: #78BCC2; } .ds-btn-secondary:focus-visible { outline: 2px solid #40676B; outline-offset: 3px; }"
+    },
+    {
+      "name": "Standard Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "White rounded-2xl card with a subtle border. Lifts on hover. No shadow at rest.",
+      "html": "<div class=\"ds-card\"><h3 class=\"ds-card-title\">Feature Title</h3><p class=\"ds-card-body\">Description text goes here.</p></div>",
+      "css": ".ds-card { background: #fff; border-radius: 1rem; border: 1px solid #e5e7eb; padding: 1.5rem; transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s cubic-bezier(0.4,0,0.2,1), border-color 0.3s ease; } .ds-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 4px 8px rgba(0,0,0,0.06); border-color: #89D6DC; } .ds-card-title { font: 600 1.125rem 'IBM Plex Sans', sans-serif; color: #1f2937; margin: 0 0 0.5rem; } .ds-card-body { font: 400 1rem 'Helvetica Neue', sans-serif; color: #374151; line-height: 1.65; margin: 0; } @media (prefers-reduced-motion: reduce) { .ds-card { transition: none; } .ds-card:hover { transform: none; } }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Rounded-xl input, gray surface at rest, white on focus with teal ring.",
+      "html": "<input type=\"text\" class=\"ds-input\" placeholder=\"your@email.com\" />",
+      "css": ".ds-input { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 0.75rem; padding: 0.75rem 1rem; font: 400 1rem 'Helvetica Neue', sans-serif; color: #374151; width: 100%; transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease; } .ds-input:focus { background: #fff; border-color: transparent; outline: none; box-shadow: 0 0 0 2px #40676B; } .ds-input:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Section Badge",
+      "kind": "chip",
+      "description": "Teal-50 pill for section categorization. Short labels only.",
+      "html": "<span class=\"ds-badge\">Services</span>",
+      "css": ".ds-badge { display: inline-block; background: #DAF6F9; color: #40676B; font: 600 0.875rem 'IBM Plex Sans', sans-serif; padding: 0.375rem 1rem; border-radius: 9999px; letter-spacing: 0.01em; }"
+    },
+    {
+      "name": "Workflow Node Card",
+      "kind": "custom",
+      "description": "Animated pipeline node. Pulses with teal or orange glow in staggered sequence to simulate live data flow. The hero's proof-of-craft element.",
+      "html": "<div class=\"ds-node ds-node--teal\"><div class=\"ds-node-icon\">📊</div><span class=\"ds-node-label\">Data Source</span><span class=\"ds-node-dot ds-node-dot--teal\"></span></div>",
+      "css": ".ds-node { display:flex; flex-direction:column; align-items:center; gap:0.5rem; background:#fff; padding:0.875rem 1.25rem; border-radius:0.75rem; box-shadow:0 2px 8px rgba(0,0,0,0.08),0 1px 3px rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.06); position:relative; min-width:90px; transition:all 0.4s cubic-bezier(0.4,0,0.2,1); } .ds-node--teal { border:1.5px solid rgba(97,194,200,0.4); animation:node-pulse-teal 4s ease-in-out infinite; } .ds-node-icon { width:2.25rem; height:2.25rem; border-radius:0.5rem; display:flex; align-items:center; justify-content:center; font-size:1rem; } .ds-node-label { font:600 0.75rem 'IBM Plex Sans',sans-serif; color:#374151; text-align:center; white-space:nowrap; } .ds-node-dot { position:absolute; width:10px; height:10px; border-radius:50%; top:-5px; right:-5px; border:2px solid #fff; } .ds-node-dot--teal { background:#61C2C8; } @keyframes node-pulse-teal { 0%,100% { box-shadow:0 2px 8px rgba(0,0,0,0.08); border-color:rgba(97,194,200,0.4); } 50% { box-shadow:0 0 20px rgba(97,194,200,0.45),0 0 40px rgba(97,194,200,0.2); border-color:#61C2C8; } } @media (prefers-reduced-motion:reduce) { .ds-node--teal { animation:none; } }"
+    }
+  ]
+}

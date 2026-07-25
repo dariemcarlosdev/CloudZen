@@ -1,0 +1,80 @@
+@*
+    Pagination Component
+
+    PURPOSE:
+    Reusable page navigation bar. Displays numbered page buttons with
+    previous/next arrows and ellipsis for large page counts.
+    Parent owns page state; this component only emits OnPageChanged events.
+*@
+
+@if (TotalPages > 1)
+{
+    <nav aria-label="Pagination" class="flex justify-center items-center gap-1.5 mt-10">
+        @* Previous Button *@
+        <button @onclick="() => GoToPage(CurrentPage - 1)"
+                disabled="@(!HasPrevious)"
+                class="@PrevNextClasses(!HasPrevious)"
+                aria-label="Previous page">
+            <i class="bi bi-chevron-left text-xs"></i>
+        </button>
+
+        @* Page Numbers *@
+        @foreach (var pageNumber in GetVisiblePageNumbers())
+        {
+            @if (pageNumber is null)
+            {
+                @* Ellipsis *@
+                <span class="w-9 h-9 flex items-center justify-center text-gray-400 text-sm select-none"
+                      aria-hidden="true">
+                    &hellip;
+                </span>
+            }
+            else
+            {
+                <button @onclick="() => GoToPage(pageNumber.Value)"
+                        class="@PageButtonClasses(pageNumber.Value)"
+                        aria-label="@($"Page {pageNumber.Value}")"
+                        aria-current="@(pageNumber.Value == CurrentPage ? "page" : null)">
+                    @pageNumber.Value
+                </button>
+            }
+        }
+
+        @* Next Button *@
+        <button @onclick="() => GoToPage(CurrentPage + 1)"
+                disabled="@(!HasNext)"
+                class="@PrevNextClasses(!HasNext)"
+                aria-label="Next page">
+            <i class="bi bi-chevron-right text-xs"></i>
+        </button>
+    </nav>
+
+    @* Page Info *@
+    <p class="text-center text-xs text-gray-400 mt-3">
+        Page @CurrentPage of @TotalPages
+        <span class="mx-1">&middot;</span>
+        @TotalItems project@(TotalItems != 1 ? "s" : "") total
+    </p>
+}
+
+@code {
+    /// <summary>
+    /// Tailwind classes for previous/next arrow buttons.
+    /// </summary>
+    private static string PrevNextClasses(bool disabled) => disabled
+        ? "w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 text-gray-300 cursor-not-allowed"
+        : "w-9 h-9 flex items-center justify-center rounded-xl bg-white border border-gray-200 text-gray-600 " +
+          "hover:border-teal-cyan-aqua-300 hover:text-teal-cyan-aqua-600 hover:shadow-md " +
+          "transition-all duration-200 cursor-pointer";
+
+    /// <summary>
+    /// Tailwind classes for numbered page buttons — active vs inactive.
+    /// </summary>
+    private string PageButtonClasses(int page) => page == CurrentPage
+        ? "w-9 h-9 flex items-center justify-center rounded-xl text-sm font-bold " +
+          "bg-gradient-to-br from-teal-cyan-aqua-600 to-teal-cyan-aqua-400 text-white shadow-lg shadow-teal-cyan-aqua-500/30"
+        : "w-9 h-9 flex items-center justify-center rounded-xl text-sm font-medium " +
+          "bg-white border border-gray-200 text-gray-600 " +
+          "hover:border-teal-cyan-aqua-300 hover:text-teal-cyan-aqua-600 hover:shadow-md " +
+          "transition-all duration-200 cursor-pointer";
+}

@@ -1,0 +1,106 @@
+/* ── Heading fade-up ── */
+.timeline-heading {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.timeline-heading.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Stage entry ── */
+.timeline-stage {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    transition-delay: calc(var(--stage-delay, 0) * 250ms + 0.3s);
+}
+
+.timeline-stage.animate-in {
+    opacity: 1;
+}
+
+/* ── Card slide-up ── */
+.timeline-card {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: calc(var(--stage-delay, 0) * 250ms + 0.4s);
+}
+
+.timeline-stage.animate-in .timeline-card {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Card hover micro-interaction ── */
+.timeline-card > div {
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.timeline-card > div:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px -8px rgba(97, 194, 200, 0.18);
+    border-color: rgba(97, 194, 200, 0.3);
+}
+
+/*
+ * Circle ring-burst — NO position override here!
+ * The circle already has Tailwind's `absolute` for layout;
+ * `absolute` also creates a containing block for ::after.
+ */
+.timeline-circle::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid rgba(97, 194, 200, 0.5);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.timeline-stage.animate-in .timeline-circle::after {
+    animation: ring-burst 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(var(--stage-delay, 0) * 250ms + 0.2s);
+}
+
+@keyframes ring-burst {
+    0% {
+        opacity: 0.8;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(2);
+    }
+}
+
+/* ── Bottom badge fade-up ── */
+.timeline-badge {
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    transition-delay: 1.2s;
+}
+
+.timeline-badge.animate-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ── Accessibility: respect reduced-motion preference ── */
+@media (prefers-reduced-motion: reduce) {
+    .timeline-heading,
+    .timeline-stage,
+    .timeline-card,
+    .timeline-badge {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+    }
+
+    .timeline-circle::after {
+        display: none;
+    }
+}

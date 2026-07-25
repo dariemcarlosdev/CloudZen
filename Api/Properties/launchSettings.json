@@ -8,7 +8,7 @@
     "CloudZen.Api (HTTPS)": {
       "commandName": "Executable",
       "executablePath": "func",
-      "commandLineArgs": "start --port 7257 --useHttps ",
+      "commandLineArgs": "start --port 7257 --useHttps",
       "workingDirectory": "bin\\Debug\\net8.0",
       "launchBrowser": false,
       "environmentVariables": {

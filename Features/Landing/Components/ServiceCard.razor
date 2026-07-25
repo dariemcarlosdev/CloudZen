@@ -1,0 +1,22 @@
+
+@* A single service card with Bootstrap Icon, title, and HTML description. *@
+
+<div class="group relative p-7 bg-white rounded-2xl border border-teal-cyan-aqua-200/40 overflow-hidden
+            transition-[border-color,box-shadow] duration-300 ease-out
+            hover:border-teal-cyan-aqua-300 hover:shadow-[0_10px_30px_-15px_rgba(64,103,107,0.22)]">
+    <span aria-hidden="true"
+          class="absolute top-0 left-0 right-0 h-[2px] bg-teal-cyan-aqua-500 origin-left
+                 scale-x-[0.16] group-hover:scale-x-100
+                 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"></span>
+    <div class="w-12 h-12 mb-5 bg-teal-cyan-aqua-50 rounded-xl flex items-center justify-center text-teal-cyan-aqua-600 text-xl
+                transition-colors duration-300 group-hover:bg-teal-cyan-aqua-600 group-hover:text-white">
+        <i class="bi @Service.Icon"></i>
+    </div>
+    <h3 class="text-lg font-bold text-gray-900 mb-2 tracking-tight">@Service.Title</h3>
+    <p class="text-gray-500 text-sm leading-relaxed">@((MarkupString)Service.Description)</p>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public ServiceInfo Service { get; set; } = default!;
+}

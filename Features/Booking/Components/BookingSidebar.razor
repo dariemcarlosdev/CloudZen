@@ -1,0 +1,51 @@
+@* BookingSidebar.razor — Left sidebar with meeting info, shown in Steps 1 & 2. *@
+
+<div class="md:w-[280px] border-b md:border-b-0 md:border-r border-gray-200 p-6 flex flex-col gap-4">
+
+    @if (ShowBackButton)
+    {
+        <button @onclick="OnBackClicked" class="text-teal-cyan-aqua-400 hover:text-teal-cyan-aqua-600 transition self-start" title="Back">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7 7-7"/></svg>
+        </button>
+    }
+    else
+    {
+        <img src="/images/cloudzen-logo-2.png" alt="CloudZen Logo" class="w-16 h-16 object-cover rounded-full" loading="lazy" width="64" height="64" />
+    }
+
+    <span class="text-sm font-semibold text-teal-cyan-aqua-600">Bookings</span>
+    <h3 class="text-xl font-bold text-gray-800 leading-tight">CloudZen Virtual Meeting</h3>
+
+    <div class="flex items-center gap-2 text-gray-500 text-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M12 6v6l4 2"/></svg>
+        30 Mins
+    </div>
+
+    @if (SelectedDate.HasValue)
+    {
+        <div class="flex items-center gap-2 text-gray-500 text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke-width="2"/><path stroke-width="2" d="M16 2v4M8 2v4M3 10h18"/></svg>
+            @if (!string.IsNullOrEmpty(TimeSlotRange))
+            {
+                @TimeSlotRange@(", ")
+            }
+            @SelectedDate.Value.ToString("ddd, MMM dd, yyyy")
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(TimeZoneLabel) && ShowBackButton)
+    {
+        <div class="flex items-center gap-2 text-gray-500 text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><path stroke-width="2" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+            @TimeZoneLabel
+        </div>
+    }
+
+    @if (!ShowBackButton)
+    {
+        <p class="text-sm text-gray-400 mt-2 leading-relaxed">
+            Schedule a 30 minute virtual meeting to speak with one of our team members to see how CloudZen can bring AI Solutions to your business!
+        </p>
+    }
+</div>
+

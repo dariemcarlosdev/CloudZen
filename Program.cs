@@ -1,9 +1,18 @@
 using CloudZen;
-using CloudZen.Models.Options;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using CloudZen.Services;
-using CloudZen.Services.Abstractions;
+// Feature service registrations
+using CloudZen.Features.Booking;
+using CloudZen.Features.Booking.Services;
+using CloudZen.Features.Contact;
+using CloudZen.Features.Contact.Services;
+using CloudZen.Features.Chat;
+using CloudZen.Features.Chat.Services;
+using CloudZen.Features.Landing.Services;
+using CloudZen.Features.Profile.Services;
+using CloudZen.Features.Projects.Services;
+using CloudZen.Features.Tickets.Services;
+using CloudZen.Common.Options;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -26,6 +35,7 @@ if (builder.HostEnvironment.IsDevelopment())
     const string functionsLocalUrl = "http://localhost:7257/api"; // update with your local Functions URL and port
     builder.Configuration["ChatbotService:ApiBaseUrl"] = functionsLocalUrl;
     builder.Configuration["EmailService:ApiBaseUrl"] = functionsLocalUrl;
+    builder.Configuration["BookingService:ApiBaseUrl"] = functionsLocalUrl;
 }
 
 // =============================================================================
@@ -55,6 +65,11 @@ builder.Services.AddOptions<BlobStorageOptions>()
 builder.Services.AddOptions<ChatbotOptions>()
     .BindConfiguration(ChatbotOptions.SectionName);
 
+// Configure Booking Service options from appsettings.json
+// Section: "BookingService"
+builder.Services.AddOptions<BookingServiceOptions>()
+    .BindConfiguration(BookingServiceOptions.SectionName);
+
 // =============================================================================
 // HTTP CLIENT REGISTRATION
 // =============================================================================
@@ -80,7 +95,13 @@ builder.Services.AddScoped(sp => new HttpClient
 // =============================================================================
 
 // Register GoogleCalendarUrlService
-builder.Services.AddScoped<GoogleCalendarUrlService>();
+builder.Services.AddScoped<IGoogleCalendarUrlService, GoogleCalendarUrlService>();
+
+// Register BookingService for calendar logic, date availability, and formatting
+builder.Services.AddScoped<IBookingService, BookingService>();
+
+// Register AppointmentService for n8n webhook appointment booking
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 
 // Register TicketService as the implementation for ITicketService
 builder.Services.AddScoped<ITicketService, TicketService>();
@@ -99,9 +120,21 @@ builder.Services.AddScoped<IEmailService, ApiEmailService>();
 builder.Services.AddScoped<IChatbotService, ChatbotService>();
 
 // Register ProjectService for managing portfolio projects
-builder.Services.AddScoped<ProjectService>();
+builder.Services.AddScoped<IProjectService, ProjectService>();
 
-// Register PersonalService for managing service offerings
-builder.Services.AddScoped<PersonalService>();
+// Register ServiceOfferingsService for managing professional service offerings
+builder.Services.AddScoped<IServiceOfferingsService, ServiceOfferingsService>();
+
+// Register ToolService for the Tools Overview section
+builder.Services.AddScoped<IToolService, ToolService>();
+
+// Register FeatureHighlightService for the Features Showcase section
+builder.Services.AddScoped<IFeatureHighlightService, FeatureHighlightService>();
+
+// Register MissionService for the About Us / Mission / Standards section
+builder.Services.AddScoped<IMissionService, MissionService>();
+
+// Register CaseStudyService for case study text transformations
+builder.Services.AddScoped<ICaseStudyService, CaseStudyService>();
 
 await builder.Build().RunAsync();

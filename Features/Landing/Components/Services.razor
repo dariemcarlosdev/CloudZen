@@ -1,0 +1,140 @@
+@page "/services"
+
+<PageTitle>Services — CloudZen | Technology Solutions, Automation & System Modernization</PageTitle>
+<HeadContent>
+    <meta name="description" content="CloudZen handles your technology so you can focus on growing. We offer system modernization, smart automation, cloud migration, custom software, and AI-powered solutions for growing businesses." />
+    <link rel="canonical" href="https://www.cloud-zen.net/services" />
+</HeadContent>
+
+@* ══════════════════════════════════════════════════════════════
+   Services Page — Standalone page showcasing CloudZen's offerings.
+   Layout: Hero → Featured services (top 3) → Full grid → How We Work → CTA
+   ══════════════════════════════════════════════════════════════ *@
+
+@* ── Hero Banner ── *@
+<section class="pt-12 md:pt-16 pb-10 md:pb-16 bg-gradient-to-br from-gray-50 to-white text-center">
+    <div class="max-w-4xl mx-auto px-6">
+        <span class="entrance entrance-1 inline-block px-4 py-1.5 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-600 text-sm font-semibold rounded-full mb-6">
+            <i class="bi bi-person-check mr-1"></i> Your Technology Partner
+        </span>
+        <h1 class="entrance entrance-2 text-4xl md:text-5xl font-bold text-gray-800 mb-4 tracking-tight">
+            We Handle the Technology.
+            <span class="bg-gradient-to-r from-teal-cyan-aqua-600 to-cloudzen-teal bg-clip-text text-transparent">You Focus on Growing and Making Money.</span>
+        </h1>
+        <p class="entrance entrance-3 text-lg text-gray-500 max-w-2xl mx-auto mb-2">
+            One partner who builds, modernizes, and automates — so you don't have to hire an entire tech department.
+        </p>
+        <div class="entrance entrance-4 w-16 h-1 bg-teal-cyan-aqua-600 mx-auto rounded-full mt-4"></div>
+    </div>
+</section>
+
+@* ── Value Proposition ── *@
+<section class="py-8 md:py-12 bg-white">
+    <div class="max-w-5xl mx-auto px-6 text-center">
+        <p class="reveal text-lg text-gray-600 leading-relaxed">
+            Whether you're stuck with slow systems, drowning in manual tasks, or just need technology that works —
+            <span class="font-semibold text-teal-cyan-aqua-600">CloudZen is here to help</span>.
+            We modernize legacy systems, automate repetitive tasks, and deploy tools that streamline operations.
+            By handling the technology behind the scenes, we let you focus entirely on your customers.
+        </p>
+    </div>
+</section>
+
+@* ── Featured Services (Top 3) ── *@
+<section class="py-12 md:py-16 bg-gradient-to-br from-teal-cyan-aqua-50 via-white to-teal-cyan-aqua-50/30">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="reveal text-3xl font-bold text-gray-800 mb-3">Core Solutions</h2>
+            <div class="reveal w-16 h-1 bg-teal-cyan-aqua-600 mx-auto rounded-full mb-3"></div>
+            <p class="reveal text-gray-500">The foundation of every transformation we deliver.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6 md:gap-8">
+            @{ var featIdx = 0; }
+            @foreach (var service in _featured)
+            {
+                <div class="reveal-scale reveal-delay-@((featIdx % 3) + 1) group relative p-7 md:p-8 bg-white rounded-2xl border border-teal-cyan-aqua-200/40 overflow-hidden
+                            transition-[border-color,box-shadow] duration-300 ease-out
+                            hover:border-teal-cyan-aqua-300 hover:shadow-[0_10px_30px_-15px_rgba(64,103,107,0.22)]">
+                    <span aria-hidden="true"
+                          class="absolute top-0 left-0 right-0 h-[2px] bg-teal-cyan-aqua-500 origin-left
+                                 scale-x-[0.16] group-hover:scale-x-100
+                                 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"></span>
+                    <div class="w-14 h-14 mb-6 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-600 rounded-xl flex items-center justify-center text-2xl
+                                transition-colors duration-300 group-hover:bg-teal-cyan-aqua-600 group-hover:text-white">
+                        <i class="bi @service.Icon"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3 tracking-tight">@service.Title</h3>
+                    <p class="text-gray-500 leading-relaxed">@((MarkupString)service.Description)</p>
+                </div>
+                featIdx++;
+            }
+        </div>
+    </div>
+</section>
+
+@* ── All Services Grid ── *@
+<section class="py-12 md:py-16 bg-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-8 md:mb-12">
+            <h2 class="reveal text-3xl font-bold text-gray-800 mb-3">Everything We Offer</h2>
+            <div class="reveal w-16 h-1 bg-teal-cyan-aqua-600 mx-auto rounded-full"></div>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            @{ var remIdx = 0; }
+            @foreach (var service in _remaining)
+            {
+                <div class="reveal-scale reveal-delay-@((remIdx % 6) + 1)">
+                    <ServiceCard Service="@service" />
+                </div>
+                remIdx++;
+            }
+        </div>
+    </div>
+</section>
+
+@* ── How We Work (3 Steps) ── *@
+<section class="py-12 md:py-16 bg-gradient-to-br from-teal-cyan-aqua-900/5 via-teal-cyan-aqua-50/40 to-teal-cyan-aqua-900/5">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-10 md:mb-14">
+            <h2 class="reveal text-3xl font-bold text-gray-800 mb-3">How We Work</h2>
+            <div class="reveal w-16 h-1 bg-teal-cyan-aqua-600 mx-auto rounded-full mb-3"></div>
+            <p class="reveal text-gray-500">A simple, transparent process from start to finish.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-8 md:gap-10">
+            @* Step 1 *@
+            <div class="reveal reveal-delay-1 text-center">
+                <div class="step-number w-16 h-16 mx-auto mb-5 rounded-full flex items-center justify-center text-white text-2xl font-bold">1</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Discover</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">We listen to your challenges, understand your workflow, and identify the bottlenecks holding your business back.</p>
+            </div>
+            @* Step 2 *@
+            <div class="reveal reveal-delay-2 text-center">
+                <div class="step-number w-16 h-16 mx-auto mb-5 rounded-full flex items-center justify-center text-white text-2xl font-bold">2</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Build</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">We design and develop a tailored solution in short stages — keeping you in the loop with visible progress every week.</p>
+            </div>
+            @* Step 3 *@
+            <div class="reveal reveal-delay-3 text-center">
+                <div class="step-number w-16 h-16 mx-auto mb-5 rounded-full flex items-center justify-center text-white text-2xl font-bold">3</div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Launch & Grow</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">After rigorous testing, we launch with confidence. Your systems are ready to scale as your business grows.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@* ── Bottom CTA ── *@
+<section class="bg-gradient-to-br from-teal-cyan-aqua-900 to-teal-cyan-aqua-800 text-white text-center py-12 md:py-16">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6">
+        <h2 class="reveal text-2xl md:text-3xl font-bold mb-4">Ready to modernize your business?</h2>
+        <p class="reveal text-teal-cyan-aqua-100 mb-8">Let's talk about what's slowing you down — and how we can fix it.</p>
+        <div class="reveal flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="/contact" class="btn-shimmer px-8 py-3 bg-orange-400 text-teal-cyan-aqua-900 font-semibold rounded-full shadow-lg shadow-orange-500/30 hover:bg-orange-500 hover:shadow-xl hover:shadow-orange-500/40 transition-all duration-300 hover:scale-105 active:scale-95 uppercase tracking-wide">
+                Get Started →
+            </a>
+            <a href="/contact" class="px-8 py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-full border border-white/30 hover:bg-white/20 hover:border-white/50 transition-all duration-300 hover:scale-105 uppercase tracking-wide">
+                Book a Call
+            </a>
+        </div>
+    </div>
+</section>

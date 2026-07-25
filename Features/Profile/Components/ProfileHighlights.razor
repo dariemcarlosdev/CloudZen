@@ -1,0 +1,75 @@
+@* Profile Highlights Component - Displays key results, expertise, and resume download *@
+
+<div class="bg-gradient-to-br from-teal-cyan-aqua-50/20 to-teal-cyan-aqua-50/5 rounded-2xl p-6 md:p-8">
+    <h3 class="text-2xl font-bold text-gray-800 mb-4">Key Results Delivered</h3>
+    <div class="w-12 h-1 bg-teal-cyan-aqua-600 rounded-full mb-6"></div>
+
+    <ul class="space-y-3">
+        <li class="flex items-start gap-3">
+            <i class="bi bi-check-circle-fill text-teal-cyan-aqua-600 text-lg mt-0.5 flex-shrink-0"></i>
+            <span class="text-gray-600 text-sm">Modernized WPBT Assessment Services for MDCPS by migrating from legacy ASP.NET Web Forms to .NET Core, accelerating assessment cycles by 50%.</span>
+        </li>
+        <li class="flex items-start gap-3">
+            <i class="bi bi-check-circle-fill text-teal-cyan-aqua-600 text-lg mt-0.5 flex-shrink-0"></i>
+            <span class="text-gray-600 text-sm">Engineered delta-based SSIS ETL pipeline for SAP Maintenance Data, reducing job runtimes by 70%.</span>
+        </li>
+        <li class="flex items-start gap-3">
+            <i class="bi bi-check-circle-fill text-teal-cyan-aqua-600 text-lg mt-0.5 flex-shrink-0"></i>
+            <span class="text-gray-600 text-sm">Architected cloud-native ETL solution migrating SSIS pipelines to Azure with event-driven microservices.</span>
+        </li>
+        <li class="flex items-start gap-3">
+            <i class="bi bi-check-circle-fill text-teal-cyan-aqua-600 text-lg mt-0.5 flex-shrink-0"></i>
+            <span class="text-gray-600 text-sm">Built production-ready microservices with Clean Architecture, JWT auth, CQRS, and RabbitMQ Pub/Sub.</span>
+        </li>
+        <li class="flex items-start gap-3">
+            <i class="bi bi-check-circle-fill text-teal-cyan-aqua-600 text-lg mt-0.5 flex-shrink-0"></i>
+            <span class="text-gray-600 text-sm">Developed AI-powered Smart Menu Optimizer increasing restaurant profit margins by 18% and reducing food waste by 22%.</span>
+        </li>
+        <li class="flex items-start gap-3">
+            <i class="bi bi-check-circle-fill text-teal-cyan-aqua-600 text-lg mt-0.5 flex-shrink-0"></i>
+            <span class="text-gray-600 text-sm">Established CI/CD pipelines with GitHub Actions and Docker across multiple projects.</span>
+        </li>
+    </ul>
+
+    <h3 class="text-xl font-bold text-gray-800 mt-8 mb-4">Core Expertise</h3>
+
+    <div class="flex flex-wrap gap-2">
+        <span class="px-3 py-1 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-700 text-xs font-medium rounded-full">.NET / C#</span>
+        <span class="px-3 py-1 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-700 text-xs font-medium rounded-full">Azure OpenAI / Cognitive Services</span>
+        <span class="px-3 py-1 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-700 text-xs font-medium rounded-full">Web APIs / REST</span>
+        <span class="px-3 py-1 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-700 text-xs font-medium rounded-full">Azure Cloud Services</span>
+        <span class="px-3 py-1 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-700 text-xs font-medium rounded-full">DevOps / CI/CD</span>
+        <span class="px-3 py-1 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-700 text-xs font-medium rounded-full">Blazor</span>
+        <span class="px-3 py-1 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-700 text-xs font-medium rounded-full">T-SQL & Databases</span>
+        <span class="px-3 py-1 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-700 text-xs font-medium rounded-full">ETL / Data Integration</span>
+        <span class="px-3 py-1 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-700 text-xs font-medium rounded-full">SSIS Pipeline Engineering</span>
+        <span class="px-3 py-1 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-700 text-xs font-medium rounded-full">Power BI & Reporting</span>
+        <span class="px-3 py-1 bg-teal-cyan-aqua-50 text-teal-cyan-aqua-700 text-xs font-medium rounded-full">Software Architecture</span>
+    </div>
+
+    <div class="mt-8">
+        <button @onclick="HandleResumeDownload"
+                class="btn-shimmer group inline-flex items-center gap-2 px-6 py-3 bg-orange-400 text-teal-cyan-aqua-900 font-semibold rounded-full
+                       shadow-lg shadow-orange-400/25
+                       hover:bg-orange-500 hover:shadow-xl hover:shadow-orange-500/40
+                       transition-all duration-300 active:scale-95">
+            <i class="bi bi-download" aria-hidden="true"></i>
+            <span>Download my resume</span>
+        </button>
+    </div>
+</div>
+
+@code {
+    /// <summary>
+    /// Event callback triggered when the download resume button is clicked.
+    /// Envet callback is specially used to allow parent component to handle the event. In this case, parent component will handle the actual download logic.
+    /// Parent component should handle the actual download logic.
+    /// </summary>
+    [Parameter]
+    public EventCallback OnResumeDownload { get; set; }
+
+    private async Task HandleResumeDownload()
+    {
+        await OnResumeDownload.InvokeAsync();
+    }
+}
